@@ -24,7 +24,7 @@ However, it is a very primitive language and thus its functionnalities are limit
 	> Immediate **int** are limited to the range [0; 2<sup>16</sup> - 1]
 	
 - **bool** : classic boolean type : *true (1)* or *false (0)* 
-- **float** 
+- **float** : currently supporting 2 decimal points 
 - **void** : void type used for *main()* function
 - Strings allowed in *print()* function
 
