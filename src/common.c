@@ -12,36 +12,62 @@
 #include "../include/common.h"
 #include "../include/arch.h"
 
-#define RED "\e[0;31m"
-#define NC "\e[0m"
+#define     MAIN_VERSION    "0"                 /*dev phase*/
+#define     SUB_VERSION     "1"                 /*first iteration*/
+
+#define     NC              "\e[0m"
+#define     BLACK           "\033[30m"          /* Black */
+#define     RED             "\033[31m"          /* Red */
+#define     GREEN           "\033[32m"          /* Green */
+#define     YELLOW          "\033[33m"          /* Yellow */
+#define     BLUE            "\033[34m"          /* Blue */
+#define     WHITE           "\033[37m"          /* White */
+#define     BOLD            "\033[1m"           /* Bold */
+#define     BOLDWHITE       "\033[1m\033[37m"   /* Bold White */
+
 extern char * infile;
 extern char * outfile;
-int32_t trace_level = DEFAULT_TRACE_LEVEL;
+int trace_level = DEFAULT_TRACE_LEVEL;
 extern bool stop_after_syntax;
 extern bool stop_after_verif;
-bool incomp=0;
+bool uncompatible=0;
+
+void print_version(){
+    printf("\n");
+    printf(BOLD "-------------------- SaturnCC --------------------\n" NC);
+    printf("\n");
+    printf(BOLD "Translater for simplified C to Saturn HP assembly\n" NC);
+    printf(BOLD "Build Version :" NC "v%s.%s\r\n", MAIN_VERSION, SUB_VERSION);
+    printf(BOLD "Github link : " NC "https://github.com/jugen667/saturn_translater\n");
+    printf("\n");
+    printf(BOLD "--------------------------------------------------\n" NC);
+    printf("\n");
+}
+
 
 void affiche_help(){
-	printf("  OPTIONS helper 4 minicc \n\n");
-	printf("  Utilisation : ./minicc <options> <infile>\n\n");
-	printf("  -b : affiche une banière indiquant le nom du compilateur \n          et des membres du groupe \n");
-	printf("  -o <filename> : Définit le nom du fichier assembleur produit \n          (défaut : out.s)\n");
-	printf("  -t <int> : Définit le niveau de trace à utiliser entre 0 et 5 \n          (0 = pas de trace ; 5 = toutes les traces defaut = 0)\n");
-	printf("  -r <int> : Définit le nombre maximum de registres à utiliser, \n          entre 4 et 8 (défaut : 8)\n");
-	printf("  -s : Arrêter la compilation après l’analyse syntaxique \n          (défaut = non)\n");
-	printf("  -v : Arrêter la compilation après la passe de vérifications \n          (défaut = non)\n");
-	printf("  -h : Afficher la liste des options (fonction d’usage) \n          et arrêter le parsing des arguments\n\n");
+    printf("\n");
+	printf(BOLD "Help page Saturncc \n\n" NC);
+	printf(BOLD "Translater for simplified C to Saturn HP assembly\n" NC);
+    printf("Usage : ./saturncc <options> <infile>\n\n");
+	printf("  -o <filename> : Custom output filename\n\t(default : out.s)\n");
+	printf("  -t <int> : Trace level between 0 and 5 \n\t(0 = no trace ; 5 = alltraces) (default = 0)\n");
+	printf("  -r <int> : Max register to use\n\tbetween 1 and 5 (default : 5)\n");
+	printf("  -s : Stop teanslation after syntax check \n\tdéfaut = non)\n");
+	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
+	printf("  -h : Print help\n");
+    printf("  -v : Print build version of SaturnCC\n\n");
 }
 
-void affiche_membres(){
-	printf("oooo     oooo ooooo oooo   oooo ooooo        oooooooo8   oooooooo8 \n 8888o   888   888   8888o  88   888       o888     88 o888     88 \n 88 888o8 88   888   88 888o88   888       888         888         \n 88  888  88   888   88   8888   888       888o     oo 888o     oo \no88o  8  o88o o888o o88o    88  o888o       888oooo88   888oooo88  \n                                                              \nKKKKKKKKKKKKKKKKKKKKKKKKKK0KKKKKKKKKKKKKK0000000000000000000000000000KKKKKK\nKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKK000000000000000000000000000KKKKKKKK\nKKKKKKKKKKKKXXXXXXKKKKKKKKKKKKKKKKKKK000KKKK00000000000000000000KKKKKKKKKKK\n00KKKKKKXXXXXXXXK0000OO00KKKKK000000KKKKKKKKKKKK0KK000000KKKKKKKKKKKKKKKKXX\ndxxkOO0KKXXXXXX0xl:::;:loxkOOOkxdxkO00KKKKKKKKKKKKKKKKKKKKKKKKKKKKKKKXXXXXX\nxddxddodOKKXK0xl;'''''''',::::::::ldxxxk00KKKKKKKKKKKKKKKKKKXXXXXXXXXXXXXNN\nxdxdoxk0KXXKxc,'.....'..........'',;:clodk00KKKKKKKKKKKKXXXXXXXXXXXXXXXXXNN\nxooxk0KKKKXOc'.............  ..''..,;;:loxOO0KXXKXXXXXXXXXXXXXXXXXNNNNNNNNN\ndxk0KXKkcckd,..'..............'','.';::cldkkO0KXXXXXXXXXXXNNNNNNNNNNNNNNWWW\nOKKXXX0d,.....'..,;;;;;;;;,,,,,,,;,',:;;:lxkO0KK00KKXXXXXXNNNNNNNWWWWWWWWWW\nXXXXXX0kl'....';ccccccccc::::;;,,,,''''.';clxxollodxxxkO0XNNNNWWWWWWMMMMWWX\nXXXXXXXOl'...,cllllllllcccccc:;;;;,'......,cdc....,''',;cdkKNWWWMMMMMMWXOkx\nXXXXXXKk:....:lc::;;;::cccc::::;;;;;,,,'.';cl,.   ......,;:cxKWMMMNXK0000Ok\nXXXXNX0o,...:lc:;,'...',;;;;;,,,,,;:ldo;';cc'.....,;:::;;,,;ckXXKKKKXNWMMNO\nXXXXXX0l'..;llcc:;,'..',,;;,......';dOd;,;:'..';:cccccccccc::lOXNWMMMMMMMMX\nXXXXXNOc,.,lllc:,......;:c;'...'''''cxl,,:;..,::cccccc:;::loolOWWKKWMMMMMMW\nXXXNNNxc:,colllc:;,',,,;:c;,.....',,coc,;cc,'';::::c:,''',;cddkX0dxXMMMMMMM\nXXXNNNk:;codolcccc::c:;:cc:,'''..,:cldc;cl:::;,''';cc:,'',:cldkkdodKMMMMMMM\nXNNNNN0lcodoolccc:::;;:cccl:,;;;;:oxxdc;oo,;c;'...,cllccccllloxxolo0WMMMMWX\nXXNNNNNkooooooolc:;,,;;;;,;:;,;::cldoc:oOkl;cc;,,,::;;;;:ccllldxoloOWMMMNOx\nXXXXNNNXOdolooolc:;;;,'''...'',;:lddc;lKWXOdllllcc:,',,;:cccllodoloONMWXkdo\nKKKXXXXXKxlloolc::;;;,'.....',,;codoxOKWWWKOxoollc::;,',,,;:clooolldOK0kdx0\nKKKKKKKK0xlooolc:;,'''......',,;lk0KNWWMMMNO0Odlllc:;,'',;:::coollllodddxKW\nXXXXXKKKKkooool:;;;,,'.......';:dKWMMMMMMMWKOXKOdlc:;;;;;;;;;coolllloooodk0\nKKKXXXXXXOooolc:::::;,'.''''',;o0WMMMMMMMMMN0KWWXOo:;,,'''.'';lllllllooolll\n00KKXXKKOdolllc;;::;;,,''''',;lONMMMMMMMMMMWK0XXXKxl:;,'''',,:lllllllolllll\n0KKKXXKkdooll::;;;::;;,,,,,',oOKNMMMMMWNXK0kO0kocloolc:::;;;;coooooolllllll\nddkkkkxdoolllc;,,,,,'.''',,:o0X0KNWW0kxdolc:lxo,',::cccc:::;;coooooolllllcc\n:cloooooolllccc:,''......';d0K0xdxKN0xxkkOxl:,'....,;::::::;;coooooooollcc:\n;;:cloolllccccc::;;'...',;oOKd;,;lk0XXKK0xc,'........';;::;;;:oooooooollc:;\n,,,;cllllccc:::::;;'.'',,cON0:',;:okOOxl:''............';;;;;:looooollllc:;\n\nProject by Rio & Genty \n");
-}
-
-void testInt(int min, int max, int test){
-	if (test <= max && test >= min){}
-	else{
-		fprintf(stderr,RED "[CRITICAL ERROR]\n");
-		fprintf(stderr,NC"option non compatible avec %d \n",test);
+void test_int_value(int min, int max, int test, char * argv ){
+	if (test > max || test < min){
+		fprintf(stderr,NC"value %d out of range for option %s\n",test, argv);
+        if (argv[1] == 'r'){
+            fprintf(stderr,NC"\t-> value must be between 1 and 5\n");
+        }
+        else if (argv[1] == 't'){
+            fprintf(stderr,NC"\t-> value must be between 0 and 5\n");
+        }
 		exit(1);	
 	}
 }
@@ -51,33 +77,25 @@ void testStr(char * test, char ASMouC){
 	while (test[i] != '\0'){
 		if ((test[i] <= 'z' && test[i] >= '/') || (test[i] == '.' && test[i+1] == ASMouC )){}
 		else{
-			fprintf(stderr,RED "[CRITICAL ERROR]\n");
-			fprintf(stderr,NC"option non compatible avec %s \n",test);
+			fprintf(stderr,NC"uncompatible option with %s\n",test);
 			exit(1);	
-			}
+		}
 		i++;
 	}
 }
 
-void argIncompatible(char *UN, char *DEUX, char *test){
-	if((strcmp(test,UN) || strcmp(test,DEUX)) && incomp == 0){
-		incomp =1;
+void test_arg_compatibility(char *arg_1, char *arg_2, char *test){
+	if((strcmp(test, arg_1) || strcmp(test, arg_2)) && uncompatible == 0){
+		uncompatible = 1;
 	}
-	else if((strcmp(test,UN) || strcmp(test,DEUX)) && incomp == 1){
-		fprintf(stderr,RED "[CRITICAL ERROR]\n");
-		fprintf(stderr,NC"arguments %s et %s incompatibles \n",UN,DEUX);
+	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == 1){
+		fprintf(stderr,NC"uncompatible options  : %s and %s \n", arg_1, arg_2);
 		exit(1);
 	}
 }
 
 void parse_args(int argc, char ** argv) {
 	infile = NULL;
-	for (int i=1; i<argc; i++){
-		if (strcmp(argv[i],"-h")==1){
-			affiche_help();
-			exit(1);
-		}
-	}
     for (int i=1; i<argc; i++){
     	if (argv[i][0] != '-'){
     		testStr(argv[i],'c');
@@ -88,46 +106,42 @@ void parse_args(int argc, char ** argv) {
     	else{
     		if (argv[i][2] == '\0'){
 				switch (argv[i][1]){
-					case 'b':
-						affiche_membres();
-						exit(1);
-						break;
 					case 'o':
-						//TESTS à faire !!! si pas les bons caractères
 						testStr(argv[i+1],'s');
 						outfile = argv[i+1];
-						//printf("le nom du fichier asm produit est %s \n", outfile);
+						printf("output file name : %s \n", outfile);
 						i++;
 						break;
 					case 't':
-						//TESTS à faire !!! si pas les bons caractères
-						testInt(0,5,atoi(argv[i+1]));
+						test_int_value(0,5,atoi(argv[i+1]), argv[i]);
 						trace_level = atoi(argv[i+1]);
-						printf("le trace level est fixé à %d \n",trace_level);
 						i++;
 						break;
 					case 'r':
-						//TESTS à faire !!! si pas les bons caractères
-						testInt(4,8,atoi(argv[i+1]));
+						test_int_value(1,5,atoi(argv[i+1]), argv[i]);
 						set_max_registers(atoi(argv[i+1]));
-						//printf("le nombre de registres est fixé à %d \n",atoi(argv[i+1]));
 						i++;
 						break;
 					case 's':
-						argIncompatible("-s","-v",argv[i]);
+						test_arg_compatibility("-s","-c",argv[i]);
 						stop_after_syntax = 1;
-						//printf("arrêt après la phase d'analyse syntaxique \n");
 						break;
-					case 'v':
-						argIncompatible("-s","-v",argv[i]);
+					case 'c':
+						test_arg_compatibility("-s","-c",argv[i]);
 						stop_after_verif = 1;
 						//printf("arrêt après la phase de vérification \n");
 						break;
+                    case 'v':
+                        print_version();
+                        exit(1);
+                        break;
+                    case 'h':
+                        affiche_help();
+                        exit(1);
+                        break;
 					default:
-						printf("%s ",argv[i]);
-						fprintf(stderr,RED "[CRITICAL ERROR]\n");
-						fprintf(stderr,NC "n'est pas une option de minicc \nannulation en cours \n\n");
-						affiche_help();
+						fprintf(stderr,NC "%s is not a valid option\n", argv[i]);
+                        fprintf(stderr,NC "Show helps with \"saturncc -h\"\n");
 						exit(1);
 						break;
 				}
@@ -135,25 +149,29 @@ void parse_args(int argc, char ** argv) {
 		}
     }
 	if (infile == NULL){
-		fprintf(stderr,RED "[CRITICAL ERROR]\n");
-		fprintf(stderr,NC "pas de fichier .c dans la commande \n\n");
-		affiche_help();
+		fprintf(stderr,NC "No .c file to translate \n\n");
 		exit(1);
 	}
 }
 
 
 void free_nodes(node_t n) {
-    // A implementer
+    // TO DO
+    // input : root node 
+    // Parse until no more node
+    // come back and free nodes
 }
 
 
 char * strdupl(char * s) {
+    // TO CHANGE (MEMORY LEAK INCOMING)
     char * r = malloc(strlen(s) + 1);
     strcpy(r, s);
     return r;
 }
 
+
+// === DOT FILE CREATION ===
 
 static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num) {
 
@@ -175,7 +193,10 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num) {
             }
         case NODE_INTVAL:
         case NODE_BOOLVAL:
-            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Value: %" PRId64 "}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->value);
+            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Value: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->int_value);
+            break;
+        case NODE_FLOATVAL:
+            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Value: %.2f}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->float_value);
             break;
         case NODE_STRINGVAL:
             {
@@ -234,12 +255,12 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num) {
         case NODE_NOT:
         case NODE_BNOT:
         case NODE_UMINUS:
-	case NODE_ELSE:
-	case NODE_AFFECT:
+    	case NODE_ELSE:
+    	case NODE_AFFECT:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s|Nb. ops: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->nops);
             break;
 	default:
-            printf("*** Error in %s: unknow nature : %s\n", __func__, node_nature2string(n->nature));
+            printf("*** Error in %s: unknown nature : %s\n", __func__, node_nature2string(n->nature));
             assert(false);
     }
 
@@ -287,6 +308,8 @@ const char * node_type2string(node_type t) {
             return "TYPE INT";
         case TYPE_BOOL:
             return "TYPE BOOL";
+        case TYPE_FLOAT:
+            return "TYPE FLOAT";
         case TYPE_VOID:
             return "TYPE VOID";
         default:
@@ -315,6 +338,8 @@ const char * node_nature2string(node_nature t) {
             return "TYPE";
         case NODE_INTVAL:
             return "INTVAL";
+        case NODE_FLOATVAL:
+            return "FLOATVAL";
         case NODE_BOOLVAL:
             return "BOOLVAL";
         case NODE_STRINGVAL:
@@ -377,9 +402,9 @@ const char * node_nature2string(node_nature t) {
             return "AFFECT";
         case NODE_PRINT:
             return "PRINT";
-	case NODE_ELSE:
-	    return "ELSE";
-	default:
+    	case NODE_ELSE:
+    	    return "ELSE";
+    	default:
             fprintf(stderr, "*** Error in %s: Unknown node nature: %d\n", __func__, t);
             exit(1);
     }
