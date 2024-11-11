@@ -13,10 +13,7 @@ More about the subset under [grammar/rules.md](https://github.com/jugen667/satur
 
 # Road Map
 
-## Add float support
-	[x] Lexico.l
-
-	[x] Grammar.y
+## --Add float support--
 
 ## Instruction Set implementation 
 
