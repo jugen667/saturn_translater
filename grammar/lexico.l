@@ -34,21 +34,19 @@ extern int yydebug;
 %option yylineno
 
 
-LETTRE          [a-zA-Z]
-CHIFFRE         [0-9]
-CHIFFRE_NON_NUL [1-9]
-ENTIER_DEC      0|{CHIFFRE_NON_NUL}{CHIFFRE}*
-LETTRE_HEXA     [a-fA-F]
-ENTIER_HEXA     0x({CHIFFRE}|{LETTRE_HEXA})+
-ENTIER          {ENTIER_DEC}|{ENTIER_HEXA}
-FLOAT           ({ENTIER})"."({ENTIER})
-/* A completer ; fausses definitions pour passer la compilation */
-IDF             {LETTRE}({LETTRE}|{CHIFFRE}|'_')*
-CHAINE_CAR      [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E] 
-/* On exclue les caractères non voulus */
-CHAINE          \"({CHAINE_CAR}|\\\"|\\n)*\"
-COMMENTAIRE     \/\/({CHAINE_CAR})*(\\n)*
-SEPARATEUR      [ \t\n]+
+LETTER              [a-zA-Z]
+FIGURE              [0-9]
+FIGURE_NON_NUL      [1-9]
+INTEGER_DEC         0|{FIGURE_NON_NUL}{FIGURE}*
+LETTER_HEXA         [a-fA-F]
+INTEGER_HEXA        0x({FIGURE}|{LETTER_HEXA})+
+INTEGER             {INTEGER_DEC}|{INTEGER_HEXA}
+FLOAT               ({INTEGER_DEC}*\.{INTEGER_DEC}*)
+IDF                 {LETTER}({LETTER}|{FIGURE}|'_')*
+STRING_CHAR         [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E] 
+STRING              \"({STRING_CHAR}|\\\"|\\n)*\"
+COMMENT             \/\/({STRING_CHAR})*(\\n)*
+SEPARATOR           [ \t\n]+
 
 %%
 
@@ -104,9 +102,8 @@ SEPARATEUR      [ \t\n]+
                 RETURN(TOK_IDENT);
 }
 
-{ENTIER} {
+{INTEGER} {
                 #if !LEX_DEBUG
-                /* A completer : affecter yylval.intval et faire des verifications */
                 yylval.intval = atoi(yytext);
                 #endif
                 RETURN(TOK_INTVAL);
@@ -114,13 +111,12 @@ SEPARATEUR      [ \t\n]+
 
 {FLOAT} {
                 #if !LEX_DEBUG
-                /* A completer : affecter yylval.intval et faire des verifications */
-                yylval.floatval = atoi(yytext);
+                yylval.floatval = atof(yytext);
                 #endif
                 RETURN(TOK_FLOATVAL);
 }
 
-{CHAINE} {
+{STRING} {
                 #if !LEX_DEBUG
                 /* A completer : affecter yylval.strval */
                 yylval.strval = strdupl(yytext);
@@ -128,7 +124,7 @@ SEPARATEUR      [ \t\n]+
                 RETURN(TOK_STRING);
 }
 
-{COMMENTAIRE} {
+{COMMENT} {
 }
 
 

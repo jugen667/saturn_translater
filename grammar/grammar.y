@@ -27,12 +27,10 @@ void analyse_tree(node_t root);
 node_t make_node(node_nature nature, int nops, ...);
 node_t make_node_ident(char* identifier);
 node_t make_node_type(node_type type);
-node_t make_node_intval(int64_t value);
-node_t make_node_floatval(int64_t value);
+node_t make_node_intval(int32_t value);
+node_t make_node_floatval(float value);
 node_t make_node_boolval(bool value);
 node_t make_node_strval(char* string);
-
-/* A completer */
 
 %}
 
@@ -45,8 +43,6 @@ node_t make_node_strval(char* string);
     node_t ptr;
 };
 
-
-/* Definir les token ici avec leur associativite, dans le bon ordre */
 %type <intval> TOK_INTVAL;
 %type <floatval> TOK_FLOATVAL;
 %type <strval> TOK_IDENT TOK_STRING;
@@ -379,8 +375,7 @@ ident       : TOK_IDENT
 
 %%
 
-
-/* A completer et/ou remplacer avec d'autres fonctions */
+// === NODE MAKER FUNCS === 
 node_t make_node(node_nature nature, int nops, ...) {
     va_list ap;
     node_t node = (node_t) malloc(sizeof(node_s));
@@ -407,12 +402,13 @@ node_t make_node_ident(char* identifier){
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = identifier;
-    node->type = TYPE_NONE; // initialisation car type maj dans passe 1
-    node->offset = 0;  // initialisation car offset maj dans passe 1
-    node->global_decl = false; // maj dans passe 1
+    node->type = TYPE_NONE;         // init but update in passe 1
+    node->offset = 0;               // init but update in passe 1
+    node->global_decl = false;      // init but update in passe 1
     node->decl_node = NULL;
     node->opr = NULL;
-    node->value = 0;
+    node->int_value = 0;
+    node->float_value = 0;
     return node;
 }
 
@@ -422,40 +418,41 @@ node_t make_node_type(node_type type){
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = NULL;
-    node->type = type; // initialisation car type maj dans passe 1
-    node->offset = 0;  // initialisation car offset maj dans passe 1
-    node->global_decl = false; // maj dans passe 1
+    node->type = type;              // init but update in passe 1
+    node->offset = 0;               // init but update in passe 1
+    node->global_decl = false;      // init but update in passe 1
     node->decl_node = NULL;
     node->opr = NULL;
-    node->value = 0;
+    node->int_value = 0;
+    node->float_value = 0;
     return node;
 }
 
-node_t make_node_intval(int64_t value){
+node_t make_node_intval(int32_t value){
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_INTVAL;
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = NULL;
-    node->type = TYPE_INT; // initialisation car type maj dans passe 1
-    node->offset = 0;  // initialisation car offset maj dans passe 1
-    node->global_decl = false; // maj dans passe 1
-    node->value = value;
+    node->type = TYPE_INT;          // init but update in passe 1
+    node->offset = 0;               // init but update in passe 1
+    node->global_decl = false;      // init but update in passe 1
+    node->int_value = value;
     node->decl_node = NULL;
     node->opr = NULL;
     return node;
 }
 
-node_t make_node_floatval(int64_t value){
+node_t make_node_floatval(float value){
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_FLOATVAL;
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = NULL;
-    node->type = TYPE_FLOAT; // initialisation car type maj dans passe 1
-    node->offset = 0;  // initialisation car offset maj dans passe 1
-    node->global_decl = false; // maj dans passe 1
-    node->value = value;
+    node->type = TYPE_FLOAT;        // init but update in passe 1
+    node->offset = 0;               // init but update in passe 1
+    node->global_decl = false;      // init but update in passe 1
+    node->float_value = value;
     node->decl_node = NULL;
     node->opr = NULL;
     return node;
@@ -467,10 +464,10 @@ node_t make_node_boolval(bool value){
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = NULL;
-    node->type = TYPE_BOOL; // initialisation car type maj dans passe 1
-    node->offset = 0;  // initialisation car offset maj dans passe 1
-    node->global_decl = false; // maj dans passe 1
-    node->value = value;
+    node->type = TYPE_BOOL;         // init but update in passe 1
+    node->offset = 0;               // init but update in passe 1
+    node->global_decl = false;      // init but update in passe 1
+    node->int_value = value;
     node->decl_node = NULL;
     node->opr = NULL;
     return node;
@@ -482,9 +479,9 @@ node_t make_node_strval(char* string){
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = NULL;
-    node->type = TYPE_NONE; // initialisation car type maj dans passe 1
-    node->offset = 0;  // initialisation car offset maj dans passe 1
-    node->global_decl = false; // maj dans passe 1
+    node->type = TYPE_NONE;         // init but update in passe 1
+    node->offset = 0;               // init but update in passe 1
+    node->global_decl = false;      // maj dans passe 1
     node->str = string;
     node->decl_node = NULL;
     node->opr = NULL;
@@ -494,15 +491,16 @@ node_t make_node_strval(char* string){
 void analyse_tree(node_t root) {
     dump_tree(root, "apres_syntaxe.dot");
     if (!stop_after_syntax) {
-        analyse_passe_1(root);
-        dump_tree(root, "apres_passe_1.dot");
-        if (!stop_after_verif) {
-            create_program(); 
-            gen_code_passe_2(root);
-            dump_mips_program(outfile);
-            free_program();
-        }
-        free_global_strings();
+        // TODO AFTER PASSE 1
+        // analyse_passe_1(root);
+        // dump_tree(root, "apres_passe_1.dot");
+        // if (!stop_after_verif) {
+        //     create_program(); 
+        //     gen_code_passe_2(root);
+        //     dump_mips_program(outfile);
+        //     free_program();
+        // }
+        // free_global_strings();
     }
     free_nodes(root);
 }

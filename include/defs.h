@@ -72,11 +72,14 @@ typedef enum node_type_s {
 } node_type;
 
 
+// === NODE STRUCT ===
+
 typedef struct _node_s {
     node_nature nature;
     node_type type;
 
-    int64_t value;
+    int32_t int_value;
+    float float_value;
     int32_t offset;
     bool global_decl;
     int32_t lineno;
