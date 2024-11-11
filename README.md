@@ -13,9 +13,11 @@ More about the subset under [grammar/rules.md](https://github.com/jugen667/satur
 
 # Road Map
 
-## --Add float support--
+##~~Add float support~~
 
 ## Instruction Set implementation 
-
-## Figure sizes for datas
+	
+- registers setups
+- instuctions list
+- dump in a file
 
