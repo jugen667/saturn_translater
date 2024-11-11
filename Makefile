@@ -11,12 +11,10 @@ YACC_FLAGS=
 LEX_FLAGS=
 
 ifeq ($(DEBUG_LEX),1)
-	YACC_FLAGS=
 	LEX_FLAGS=-DLEX_DEBUG=1
 endif
 ifeq ($(DEBUG_YACC),1)
 	YACC_FLAGS=-DYYDEBUG=1
-	LEX_FLAGS=
 endif
 
 
@@ -26,9 +24,9 @@ INCLUDE=-I$(INC_DIR)
 all: $(EXE)
 
 # $(EXE) : y.tab.o lex.yy.o arch.o common.o passe_1.o passe_2.o
+#	@gcc $(CFLAGS) $(INCLUDE) -L$(UTILS) y.tab.o lex.yy.o arch.o common.o passe_1.o passe_2.o -o $@ -lminiccutils
 $(EXE) : y.tab.o lex.yy.o arch.o common.o
 	@echo "| Linking / Creating binary $@"
-	#@gcc $(CFLAGS) $(INCLUDE) -L$(UTILS) y.tab.o lex.yy.o arch.o common.o passe_1.o passe_2.o -o $@ -lminiccutils
 	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o arch.o common.o -o $@
 	@echo "| Cleaning .o files"
 	@rm -f *.o
