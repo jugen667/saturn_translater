@@ -28,7 +28,7 @@ node_t make_node(node_nature nature, int nops, ...);
 node_t make_node_ident(char* identifier);
 node_t make_node_type(node_type type);
 node_t make_node_intval(int32_t value);
-node_t make_node_floatval(float value);
+node_t make_node_floatval(double value);
 node_t make_node_boolval(bool value);
 node_t make_node_strval(char* string);
 
@@ -38,7 +38,7 @@ node_t make_node_strval(char* string);
 
 %union {
     int16_t intval;
-    float floatval;
+    double floatval; // double for accuracy
     char * strval;
     node_t ptr;
 };
@@ -443,7 +443,7 @@ node_t make_node_intval(int32_t value){
     return node;
 }
 
-node_t make_node_floatval(float value){
+node_t make_node_floatval(double value){
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_FLOATVAL;
     node->lineno = yylineno;

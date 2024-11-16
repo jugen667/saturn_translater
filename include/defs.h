@@ -79,7 +79,7 @@ typedef struct _node_s {
     node_type type;
 
     int32_t int_value;
-    float float_value;
+    double float_value; // double for accuracy 
     int32_t offset;
     bool global_decl;
     int32_t lineno;
