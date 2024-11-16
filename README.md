@@ -19,6 +19,13 @@ More about the subset under [grammar/rules.md](https://github.com/jugen667/satur
 
 ## 1st parsing : ensure we are doing operations correctly (type checks etc)
 
+### Check if we need it in our arch
+- Global context to check
+- Variable Decl to check
+- If variable not decl : put it in the env (means add an offset to it)
+- Offset management (func loop etc)
+- String support ?
+
 ## Instruction Set implementation 
 
 - registers setups
