@@ -43,7 +43,7 @@ INTEGER_HEXA        0x({FIGURE}|{LETTER_HEXA})+
 INTEGER             {INTEGER_DEC}|{INTEGER_HEXA}
 FLOAT               ({INTEGER_DEC}*\.{INTEGER_DEC}*)
 IDF                 {LETTER}({LETTER}|{FIGURE}|'_')*
-STRING_CHAR         [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E] 
+STRING_CHAR         [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E]
 STRING              \"({STRING_CHAR}|\\\"|\\n)*\"
 COMMENT             \/\/({STRING_CHAR})*(\\n)*
 SEPARATOR           [ \t\n]+
