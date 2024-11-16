@@ -1,4 +1,3 @@
-// Un exemple de programme MiniC
 int start = 0;
 int end = 5;
 bool a = true;
