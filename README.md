@@ -13,11 +13,51 @@ More about the subset under [grammar/rules.md](https://github.com/jugen667/satur
 
 # Road Map
 
-##~~Add float support~~
+## ~~Add float support~~
+
+## Ensure tree is correct
+
+## 1st parsing : ensure we are doing operations correctly (type checks etc)
 
 ## Instruction Set implementation 
-	
+
 - registers setups
 - instuctions list
 - dump in a file
 
+## 1st parsing : translate nodes to instructions with the instructions set
+
+
+
+# KNOWN BUGS 
+
+- affectation between declaration or in global throw syntax error :
+```C
+int start = 0;
+int end = 5;
+float a = 191.01450;
+start = a + end;		<--- Throw Syntax Error
+void main () {
+	int i, s = start , e = end ;
+	int sum = 0;
+	for (i = s; i < e; i = i + 1) {
+ 		sum = sum + 1;	
+ 	}
+	print("sum :", sum , "\n") ;
+}
+```
+```C
+int start = 0;
+int end = 5;
+float a = 191.01450;
+
+void main () {
+	int i, s = start , e = end ;
+	start = a + end;    <--- Throw Syntax Error
+	int sum = 0;
+	for (i = s; i < e; i = i + 1) {
+ 		sum = sum + 1;	
+ 	}
+	print("sum :", sum , "\n") ;
+}
+```
