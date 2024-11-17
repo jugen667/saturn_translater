@@ -502,7 +502,7 @@ void analyse_tree(node_t root) {
         // }
         // free_global_strings();
     }
-    free_nodes(root);
+    //free_nodes(root);
 }
 
 

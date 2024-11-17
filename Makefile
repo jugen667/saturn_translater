@@ -30,6 +30,7 @@ $(EXE) : y.tab.o lex.yy.o arch.o common.o
 	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o arch.o common.o -o $@
 	@echo "| Cleaning .o files"
 	@rm -f *.o
+	@echo "| Finished compilation"
 
 
 y.tab.c: $(GRA_DIR)/grammar.y Makefile

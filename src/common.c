@@ -72,16 +72,22 @@ void test_int_value(int min, int max, int test, char * argv ){
 	}
 }
 
-void testStr(char * test, char ASMouC){
-	int i=0;
-	while (test[i] != '\0'){
-		if ((test[i] <= 'z' && test[i] >= '/') || (test[i] == '.' && test[i+1] == ASMouC )){}
-		else{
-			fprintf(stderr,NC"uncompatible option with %s\n",test);
-			exit(1);	
-		}
-		i++;
-	}
+void testValideInFile(char * test){
+    int i=0;
+    i = strlen(test);
+    if (strstr(&test[i-2],".c") == NULL ){
+        fprintf(stderr,NC"unvalid file name : %s\n",test);
+        exit(1);    
+    }
+}
+
+void testValideOutFile(char * test){
+    int i=0;
+    i = strlen(test);
+    if (strstr(&test[i-2],".s") == NULL ){
+        fprintf(stderr,NC"unvalid file name : %s\n",test);
+        exit(1);    
+    }
 }
 
 void test_arg_compatibility(char *arg_1, char *arg_2, char *test){
@@ -98,18 +104,17 @@ void parse_args(int argc, char ** argv) {
 	infile = NULL;
     for (int i=1; i<argc; i++){
     	if (argv[i][0] != '-'){
-    		testStr(argv[i],'c');
-    		infile = argv[i];
-    		//printf("le nom du fichier sur lequel effectuer la compilation %s \n",argv[i]);
-    		//break;
+            testValideInFile(argv[i]);
+            infile = argv[i];
+            //printf("Infile %s \n",argv[i]);
     	}
     	else{
     		if (argv[i][2] == '\0'){
 				switch (argv[i][1]){
 					case 'o':
-						testStr(argv[i+1],'s');
+						testValideOutFile(argv[i+1]);
 						outfile = argv[i+1];
-						printf("output file name : %s \n", outfile);
+						//printf("output file name : %s \n", outfile);
 						i++;
 						break;
 					case 't':
@@ -164,7 +169,7 @@ void free_nodes(node_t n) {
 
 
 char * strdupl(char * s) {
-    // TO CHANGE (MEMORY LEAK INCOMING)
+    // TO CHANGE (MEMORY LEAK INCOMING) = Limit string size
     char * r = malloc(strlen(s) + 1);
     strcpy(r, s);
     return r;
