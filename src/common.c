@@ -53,7 +53,7 @@ void affiche_help(){
 	printf("  -o <filename> : Custom output filename\n\t(default : out.s)\n");
 	printf("  -t <int> : Trace level between 0 and 5 \n\t(0 = no trace ; 5 = alltraces) (default = 0)\n");
 	printf("  -r <int> : Max register to use\n\tbetween 1 and 5 (default : 5)\n");
-	printf("  -s : Stop teanslation after syntax check \n\tdéfaut = non)\n");
+	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
 	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
 	printf("  -h : Print help\n");
     printf("  -v : Print build version of SaturnCC\n\n");

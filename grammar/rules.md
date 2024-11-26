@@ -20,11 +20,11 @@ However, it is a very primitive language and thus its functionnalities are limit
 
 ## About data types
 ### Supported
-- **int** : based of *uint32_t* type, currently allow **ONLY** positive integrer in the range [0; 2<sup>32</sup> - 1]
+- **int** : based of *uint16_t* type, currently allow **ONLY** positive integrer in the range [0; 2<sup>16</sup> - 1]
 	> Immediate **int** are limited to the range [0; 2<sup>16</sup> - 1]
 	
 - **bool** : classic boolean type : *true (1)* or *false (0)* 
-- **float** : currently supporting 2 decimal points 
+- **float** : supported
 - **void** : void type used for *main()* function
 - Strings allowed in *print()* function
 

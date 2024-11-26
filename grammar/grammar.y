@@ -9,6 +9,7 @@
 
 #include "../include/defs.h"
 #include "../include/common.h"
+#include "../include/passe_1.h"
 
 
 
@@ -492,8 +493,8 @@ void analyse_tree(node_t root) {
     dump_tree(root, "apres_syntaxe.dot");
     if (!stop_after_syntax) {
         // TODO AFTER PASSE 1
-        // analyse_passe_1(root);
-        // dump_tree(root, "apres_passe_1.dot");
+        analyse_passe_1(root);
+        dump_tree(root, "apres_passe_1.dot");
         // if (!stop_after_verif) {
         //     create_program(); 
         //     gen_code_passe_2(root);

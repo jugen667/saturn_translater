@@ -5,7 +5,6 @@
 
 #include "../include/defs.h"
 #include "../include/passe_1.h"
-#include "../utils/miniccutils.h"
 
 extern int trace_level;
 
@@ -22,14 +21,15 @@ void check_add_type(node_t node){
 
 		if (node->opr[0]->type != TYPE_INT || node->opr[1]->type != TYPE_INT){	
 			if(node->opr[0]->type != TYPE_INT){
-				printf("Error line %d: operator '+' cannot have left operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '+' wrong type on left operand\n", node->opr[0]->lineno);
 			}
 			else if(node->opr[1]->type != TYPE_INT){
-				printf("Error line %d: operator '+' cannot have right operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '+' wrong type on left operand\n", node->opr[0]->lineno);
 			}
 			exit(EXIT_FAILURE);
 		}	
 	}
+	// case ident && number for ex
 	else if (node->opr[0]->nature == NODE_PLUS){
 		check_add_type(node->opr[0]);
 	}
@@ -42,14 +42,15 @@ void check_minus_type(node_t node){
 	if (node->opr[0]->type && node->opr[1]->type){
 		if (node->opr[0]->type != TYPE_INT || node->opr[1]->type != TYPE_INT){	
 			if(node->opr[0]->type != TYPE_INT){
-				printf("Error line %d: operator '-' cannot have left operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '-' wrong type on left operand\n", node->opr[0]->lineno);
 			}
 			else if(node->opr[1]->type != TYPE_INT){
-				printf("Error line %d: operator '-' cannot have right operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '-' wrong type on left operand\n", node->opr[0]->lineno);
 			}
 			exit(EXIT_FAILURE);
 		}	
 	}
+	// case ident && number for ex
 	else if (node->opr[0]->nature == NODE_MINUS){
 		check_minus_type(node->opr[0]);
 	}
@@ -62,14 +63,15 @@ void check_mul_type(node_t node){
 	if (node->opr[0]->type && node->opr[1]->type){		
 		if (node->opr[0]->type != TYPE_INT || node->opr[1]->type != TYPE_INT){	
 			if(node->opr[0]->type != TYPE_INT){
-				printf("Error line %d: operator '*' cannot have left operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '*' wrong type on left operand \n", node->opr[0]->lineno);
 			}
 			else if(node->opr[1]->type != TYPE_INT){
-				printf("Error line %d: operator '*' cannot have right operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '*' wrong type on right operand\n", node->opr[0]->lineno);
 			}
 			exit(EXIT_FAILURE);
 		}	
 	}
+	// case ident && number for ex
 	else if (node->opr[0]->nature == NODE_MUL){
 		check_mul_type(node->opr[0]);
 	}
@@ -82,10 +84,10 @@ void check_div_type(node_t node){
 	if (node->opr[0]->type && node->opr[1]->type){		
 		if (node->opr[0]->type != TYPE_INT || node->opr[1]->type != TYPE_INT){	
 			if(node->opr[0]->type != TYPE_INT){
-				printf("Error line %d: operator '/' cannot have left operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '/' wrong type on left operand\n", node->opr[0]->lineno);
 			}
 			else if(node->opr[1]->type != TYPE_INT){
-				printf("Error line %d: operator '/' cannot have right operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '/' wrong type on left operand\n", node->opr[0]->lineno);
 			}
 			exit(EXIT_FAILURE);
 		}	
@@ -102,10 +104,10 @@ void check_mod_type(node_t node){
 	if (node->opr[0]->type && node->opr[1]->type){		
 		if (node->opr[0]->type != TYPE_INT || node->opr[1]->type != TYPE_INT){	
 			if(node->opr[0]->type != TYPE_INT){
-				printf("Error line %d: operator '%%' cannot have left operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '%%' wrong type on left operand\n", node->opr[0]->lineno);
 			}
 			else if(node->opr[1]->type != TYPE_INT){
-				printf("Error line %d: operator '%%' cannot have right operand of type TYPE BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: operator '%%' wrong type on left operand\n", node->opr[0]->lineno);
 			}
 			exit(EXIT_FAILURE);
 		}	
@@ -122,19 +124,19 @@ void check_mod_type(node_t node){
 void check_bool_expr(node_t node, int positionnal){
 	if (node->opr[positionnal]->type != TYPE_BOOL && node->opr[positionnal]->type != TYPE_NONE){
 		if (node->nature == NODE_IF){
-			printf("Error line %d: 'if' condition does not have a boolean type\n", node->opr[0]->lineno);
+			printf("Error line %d: 'if' statement incorrect\n", node->opr[0]->lineno);
 			exit(EXIT_FAILURE);
 		}
 		else if (node->nature == NODE_WHILE){
-			printf("Error line %d: 'while' condition does not have a boolean type\n", node->opr[0]->lineno);
+			printf("Error line %d: 'while' statement incorrect\n", node->opr[0]->lineno);
 			exit(EXIT_FAILURE);
 		}
 		else if (node->nature == NODE_DOWHILE){
-			printf("Error line %d: 'do ... while' condition does not have a boolean type\n", node->opr[0]->lineno);
+			printf("Error line %d: 'do ... while' statement incorrect\n", node->opr[0]->lineno);
 			exit(EXIT_FAILURE);
 		}
 		else if (node->nature == NODE_FOR){
-			printf("Error line %d: 'for' condition does not have a boolean type\n", node->opr[0]->lineno);
+			printf("Error line %d: 'for' statement incorrect\n", node->opr[0]->lineno);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -145,14 +147,14 @@ void check_bool_op(node_t node){
 	if (node->opr[1] != NULL){
 		if (node->opr[0]->type && node->opr[1]->type){
 			if (node->opr[0]->type != node->opr[1]->type){	
-				printf("Error line %d: two arguments must be of type TYPE_BOOL\n", node->opr[0]->lineno);
+				printf("Error line %d: non 'bool' operands\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
 		}
 	}
 	else{
 		if (node->opr[0]->type != TYPE_BOOL){	
-			printf("Error line %d: two arguments must be of type TYPE_BOOL\n", node->opr[0]->lineno);
+			printf("Error line %d: non 'bool' operands\n", node->opr[0]->lineno);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -163,14 +165,14 @@ void check_int_op(node_t node){
 	if (node->opr[1] != NULL){
 		if (node->opr[0]->type && node->opr[1]->type){
 			if (node->opr[0]->type != node->opr[1]->type){	
-				printf("Error line %d: two arguments must be of type TYPE_INT\n", node->opr[0]->lineno);
+				printf("Error line %d: non 'int' or 'float' operands\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
 		}
 	}
 	else{
 		if (node->opr[0]->type != TYPE_INT){	
-			printf("Error line %d: two arguments must be of type TYPE_INT\n", node->opr[0]->lineno);
+			printf("Error line %d: non 'int' or 'float' operands\n", node->opr[0]->lineno);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -181,7 +183,7 @@ void check_affect_type(node_t node){
 	if (node->opr[1] != NULL){
 		if (node->opr[0]->type && node->opr[1]->type){
 			if (node->opr[0]->type != node->opr[1]->type){	
-				printf("Error line %d: cannot affect a variable to a type which different from the declared one\n", node->opr[0]->lineno);
+				printf("Error line %d: variable and value from different type\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
 			else{
@@ -195,8 +197,9 @@ void check_affect_type(node_t node){
 void check_global_decl(node_t node){
 	if (node->opr[1] != NULL){
 		if (node->opr[0]->global_decl){
-			if ((node->opr[1]->nature != NODE_INTVAL)
-				&& (node->opr[1]->nature != NODE_BOOLVAL)){
+			if (	(node->opr[1]->nature != NODE_INTVAL)
+				&&  (node->opr[1]->nature != NODE_BOOLVAL)
+				&& 	(node->opr[1]->nature != NODE_FLOATVAL)){
 				printf("Error line %d: global variables can only be initialized with a constant value\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
@@ -206,7 +209,7 @@ void check_global_decl(node_t node){
 
 
 void check_intval_domain(node_t node){
-	if(node->value > 0xffffffff7fffffff){
+	if(node->int_value > 0xffffffff7fffffff){
 		printf("Error line %d: integer out of range\n", node->lineno);
 		exit(EXIT_FAILURE);
 	}
@@ -218,7 +221,7 @@ void check_intval_domain(node_t node){
 void analyse_passe_1(node_t root) {	
 	node_t variableDecl;
 	if (root->nature == NODE_PROGRAM){
-		push_global_context();
+		//push_global_context();
 		isGlobal=1; //flag to update the global_decl attribute
 	}	
 
@@ -232,37 +235,39 @@ void analyse_passe_1(node_t root) {
 					}
 					break;
 				case NODE_INTVAL :
+				case NODE_FLOATVAL :
 					check_intval_domain(root->opr[i]);
 					break;
 				case NODE_IDENT :
-					// On verifie si la variable a déjà été déclarée
-					variableDecl = (node_t) get_decl_node(root->opr[i]->ident);
+					// Check if variable has been declared already
+					//variableDecl = (node_t) get_decl_node(root->opr[i]->ident);  // 2 ENTRY ARRAY FOR IDENT ASSOCIATION WITH A NODE
 
 					// If ident == 'main' => setup the type to void and jump to the next node
 					if (!(strcmp(root->opr[i]->ident, "main"))){
 						root->opr[i]->type = TYPE_VOID;
 						break;
 					}
-					// Offset update
-					if (variableDecl == NULL && declaration){
-						//If undeclared, we add it to the environnement
-						root->opr[i]->offset = env_add_element(root->opr[i]->ident, root->opr[i]);
-						root->opr[i]->type = current_type;
-					}
-					else {
-						// Else we get the adress of declaration and associate it with the current variable
-						if (variableDecl != NULL){
-							root->opr[i]->offset = variableDecl->offset;
-							root->opr[i]->type = variableDecl->type;
-							root->opr[i]->global_decl = variableDecl->global_decl;
+					root->opr[i]->type = current_type;
+					
+					// Offset update global variable handling
+					// if (variableDecl == NULL && declaration){
+						// //If undeclared, we add it to the environnement
+						//root->opr[i]->offset = env_add_element(root->opr[i]->ident, root->opr[i]);
+					// }
+					// else {
+					// 	// Else we get the adress of declaration and associate it with the current variable
+					// 	if (variableDecl != NULL){
+					// 		root->opr[i]->offset = variableDecl->offset;
+					// 		root->opr[i]->type = variableDecl->type;
+					// 		root->opr[i]->global_decl = variableDecl->global_decl;
 							
 
-						}
-						else {
-							printf("Error line %d : undeclared variable '%s'\n", root->opr[i]->lineno, root->opr[i]->ident);
-							exit(EXIT_FAILURE);
-						}					
-					}
+					// 	}
+					// 	else {
+					// 		printf("Error line %d : undeclared variable '%s'\n", root->opr[i]->lineno, root->opr[i]->ident);
+					// 		exit(EXIT_FAILURE);
+					// 	}					
+					// }
 
 					// Update of the global_decl
 					if(isGlobal && !root->opr[i]->global_decl){
@@ -270,11 +275,11 @@ void analyse_passe_1(node_t root) {
 						root->opr[i]->global_decl = true;
 					}
 					// Update of decl_node
-					root->opr[i]->decl_node = get_decl_node(root->opr[i]->ident);
+					// root->opr[i]->decl_node = get_decl_node(root->opr[i]->ident);
 					break;
 
 					
-				// Operators that returns int expressions
+				// Operators that returns int expressions (do with float too)
 				case NODE_PLUS :
 					root->opr[i]->type = TYPE_INT;
 					break;
@@ -345,20 +350,21 @@ void analyse_passe_1(node_t root) {
 					break;
 
 				case NODE_DECL :
-					declaration = 1;
+					declaration = 1; // Correction to apply (not reset)
 					break;
 
 				case NODE_BLOCK :
 					isGlobal=0;
-					push_context();
+					//push_context();
 					break;
 
 				case NODE_FUNC :
-					reset_env_current_offset();
+					//reset_env_current_offset();
 					break;
 	
 				case NODE_STRINGVAL :
-					root->opr[i]->offset = add_string(root->opr[i]->str);
+					// Offset update
+					// root->opr[i]->offset = add_string(root->opr[i]->str);
 					break;
 			}	
 		}
@@ -367,10 +373,9 @@ void analyse_passe_1(node_t root) {
 		if(root->opr[i] != NULL){
 			analyse_passe_1(root->opr[i]);
 		}
-		//printf("type neoud : %d\n", root->type);
 		// get offset of the function
 		if(root->nature == NODE_FUNC){
-			root->offset = get_env_current_offset();
+			// root->offset = get_env_current_offset();
 			if(root->opr[0]->type != TYPE_VOID){
 				printf("Error line %d: 'main()' declaration must have a 'void' return type\n", root->opr[0]->lineno);
 				exit(EXIT_FAILURE);
@@ -425,7 +430,7 @@ void analyse_passe_1(node_t root) {
 		
 		// case if(...) else ...
 		if(root->nature == NODE_IF && root->nops == 3){
-			// if 3 node then 3rd is else stamenet
+			// if 3 node then 3rd is else stamenet (to check)
 			printf("Debug >> Nops %d\n", root->nops);
 			for(int i=0;i<root->nops;i++){
         			printf("Debug >> Nopr %d %d\n", i, root->opr[i]->nature);
@@ -449,9 +454,9 @@ void analyse_passe_1(node_t root) {
 			root->nature == NODE_BOR ||
 			root->nature == NODE_BXOR||
 			root->nature == NODE_SRL||
-			root->nature ==NODE_SRA ||
-			root->nature ==NODE_SLL ){
-				check_int_op(root);
+			root->nature == NODE_SRA ||
+			root->nature == NODE_SLL ){
+			check_int_op(root);
 		}
 	}
 }
