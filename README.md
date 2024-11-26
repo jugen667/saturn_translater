@@ -11,20 +11,27 @@ We are using a sub-set of C.
 
 More about the subset under [grammar/rules.md](https://github.com/jugen667/saturn_translater/blob/master/grammar/rules.md)
 
+## Utils
+
+Fast test file with tree as png and svg
+```make clean && make all && bin/saturncc temp/test.c && tools/graph-create.sh```
+
 # Road Map
 
 ## ~~Add float support~~
 
-## Ensure tree is correct
+## ~~Ensure tree is correct~~
 
 ## 1st parsing : ensure we are doing operations correctly (type checks etc)
 
 ### Check if we need it in our arch
-- Global context to check
+- Global variable handling
 - Variable Decl to check
+- Global context to check (if func supported)
 - If variable not decl : put it in the env (means add an offset to it)
 - Offset management (func loop etc)
 - String support ?
+- Add support for more C function ? (incremental operator)
 
 ## Instruction Set implementation 
 
@@ -32,7 +39,7 @@ More about the subset under [grammar/rules.md](https://github.com/jugen667/satur
 - instuctions list
 - dump in a file
 
-## 1st parsing : translate nodes to instructions with the instructions set
+## 2nd parsing : translate nodes to instructions with the instructions set
 
 
 
