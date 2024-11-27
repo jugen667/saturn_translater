@@ -1,3 +1,11 @@
+// ========================================
+// > Author :   jugen 667 
+// > Title  :   common.c
+// > Desc.  :   Compiler options parsing   
+//              and utils functions 
+// > Associated header : common.h
+// ========================================
+
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>

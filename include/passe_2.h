@@ -1,3 +1,9 @@
+// ========================================
+// > Author :   jugen 667 
+// > Title  :   passe_2.h 
+// > Desc.  :   Header for the second parse
+// ========================================
+
 #ifndef _PASSE_2_H_
 #define _PASSE_2_H_
 

@@ -1,3 +1,8 @@
+// ========================================
+// > Author :   jugen 667 
+// > Title  :   passe_1.h 
+// > Desc.  :   Header for the first parse
+// ========================================
 
 #ifndef _PASSE_1_
 #define _PASSE_1_

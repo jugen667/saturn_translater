@@ -1,3 +1,10 @@
+// ========================================
+// > Author :   jugen 667 
+// > Title  :   passe_2.c 
+// > Desc.  :   Second parse to generate
+//				assembly code
+// > Associated header : passe_2.h
+// ========================================
 
 #include <stdio.h>
 #include <stdlib.h>

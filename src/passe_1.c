@@ -1,3 +1,10 @@
+// ========================================
+// > Author :   jugen 667 
+// > Title  :   passe_1.c 
+// > Desc.  :   First parse to check tree
+//				and program consistence
+// > Associated header : passe_1.h
+// ========================================
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +25,6 @@ int declaration = 0;
 // check that operations have 2 same types
 void check_add_type(node_t node){
 	if (node->opr[0]->type && node->opr[1]->type){	
-
 		if (node->opr[0]->type != TYPE_INT || node->opr[1]->type != TYPE_INT){	
 			if(node->opr[0]->type != TYPE_INT){
 				printf("Error line %d: operator '+' wrong type on left operand\n", node->opr[0]->lineno);

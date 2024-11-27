@@ -1,3 +1,11 @@
+// ========================================
+// > Author :   jugen 667 
+// > Title  :   lexico.l 
+// > Desc.  :   Node creation and tree   
+//              creation 
+// > Associated header : 
+// ========================================
+
 %{
 #include <stdio.h>
 #include <stdlib.h>

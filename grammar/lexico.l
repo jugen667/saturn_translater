@@ -1,3 +1,11 @@
+/*  ======================================= */
+/*  > Author :   jugen 667                  */
+/*  > Title  :   lexico.l                   */
+/*  > Desc.  :   Translation of code to     */
+/*               tokens and main function   */
+/*  > Associated header :                   */
+/*  ======================================= */
+
 %{
 #include <stdio.h>
 #include <stdlib.h>

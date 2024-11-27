@@ -1,3 +1,10 @@
+// ========================================
+// > Author :   jugen 667 
+// > Title  :   defs.h
+// > Desc.  :   Header with node structs   
+//              and enums
+// ========================================
+
 #ifndef _DEFS_H_
 #define _DEFS_H_
 

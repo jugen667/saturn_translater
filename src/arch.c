@@ -1,3 +1,10 @@
+// ========================================
+// > Author :   jugen 667 
+// > Title  :   arch.c
+// > Desc.  :   Architecture description
+// > Associated header : arch.h
+// ========================================
+
 #include <stdint.h>
 
 #include "../include/arch.h"
