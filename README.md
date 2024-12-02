@@ -1,5 +1,5 @@
 # C to Saturn Assembly translater
-Simplified C to Saturn (HP-48x) assembler
+Simplified C to Saturn (HP-48x) assembly translater 
 
 ## Main features
 
