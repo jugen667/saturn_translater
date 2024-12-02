@@ -1,4 +1,4 @@
-# saturn_translater
+# C to Saturn Assembly translater
 Simplified C to Saturn (HP-48x) assembler
 
 ## Main features
@@ -8,7 +8,7 @@ This also can produce a tree of the program.
 
 ## About C
 We are using a sub-set of C. 
-
+This subset is limited by the instruction set of the Saturn CPU.
 More about the subset under [grammar/rules.md](https://github.com/jugen667/saturn_translater/blob/master/grammar/rules.md)
 
 ## Utils
