@@ -9,11 +9,14 @@ This also can produce a tree of the program.
 ## About C
 We are using a sub-set of C. 
 This subset is limited by the instruction set of the Saturn CPU.
+
 More about the subset under [grammar/rules.md](https://github.com/jugen667/saturn_translater/blob/master/grammar/rules.md)
 
 ## Utils
+Clone the repo : ```git clone https://github.com/jugen667/saturn_translater```
 
-Fast test file with tree as png and svg
+Fast test file with tree as png and svg :
+
 ```make clean && make all && bin/saturncc temp/test.c && tools/graph-create.sh```
 
 # Road Map
