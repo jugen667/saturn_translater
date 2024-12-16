@@ -14,6 +14,9 @@
 #define DEFAULT_OUTFILE "out.s"
 #define DEFAULT_TRACE_LEVEL 0
 
+#define VAR_MAX_SIZE 32
+#define VAR_MAX_NUMBER 256
+
 
 #define printf_level(level, ...) ({         \
     if (level < trace_level) {              \
@@ -80,7 +83,6 @@ typedef enum node_type_s {
 
 
 // === NODE STRUCT ===
-
 typedef struct _node_s {
     node_nature nature;
     node_type type;
@@ -96,7 +98,7 @@ typedef struct _node_s {
     
     struct _node_s * decl_node;
 
-    char * ident;
+    char * ident;   // array ? 
     char * str;
 
     // Pour l'affichage du graphe
@@ -105,6 +107,12 @@ typedef struct _node_s {
 } node_s;
 
 typedef node_s * node_t;
+
+
+typedef struct{
+    char varName[VAR_MAX_SIZE];
+    node_t node;
+} decl_table;
 
 #endif
 

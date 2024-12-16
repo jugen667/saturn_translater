@@ -8,6 +8,7 @@ void main () {
 	for (i = s; i < e; i = i + 1) {
  		sum = sum + 1;	
  	}
-	print("sum :", sum , "\n") ;
+ 	start + a;
+	print("sum :", sum , "\n");
 }
 
