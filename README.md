@@ -25,10 +25,14 @@ Fast test file with tree as png and svg
 ## 1st parsing : ensure we are doing operations correctly (type checks etc)
 
 ### Check if we need it in our arch
-- Global variable handling
+
+#### TO TEST ####
 - Variable Decl to check
+- If variable not decl : put it in a table
+- Global variable handling
+
+#### TO DO ####
 - Global context to check (if func supported)
-- If variable not decl : put it in the env (means add an offset to it)
 - Offset management (func loop etc)
 - String support ?
 - Add support for more C function ? (incremental operator)
