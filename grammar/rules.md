@@ -1,8 +1,7 @@
 # C subset ruleset
 This file describes the rules of the C subset allowed
 > [!NOTE]
-> This file is up to modification depending on project advancements
-> Rules may evolve
+> This file is up to modification depending on project advancements, rules may evolve
 
 ## Subset of C
 This <u>subset of C</u> used fot simple program and as a proof-of-concept for a Saturn compiler. It has the same syntax.
