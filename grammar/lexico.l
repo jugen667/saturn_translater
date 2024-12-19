@@ -53,7 +53,7 @@ FLOAT               ({INTEGER_DEC}*\.{INTEGER_DEC}*)
 IDF                 {LETTER}({LETTER}|{FIGURE}|'_')*
 STRING_CHAR         [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E] 
 STRING              \"({STRING_CHAR}|\\\"|\\n)*\"
-COMMENT             \/\/({STRING_CHAR})*(\\n)*
+COMMENT             \/\/({STRING_CHAR}|{STRING})*(\\n)*
 SEPARATOR           [ \t\n]+
 
 %%
