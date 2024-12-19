@@ -1,5 +1,5 @@
 // Test file
-int start = 0;
+int start = 2147483648;
 int end = 5;
 float a = 191.01450;
 void main () {
@@ -8,7 +8,5 @@ void main () {
 	for (i = s; i < e; i = i + 1) {
  		sum = sum + 1;	
  	}
- 	start + a;
-	print("sum :", sum , "\n");
+	// print("sum :", sum , "\n");
 }
-

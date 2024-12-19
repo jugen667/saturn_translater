@@ -12,16 +12,37 @@
 
 #include "../include/defs.h"
 #include "../include/passe_1.h"
+#include "../include/common.h"
 
 static decl_table declaration_table[VAR_MAX_NUMBER]; // max 256 variable
 
 extern int trace_level;
 
 // global variables
-short currentVar = -1; 		// declaration index (-1 for the case we dont declare variable)
+short currentVar = -1; 		// declaration index 
 int declaration = 0;		// in a declaration part
 int isGlobal = 1;			// in global scope
 node_type current_type= 0;  // typing nodes
+
+/* --------------- Debug funcs --------------- */
+void print_decl_table(void)
+{
+	for (int i=0; i < VAR_MAX_NUMBER; i++)
+	{
+		if (declaration_table[i].node == NULL)
+		{
+			printf("\n"); 	
+			break;
+		}
+		printf("%d - %s | ", i, declaration_table[i].varName);
+	}
+}
+
+void print_node_info(node_t root)
+{
+	printf("node nature:%s | node_type:%s | nops:%d\n",node_nature2string(root->nature), node_type2string(root->type), root->nops);
+}
+
 
 
 
@@ -48,9 +69,8 @@ void check_ident_size(node_t node)
 // reading a declaration table : returns a pointer to a node
 node_t get_decl_node(node_t node) 
 {
-	for(short i = 0; i < currentVar; i++)
+	for(short i = 0; i <= currentVar; i++)
 	{
-		printf("get decl node : %s\n", declaration_table[i].varName);
 		if(strncmp(declaration_table[i].varName, node->ident, VAR_MAX_SIZE))
 		{
 			// diff in strings : not the droid we are looking for
@@ -330,7 +350,7 @@ void check_global_decl(node_t node){
 
 // to do better and add a float version
 void check_intval_domain(node_t node){
-	if(node->int_value > 0xffffffff7fffffff){
+	if(node->int_value >= 0xffffffff7fffffff){
 		printf("Error line %d: integer out of range\n", node->lineno);
 		exit(EXIT_FAILURE);
 	}
@@ -345,18 +365,18 @@ void check_intval_domain(node_t node){
 void analyse_passe_1(node_t root) 
 {	
 	node_t variableDecl;
+	print_decl_table();
+	print_node_info(root);
 	if (root->nature == NODE_PROGRAM)
 	{
 		//flag to update the global_decl attribute
 		isGlobal=1; 
 	}	
-
 	// parsing the tree
 	for(int i = 0; i < root->nops; i++)
 	{
 		if(root->opr[i] != NULL)
 		{
-			printf("declaration %d | node_type : %d\n",declaration,root->opr[i]->type);
 			switch(root->opr[i]->nature)
 			{
 				case NODE_TYPE :
@@ -380,24 +400,34 @@ void analyse_passe_1(node_t root)
 					// If ident == 'main' => setup the type to void and jump to the next node
 					if (!(strcmp(root->opr[i]->ident, "main")))
 				    {
+				    	add_decl_node(root->opr[i]);
 						root->opr[i]->type = TYPE_VOID;
 						break;
 					}
 					root->opr[i]->type = current_type;
 					
 					// if first time seeing the ident (not fully operationnal : to pair with declaration flag)
-					if (variableDecl == NULL){
+					if (variableDecl == NULL && declaration == 1){
 						//If undeclared, we add it to the table
 						add_decl_node(root->opr[i]);
+						declaration = 0;
 					}
 					else {
 						// Else we get the adress of declaration and associate it with the current variable
 						// using the variable
 						if (variableDecl != NULL && declaration == 0)
 						{
-							root->opr[i]->offset = variableDecl->offset;
-							root->opr[i]->type = variableDecl->type;
 							root->opr[i]->global_decl = variableDecl->global_decl;
+							root->opr[i]->type = variableDecl->type;
+							switch(root->opr[i]->type)
+							{
+    							case TYPE_INT :
+									root->opr[i]->int_value = variableDecl->int_value;
+								break;
+							    case TYPE_FLOAT :
+									root->opr[i]->float_value = variableDecl->float_value;
+								break;
+							}
 						}
 						// if trying to redeclare	
 						else if(variableDecl != NULL && declaration == 1)
@@ -451,32 +481,32 @@ void analyse_passe_1(node_t root)
 				break;
 
 				case NODE_DECL :
-					//declaration = 1; // Correction to apply (not reset) : maybe useless
+					declaration = 1; // Correction to apply (not reset) : maybe useless
 				break;
 
 				case NODE_BLOCK :
 					isGlobal=0;
-					//push_context();
 					break;
 
 				case NODE_FUNC :
-					//reset_env_current_offset();
 					break;
 	
 				case NODE_STRINGVAL :
-					// Offset update
-					// root->opr[i]->offset = add_string(root->opr[i]->str);
 					break;
 			}	
+		}
+		else{
+			declaration = 0;
 		}
 
 		//Recursion 
 		if(root->opr[i] != NULL){
 			analyse_passe_1(root->opr[i]);
 		}
+
+		// CHECKS 
 		// get offset of the function
 		if(root->nature == NODE_FUNC){
-			// root->offset = get_env_current_offset();
 			if(root->opr[0]->type != TYPE_VOID){
 				printf("Error line %d: 'main()' declaration must have a 'void' return type\n", root->opr[0]->lineno);
 				exit(EXIT_FAILURE);
@@ -512,6 +542,7 @@ void analyse_passe_1(node_t root)
 		// check the coherence of type affectation
 		if(root->nature == NODE_AFFECT){
 			check_affect_type(root);
+
 		}
 		if(root->nature == NODE_DECLS){
 			if (root->opr[0]->type && root->opr[1]->type){
@@ -526,7 +557,6 @@ void analyse_passe_1(node_t root)
 			root->type = root->opr[0]->type;
 			check_global_decl(root);
 			check_affect_type(root);
-			declaration = 0;
 		}
 		
 		// case if(...) else ...
@@ -553,8 +583,8 @@ void analyse_passe_1(node_t root)
 		if(	root->nature == NODE_BNOT ||
 			root->nature == NODE_BAND ||
 			root->nature == NODE_BOR ||
-			root->nature == NODE_BXOR||
-			root->nature == NODE_SRL||
+			root->nature == NODE_BXOR ||
+			root->nature == NODE_SRL ||
 			root->nature == NODE_SRA ||
 			root->nature == NODE_SLL ){
 			check_int_op(root);
