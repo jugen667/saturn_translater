@@ -35,6 +35,9 @@ Fast test file with tree as png and svg :
 - Global variable handling
 
 #### TO DO ####
+- Handle 16 bit integer
+- Handle negative number
+
 - Global context to check (if func supported)
 - Offset management (func loop etc)
 - String support ?
