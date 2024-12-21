@@ -6,6 +6,10 @@
 // > Associated header : passe_1.h
 // ========================================
 
+// ================================================================================================= //
+// =========================================== INCLUDES ============================================ //
+// ================================================================================================= //
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,17 +18,29 @@
 #include "../include/passe_1.h"
 #include "../include/common.h"
 
+
+// ================================================================================================= //
+// ========================================== PROTOTYPES =========================================== //
+// ================================================================================================= //
+
 static decl_table declaration_table[VAR_MAX_NUMBER]; // max 256 variable
 
 extern int trace_level;
 
-// global variables
+// ================================================================================================= //
+// =========================================== GLOBALS ============================================= //
+// ================================================================================================= //
+
 short currentVar = -1; 		// declaration index 
 int declaration = 0;		// in a declaration part
 int isGlobal = 1;			// in global scope
 node_type current_type= 0;  // typing nodes
 
-/* --------------- Debug funcs --------------- */
+// ================================================================================================= //
+// =========================================== FUNCTIONS =========================================== //
+// ================================================================================================= //
+
+/* ========================= Debug funcs ========================= */
 void print_decl_table(void)
 {
 	for (int i=0; i < VAR_MAX_NUMBER; i++)
@@ -38,15 +54,36 @@ void print_decl_table(void)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------- //
+
 void print_node_info(node_t root)
 {
 	printf("node nature:%s | node_type:%s | nops:%d\n",node_nature2string(root->nature), node_type2string(root->type), root->nops);
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
+/* ========================= Check-Up functions ========================= */
 
+void change_int2float(node_t node, double value){
+    node->nature = NODE_FLOATVAL;
+    node->type = TYPE_FLOAT;
+    node->int_value = 0;
+    node->float_value = value;
+}
 
-/* --------------- Check-Up functions --------------- */
+// ------------------------------------------------------------------------------------------------- //
+
+// useless
+void change_float2int(node_t node, int32_t value){
+    node->nature = NODE_INTVAL;
+    node->type = TYPE_INT;      // init but update in passe 1
+    node->int_value = value;
+    node->float_value = 0;
+}
+
+// ------------------------------------------------------------------------------------------------- //
+
 bool check_var_number(void)
 {
 	if(currentVar <= VAR_MAX_NUMBER)
@@ -55,6 +92,8 @@ bool check_var_number(void)
 	}
 	return false;
 }
+
+// ------------------------------------------------------------------------------------------------- //
 
 void check_ident_size(node_t node)
 {
@@ -65,6 +104,7 @@ void check_ident_size(node_t node)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
 // reading a declaration table : returns a pointer to a node
 node_t get_decl_node(node_t node) 
@@ -83,6 +123,8 @@ node_t get_decl_node(node_t node)
 	}
 	return NULL;
 }
+
+// ------------------------------------------------------------------------------------------------- //
 
 void add_decl_node(node_t node) 
 {
@@ -103,6 +145,7 @@ void add_decl_node(node_t node)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
 // check that operations have 2 same types
 void check_add_type(node_t node)
@@ -131,6 +174,8 @@ void check_add_type(node_t node)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------- //
+
 void check_minus_type(node_t node)
 {
 	if (node->opr[0]->type && node->opr[1]->type)
@@ -156,6 +201,8 @@ void check_minus_type(node_t node)
 		check_minus_type(node->opr[1]);
 	}
 }
+
+// ------------------------------------------------------------------------------------------------- //
 
 void check_mul_type(node_t node)
 {
@@ -183,6 +230,8 @@ void check_mul_type(node_t node)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------- //
+
 void check_div_type(node_t node)
 {
 	if (node->opr[0]->type && node->opr[1]->type)
@@ -208,6 +257,8 @@ void check_div_type(node_t node)
 		check_div_type(node->opr[1]);
 	}
 }
+
+// ------------------------------------------------------------------------------------------------- //
 
 void check_mod_type(node_t node)
 {
@@ -235,10 +286,15 @@ void check_mod_type(node_t node)
 	}
 }
 
+// ------------------------------------------------------------------------------------------------- //
+
 // check that IF, DOWHILE, WHILE and FOR gives boolean type expression
 void check_bool_expr(node_t node, int positionnal)
 {
-	if (node->opr[positionnal]->type != TYPE_BOOL && node->opr[positionnal]->type != TYPE_NONE)
+	if (node->opr[positionnal]->type != TYPE_BOOL && 
+		node->opr[positionnal]->type != TYPE_INT && 
+		node->opr[positionnal]->type != TYPE_FLOAT && 
+		node->opr[positionnal]->type != TYPE_NONE)
 	{
 		if (node->nature == NODE_IF)
 		{
@@ -262,6 +318,8 @@ void check_bool_expr(node_t node, int positionnal)
 		}
 	}
 }
+
+// ------------------------------------------------------------------------------------------------- //
 
 // check that boolean operations are between 2 same types
 void check_bool_op(node_t node)
@@ -288,40 +346,45 @@ void check_bool_op(node_t node)
 
 }
 
-// unecessary float and int can coexist*
-// =====================================================================================
+// ------------------------------------------------------------------------------------------------- //
+
 void check_int_op(node_t node)
 {
 	if (node->opr[1] != NULL)
 	{
 		if (node->opr[0]->type && node->opr[1]->type)
 		{
-			if (node->opr[0]->type != node->opr[1]->type)
+			if ((node->opr[0]->type != node->opr[1]->type) ||
+				((node->opr[0]->type != TYPE_INT) ||
+				 (node->opr[1]->type != TYPE_INT)))
 			{	
-				printf("Error line %d: non 'int' or 'float' operands\n", node->opr[0]->lineno);
+				printf("Error line %d: operation '%s' only for integers\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 				exit(EXIT_FAILURE);
 			}
 		}
 	}
 	else
 	{
-		if (node->opr[0]->type != TYPE_INT || node->opr[0]->type != TYPE_FLOAT)
+		if (node->opr[0]->type != TYPE_INT) 
 		{	
-			printf("Error line %d: non 'int' or 'float' operands\n", node->opr[0]->lineno);
+			printf("Error line %d: operation '%s' only for integers\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
 		}
 	}
 }
-// =====================================================================================
+
+// ------------------------------------------------------------------------------------------------- //
 
 // check that affect are same types
 void check_affect_type(node_t node)
 {
 	if (node->opr[1] != NULL)
 	{
-		if (node->opr[0]->type && node->opr[1]->type)
-		{
-			if (node->opr[0]->type != node->opr[1]->type)
+		if (node->opr[0]->type && node->opr[1]->type) 
+	    {
+			if ((node->opr[0]->type != node->opr[1]->type) &&
+				((node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT) ||
+				 (node->opr[1]->type != TYPE_INT && node->opr[1]->type != TYPE_FLOAT))) 
 			{	
 				printf("Error line %d: uncompatible affectation\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
@@ -331,16 +394,35 @@ void check_affect_type(node_t node)
 				node->type = node->opr[0]->type;  //type of root node = type of the operation
 			}
 		}
+		// check that FLOAT are not considered INTVAL and that float value are not affected to INT
+		if (node->opr[0]->type != node->opr[1]->type) 
+	    {
+	    	if(node->opr[0]->type == TYPE_FLOAT && node->opr[1]->type == TYPE_INT)
+	    	{
+	    		change_int2float(node->opr[1], node->opr[1]->int_value);
+	    	}
+	    	else if(node->opr[0]->type == TYPE_INT && node->opr[1]->type == TYPE_FLOAT)
+	    	{
+	    		printf("Error line %d: floating value on integer variable\n", node->opr[0]->lineno);
+				exit(EXIT_FAILURE);
+	    	}
+	    }
 	}
 }
 
+// ------------------------------------------------------------------------------------------------- //
+
 // check that global declaration are not expression
-void check_global_decl(node_t node){
-	if (node->opr[1] != NULL){
-		if (node->opr[0]->global_decl){
+void check_global_decl(node_t node)
+{
+	if (node->opr[1] != NULL)
+	{
+		if (node->opr[0]->global_decl)
+		{
 			if (	(node->opr[1]->nature != NODE_INTVAL)
 				&&  (node->opr[1]->nature != NODE_BOOLVAL)
-				&& 	(node->opr[1]->nature != NODE_FLOATVAL)){
+				&& 	(node->opr[1]->nature != NODE_FLOATVAL))
+			{
 				printf("Error line %d: global variables not constant\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
@@ -348,25 +430,29 @@ void check_global_decl(node_t node){
 	}
 }
 
-// to do better and add a float version
-void check_intval_domain(node_t node){
-	if(node->int_value >= 0xffffffff7fffffff){
-		printf("Error line %d: integer out of range\n", node->lineno);
-		exit(EXIT_FAILURE);
-	}
+// ------------------------------------------------------------------------------------------------- //
+
+// check if int € [-32767; 32767]
+void check_intval_domain(node_t node)
+{
+		if(node->int_value > 0x00007fff && node->int_value < 0xffff8000)
+		{
+			printf("Error line %d: integer out of range, %x\n", node->lineno, node->int_value);
+			exit(EXIT_FAILURE);
+		}
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
+// ================================================================================================= //
 
-
-
-/* --------------- Tree parsing --------------- */
+/* ========================= Tree parsing ========================= */
 
 void analyse_passe_1(node_t root) 
 {	
 	node_t variableDecl;
-	print_decl_table();
-	print_node_info(root);
+	// print_decl_table();
+	// print_node_info(root);
 	if (root->nature == NODE_PROGRAM)
 	{
 		//flag to update the global_decl attribute
@@ -388,9 +474,12 @@ void analyse_passe_1(node_t root)
 				break;
 
 				case NODE_INTVAL :
-				case NODE_FLOATVAL :
+					root->opr[i]->type = TYPE_INT;
 					check_intval_domain(root->opr[i]);
-					// add float range 
+				break;
+				case NODE_FLOATVAL :
+					root->opr[i]->type = TYPE_FLOAT;
+					// add float range ?
 				break;
 
 				case NODE_IDENT : // ENHANCE 
@@ -407,12 +496,14 @@ void analyse_passe_1(node_t root)
 					root->opr[i]->type = current_type;
 					
 					// if first time seeing the ident (not fully operationnal : to pair with declaration flag)
-					if (variableDecl == NULL && declaration == 1){
+					if (variableDecl == NULL && declaration == 1)
+					{
 						//If undeclared, we add it to the table
 						add_decl_node(root->opr[i]);
 						declaration = 0;
 					}
-					else {
+					else 
+					{
 						// Else we get the adress of declaration and associate it with the current variable
 						// using the variable
 						if (variableDecl != NULL && declaration == 0)
@@ -436,19 +527,18 @@ void analyse_passe_1(node_t root)
 							exit(EXIT_FAILURE);
 						}
 						// if undeclared
-						else {
+						else 
+						{
 							printf("Error line %d : undeclared variable '%s'\n", root->opr[i]->lineno, root->opr[i]->ident);
 							exit(EXIT_FAILURE);
 						}					
 					}
-
 					// Update of the global_decl
 					if(isGlobal && !root->opr[i]->global_decl)
 					{
 						root->opr[i]->global_decl = true;
 					}
 				break;
-
 					
 				// Operators that returns int expressions (do with float too)
 				case NODE_PLUS :
@@ -481,78 +571,85 @@ void analyse_passe_1(node_t root)
 				break;
 
 				case NODE_DECL :
-					declaration = 1; // Correction to apply (not reset) : maybe useless
+					declaration = 1;
 				break;
 
 				case NODE_BLOCK :
 					isGlobal=0;
-					break;
+				break;
+
+				case NODE_AFFECT :
+				break;
 
 				case NODE_FUNC :
-					break;
+				break;
 	
 				case NODE_STRINGVAL :
-					break;
+				break;
 			}	
-		}
-		else{
-			declaration = 0;
-		}
-
-		//Recursion 
-		if(root->opr[i] != NULL){
-			analyse_passe_1(root->opr[i]);
-		}
+		}		
 
 		// CHECKS 
-		// get offset of the function
-		if(root->nature == NODE_FUNC){
-			if(root->opr[0]->type != TYPE_VOID){
+		if(root->nature == NODE_FUNC)
+		{
+			if(root->opr[0]->type != TYPE_VOID)
+			{
 				printf("Error line %d: 'main()' declaration must have a 'void' return type\n", root->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
 		}
 		// check that operations are between INT
-		if(root->nature == NODE_PLUS){
+		if(root->nature == NODE_PLUS)
+		{
 			check_add_type(root);
 		}
-		if(root->nature == NODE_MINUS){
+		if(root->nature == NODE_MINUS)
+		{
 			check_minus_type(root);
 		}
-		if(root->nature == NODE_DIV){
+		if(root->nature == NODE_DIV)
+		{
 			check_div_type(root);
 		}
-		if(root->nature == NODE_MUL){
+		if(root->nature == NODE_MUL)
+		{
 			check_mul_type(root);
 		}
-		if(root->nature == NODE_MOD){
+		if(root->nature == NODE_MOD)
+		{
 			check_mod_type(root);
 		}
 		// check that condition returns boolean 
 		if(	root->nature == NODE_DOWHILE ||
-			root->nature == NODE_FOR){
+			root->nature == NODE_FOR)
+		{
 			check_bool_expr(root, 1);
 			//the do_while bool expression is the second son
 		}
 		if (root->nature == NODE_WHILE ||
-			root->nature == NODE_IF ){
+			root->nature == NODE_IF )
+		{
 			check_bool_expr(root, 0);
 			//the if & while bool expression is the first son
 		}
 		// check the coherence of type affectation
-		if(root->nature == NODE_AFFECT){
+		if(root->nature == NODE_AFFECT)
+		{
 			check_affect_type(root);
 
 		}
 		if(root->nature == NODE_DECLS){
-			if (root->opr[0]->type && root->opr[1]->type){
-				if (root->opr[0]->type != root->opr[1]->type){
+			if (root->opr[0]->type && root->opr[1]->type)
+			{
+				if (root->opr[0]->type != root->opr[1]->type)
+				{
 					printf("Error line %d: variable already declared\n", root->lineno);
 					exit(EXIT_FAILURE);
 				}	
 			}
 		}
-		if(root->nature == NODE_DECL ){
+		if(root->nature == NODE_DECL)
+		{
 			// check the global declaration : not an expression and check the coherence of the types
 			root->type = root->opr[0]->type;
 			check_global_decl(root);
@@ -560,10 +657,12 @@ void analyse_passe_1(node_t root)
 		}
 		
 		// case if(...) else ...
-		if(root->nature == NODE_IF && root->nops == 3){
+		if(root->nature == NODE_IF && root->nops == 3)
+		{
 			// if 3 node then 3rd is else stamenet (to check)
 			printf("Debug >> Nops %d\n", root->nops);
-			for(int i=0;i<root->nops;i++){
+			for(int i=0;i<root->nops;i++)
+			{
         			printf("Debug >> Nopr %d %d\n", i, root->opr[i]->nature);
     			}
 			root->opr[2]->nature = NODE_ELSE;
@@ -577,17 +676,31 @@ void analyse_passe_1(node_t root)
 			root->nature == NODE_LE ||
 			root->nature == NODE_GE ||
 			root->nature == NODE_AND ||
-			root->nature == NODE_OR ){
+			root->nature == NODE_OR )
+		{
 			check_bool_op(root);
 		}
+		// integrer r operand
 		if(	root->nature == NODE_BNOT ||
 			root->nature == NODE_BAND ||
 			root->nature == NODE_BOR ||
 			root->nature == NODE_BXOR ||
 			root->nature == NODE_SRL ||
 			root->nature == NODE_SRA ||
-			root->nature == NODE_SLL ){
+			root->nature == NODE_SLL )
+		{
 			check_int_op(root);
+		}
+
+		//Recursion 
+		if(root->opr[i] != NULL)
+		{
+			analyse_passe_1(root->opr[i]);
 		}
 	}
 }
+
+// ================================================================================================= //
+// ================================================================================================= //
+// ================================================================================================= //
+

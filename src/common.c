@@ -6,6 +6,10 @@
 // > Associated header : common.h
 // ========================================
 
+// ================================================================================================= //
+// =========================================== INCLUDES ============================================ //
+// ================================================================================================= //
+
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -20,6 +24,10 @@
 #include "../include/common.h"
 #include "../include/arch.h"
 
+// ================================================================================================= //
+// =========================================== DEFINES ============================================= //
+// ================================================================================================= //
+
 #define     MAIN_VERSION    "0"                 /*dev phase*/
 #define     SUB_VERSION     "1"                 /*first iteration*/
 
@@ -33,6 +41,10 @@
 #define     BOLD            "\033[1m"           /* Bold */
 #define     BOLDWHITE       "\033[1m\033[37m"   /* Bold White */
 
+// ================================================================================================= //
+// =========================================== GLOBALS ============================================= //
+// ================================================================================================= //
+
 extern char * infile;
 extern char * outfile;
 int trace_level = DEFAULT_TRACE_LEVEL;
@@ -40,7 +52,12 @@ extern bool stop_after_syntax;
 extern bool stop_after_verif;
 bool uncompatible=0;
 
-void print_version(){
+// ================================================================================================= //
+// =========================================== FUNCTIONS =========================================== //
+// ================================================================================================= //
+
+void print_version()
+{
     printf("\n");
     printf(BOLD "-------------------- SaturnCC --------------------\n" NC);
     printf("\n");
@@ -52,8 +69,10 @@ void print_version(){
     printf("\n");
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
-void affiche_help(){
+void affiche_help()
+{
     printf("\n");
 	printf(BOLD "Help page Saturncc \n\n" NC);
 	printf(BOLD "Translater for simplified C to Saturn HP assembly\n" NC);
@@ -67,58 +86,84 @@ void affiche_help(){
     printf("  -v : Print build version of SaturnCC\n\n");
 }
 
-void test_int_value(int min, int max, int test, char * argv ){
-	if (test > max || test < min){
+// ------------------------------------------------------------------------------------------------- //
+
+void test_int_value(int min, int max, int test, char * argv )
+{
+	if (test > max || test < min)
+    {
 		fprintf(stderr,NC"value %d out of range for option %s\n",test, argv);
-        if (argv[1] == 'r'){
+        if (argv[1] == 'r')
+        {
             fprintf(stderr,NC"\t-> value must be between 1 and 5\n");
         }
-        else if (argv[1] == 't'){
+        else if (argv[1] == 't')
+        {
             fprintf(stderr,NC"\t-> value must be between 0 and 5\n");
         }
 		exit(1);	
 	}
 }
 
-void testValideInFile(char * test){
+// ------------------------------------------------------------------------------------------------- //
+
+void testValideInFile(char * test)
+{
     int i=0;
     i = strlen(test);
-    if (strstr(&test[i-2],".c") == NULL ){
+    if (strstr(&test[i-2],".c") == NULL )
+    {
         fprintf(stderr,NC"unvalid file name : %s\n",test);
         exit(1);    
     }
 }
 
-void testValideOutFile(char * test){
+// ------------------------------------------------------------------------------------------------- //
+
+void testValideOutFile(char * test)
+{
     int i=0;
     i = strlen(test);
-    if (strstr(&test[i-2],".s") == NULL ){
+    if (strstr(&test[i-2],".s") == NULL )
+    {
         fprintf(stderr,NC"unvalid file name : %s\n",test);
         exit(1);    
     }
 }
 
-void test_arg_compatibility(char *arg_1, char *arg_2, char *test){
-	if((strcmp(test, arg_1) || strcmp(test, arg_2)) && uncompatible == 0){
+// ------------------------------------------------------------------------------------------------- //
+
+void test_arg_compatibility(char *arg_1, char *arg_2, char *test)
+{
+	if((strcmp(test, arg_1) || strcmp(test, arg_2)) && uncompatible == 0)
+    {
 		uncompatible = 1;
 	}
-	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == 1){
+	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == 1)
+    {
 		fprintf(stderr,NC"uncompatible options  : %s and %s \n", arg_1, arg_2);
 		exit(1);
 	}
 }
 
-void parse_args(int argc, char ** argv) {
+// ------------------------------------------------------------------------------------------------- //
+
+void parse_args(int argc, char ** argv) 
+{
 	infile = NULL;
-    for (int i=1; i<argc; i++){
-    	if (argv[i][0] != '-'){
+    for (int i=1; i<argc; i++)
+    {
+    	if (argv[i][0] != '-')
+        {
             testValideInFile(argv[i]);
             infile = argv[i];
-            //printf("Infile %s \n",argv[i]);
     	}
-    	else{
-    		if (argv[i][2] == '\0'){
-				switch (argv[i][1]){
+    	else
+        {
+    		if (argv[i][2] == '\0')
+            {
+				switch (argv[i][1])
+                {
 					case 'o':
 						testValideOutFile(argv[i+1]);
 						outfile = argv[i+1];
@@ -161,44 +206,53 @@ void parse_args(int argc, char ** argv) {
 			}
 		}
     }
-	if (infile == NULL){
+	if (infile == NULL)
+    {
 		fprintf(stderr,NC "No .c file to translate \n\n");
 		exit(1);
 	}
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
-void free_nodes(node_t n) {
+void free_nodes(node_t n) 
+{
     // TO DO
     // input : root node 
     // Parse until no more node
     // come back and free nodes
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
-char * strdupl(char * s) {
+char * strdupl(char * s) 
+{
     // TO CHANGE (MEMORY LEAK INCOMING) = Limit string size
     char * r = malloc(strlen(s) + 1);
     strcpy(r, s);
     return r;
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
 // === DOT FILE CREATION ===
+static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num) 
+{
 
-static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num) {
-
-    if (n == NULL) {
+    if (n == NULL) 
+    {
         fprintf(f, "    N%d [shape=record, label=\"{{NULL}}\"];\n", node_num);
         return node_num;
     }
 
-    switch (n->nature) {
+    switch (n->nature) 
+    {
         case NODE_IDENT:
             {
                 node_t decl_node = n->decl_node;
                 fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{<decl>Global: %d|Ident: %s|Offset: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->global_decl, n->ident, n->offset);
-                if (decl_node != NULL && decl_node != n) {
+                if (decl_node != NULL && decl_node != n) 
+                {
                     fprintf(f, "    edge[tailclip=false];\n");
                     fprintf(f, "    \"N%d\":decl:c -> \"N%d\" [style=dashed]\n", node_num, decl_node->node_num);
                 }
@@ -218,7 +272,8 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num) {
                 while (true) {
                     str[i - 1] = n->str[i];
                     i += 1;
-                    if (n->str[i] == '"') {
+                    if (n->str[i] == '"') 
+                    {
                         str[i - 1] = '\0';
                         break;
                     }
@@ -280,9 +335,9 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num) {
     n->node_num = node_num;
 
     int32_t curr_node_num = node_num + 1;
-    for (int32_t i = 0; i < n->nops; i += 1) {
+    for (int32_t i = 0; i < n->nops; i += 1) 
+    {
         int32_t new_node_num = dump_tree2dot_rec(f, n->opr[i], curr_node_num);
-
         fprintf(f, "    edge[tailclip=true];\n");
         fprintf(f, "    N%d -> N%d\n", node_num, curr_node_num);
         curr_node_num = new_node_num + 1;
@@ -291,17 +346,20 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num) {
     return curr_node_num - 1;
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
-
-static void dump_tree2dot(FILE * f, node_t root) {
+static void dump_tree2dot(FILE * f, node_t root) 
+{
     assert(root->nature == NODE_PROGRAM);
 
     int32_t curr_node_num = 1;
     dump_tree2dot_rec(f, root, curr_node_num);
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
-void dump_tree(node_t prog_root, const char * dotname) {
+void dump_tree(node_t prog_root, const char * dotname) 
+{
 
     FILE * f;
 
@@ -312,9 +370,12 @@ void dump_tree(node_t prog_root, const char * dotname) {
     fclose(f);
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
-const char * node_type2string(node_type t) {
-    switch (t) {
+const char * node_type2string(node_type t) 
+{
+    switch (t) 
+    {
         case TYPE_NONE:
             return "TYPE NONE";
         case TYPE_INT:
@@ -330,9 +391,12 @@ const char * node_type2string(node_type t) {
     }
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
-const char * node_nature2string(node_nature t) {
-    switch (t) {
+const char * node_nature2string(node_nature t) 
+{
+    switch (t) 
+    {
         case NONE:
             return "NONE";
         case NODE_PROGRAM:
@@ -423,11 +487,12 @@ const char * node_nature2string(node_nature t) {
     }
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
-
-
-const char * node_nature2symb(node_nature t) {
-    switch (t) {
+const char * node_nature2symb(node_nature t) 
+{
+    switch (t) 
+    {
         case NONE:
         case NODE_PLUS:
             return "+";
@@ -479,6 +544,6 @@ const char * node_nature2symb(node_nature t) {
     }
 }
 
-
-
-
+// ================================================================================================= //
+// ================================================================================================= //
+// ================================================================================================= //
