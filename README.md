@@ -30,18 +30,13 @@ Fast test file with tree as png and svg :
 ### Check if we need it in our arch
 
 #### TO TEST ####
-- Variable Decl to check
-- If variable not decl : put it in a table
-- Global variable handling
 
 #### TO DO ####
-- Handle 16 bit integer
-- Handle negative number
 
 - Global context to check (if func supported)
 - Offset management (func loop etc)
 - String support ?
-- Add support for more C function ? (incremental operator)
+- Add support for more C function ? (incremental operator ?)
 
 ## Instruction Set implementation 
 
