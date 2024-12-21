@@ -22,24 +22,9 @@
 
 #include "../include/defs.h"
 #include "../include/common.h"
+#include "../include/passe_1.h"
 #include "../include/arch.h"
 
-// ================================================================================================= //
-// =========================================== DEFINES ============================================= //
-// ================================================================================================= //
-
-#define     MAIN_VERSION    "0"                 /*dev phase*/
-#define     SUB_VERSION     "1"                 /*first iteration*/
-
-#define     NC              "\e[0m"
-#define     BLACK           "\033[30m"          /* Black */
-#define     RED             "\033[31m"          /* Red */
-#define     GREEN           "\033[32m"          /* Green */
-#define     YELLOW          "\033[33m"          /* Yellow */
-#define     BLUE            "\033[34m"          /* Blue */
-#define     WHITE           "\033[37m"          /* White */
-#define     BOLD            "\033[1m"           /* Bold */
-#define     BOLDWHITE       "\033[1m\033[37m"   /* Bold White */
 
 // ================================================================================================= //
 // =========================================== GLOBALS ============================================= //
@@ -217,10 +202,26 @@ void parse_args(int argc, char ** argv)
 
 void free_nodes(node_t n) 
 {
-    // TO DO
+    short currnops;
     // input : root node 
     // Parse until no more node
     // come back and free nodes
+    if(n->nops != 0)
+    {   
+        for(int i = 0; i<n->nops; i++){
+            if(n->opr[i] != NULL)
+            {
+                free_nodes(n->opr[i]);
+            }
+        }
+        // printf("Debug > freeing %s\n", node_nature2string(n->nature));
+        free(n);
+    }
+    else
+    {
+        // printf("Debug > freeing %s\n", node_nature2string(n->nature));
+        free(n);
+    }
 }
 
 // ------------------------------------------------------------------------------------------------- //
