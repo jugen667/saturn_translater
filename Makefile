@@ -67,6 +67,20 @@ passe_1.o: $(SRC_DIR)/passe_1.c $(INC_DIR)/passe_1.h $(INC_DIR)/defs.h $(INC_DIR
 # 	@echo "| Compiling $@"
 # 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
+# keeping the binary
+clean-soft:  
+	@echo "| Cleaning all files"
+	@echo "| Cleaning .o files"
+	@rm -f *.o
+	@echo "| Cleaning lex and grammar files"
+	@rm -f $(SRC_DIR)/y.tab.c $(INC_DIR)/y.tab.h $(SRC_DIR)/lex.yy.c 
+	@echo "| Cleaning built files"
+	@rm -f *.s *.dot
+	@rm -rf tools/graph-last-program
+	@echo "| Cleaning test files"
+	@rm -f  tests/log.txt tests/buffer.txt tests/*.s tests/*.dot *.txt
+
+# remove all 
 clean: 
 	@echo "| Cleaning all files"
 	@echo "| Cleaning binary"
