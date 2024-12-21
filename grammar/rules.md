@@ -19,11 +19,9 @@ However, it is a very primitive language and thus its functionnalities are limit
 
 ## About data types
 ### Supported
-- **int** : based of *uint16_t* type, currently allow **ONLY** positive integrer in the range [0; 2<sup>16</sup> - 1]
-	> Immediate **int** are limited to the range [0; 2<sup>16</sup> - 1]
-	
+- **int** : 16-bit integer [-32767; +32767]
 - **bool** : classic boolean type : *true (1)* or *false (0)* 
-- **float** : supported
+- **float** : supported 
 - **void** : void type used for *main()* function
 - Strings allowed in *print()* function
 
@@ -61,7 +59,7 @@ These loops and branches have the same syntax as C
 - **Direct Assignement** (=)
 - **Comma** as a separator for definition and assignement 
 > Ex : int a = 1 **,** int b = 2;
-- **Comment** (// **only**)
+- **Comment** (// and /\*\*/)
 
 ### Not Supported 
 - **Incremental operators** (++, --)

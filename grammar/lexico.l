@@ -1,5 +1,5 @@
 /*  ======================================= */
-/*  > Author :   jugen 667                  */
+/*  > Author :   jugen667                   */
 /*  > Title  :   lexico.l                   */
 /*  > Desc.  :   Translation of code to     */
 /*               tokens and main function   */
@@ -48,12 +48,14 @@ FIGURE_NON_NUL      [1-9]
 INTEGER_DEC         0|{FIGURE_NON_NUL}{FIGURE}*
 LETTER_HEXA         [a-fA-F]
 INTEGER_HEXA        0x({FIGURE}|{LETTER_HEXA})+
-INTEGER             {INTEGER_DEC}|{INTEGER_HEXA}
-FLOAT               ({INTEGER_DEC}*\.{INTEGER_DEC}*)
+INTEGER             \-?{INTEGER_DEC}|{INTEGER_HEXA}
+FLOAT               \-?({INTEGER_DEC}*\.{INTEGER_DEC}*)
 IDF                 {LETTER}({LETTER}|{FIGURE}|'_')*
+SPECCHAR            [\x09-\x0E]
 STRING_CHAR         [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E] 
 STRING              \"({STRING_CHAR}|\\\"|\\n)*\"
 COMMENT             \/\/({STRING_CHAR}|{STRING})*(\\n)*
+COMMENTMUL          \/\*({STRING_CHAR}|{STRING}|{SPECCHAR})*\*\/
 SEPARATOR           [ \t\n]+
 
 %%
@@ -135,6 +137,9 @@ SEPARATOR           [ \t\n]+
 {COMMENT} {
 }
 
+{COMMENTMUL} {
+}
+
 
 [ \t\n]+
 
@@ -160,7 +165,7 @@ int main(int argc, char ** argv) {
         fclose(yyin);
     #else
         #if YYDEBUG
-        yydebug = 1;
+            yydebug = 1;
         #endif
         yyparse(&program_root);
         fclose(yyin);

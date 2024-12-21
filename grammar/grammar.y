@@ -46,7 +46,7 @@ node_t make_node_strval(char* string);
 %parse-param { node_t * program_root }
 
 %union {
-    int16_t intval;
+    int32_t intval;
     double floatval; // double for accuracy
     char * strval;
     node_t ptr;
@@ -371,13 +371,14 @@ paramprint      : ident
                 {
                     $$ = $1;
                 }
-                | TOK_STRING{
+                | TOK_STRING
+                {
                     $$ = make_node_strval($1);
                 }
                 ;
 
 ident       : TOK_IDENT
-            {
+            {                
                 $$ = make_node_ident($1);
             }
             ;
