@@ -72,6 +72,7 @@ SEPARATOR           [ \t\n]+
 "for"           RETURN(TOK_FOR);
 "do"            RETURN(TOK_DO);
 "print"         RETURN(TOK_PRINT);
+"main"          RETURN(TOK_MAIN);
 
 "+"             RETURN(TOK_PLUS);
 "-"             RETURN(TOK_MINUS);
@@ -128,7 +129,6 @@ SEPARATOR           [ \t\n]+
 
 {STRING} {
                 #if !LEX_DEBUG
-                /* A completer : affecter yylval.strval */
                 yylval.strval = strdupl(yytext);
                 #endif
                 RETURN(TOK_STRING);
@@ -144,7 +144,7 @@ SEPARATOR           [ \t\n]+
 [ \t\n]+
 
 . {
-                fprintf(stderr, "Error line %d: Lexical error\n", yylineno);
+                fprintf(stderr, RED "Error line" BOLD " %d " NC ": Lexical error\n", yylineno);
                 exit(1);
 }
 

@@ -57,7 +57,7 @@ node_t make_node_strval(char* string);
 %type <strval> TOK_IDENT TOK_STRING;
 
 %token TOK_VOID TOK_INT TOK_INTVAL TOK_FLOAT TOK_FLOATVAL TOK_BOOL TOK_TRUE TOK_FALSE 
-%token TOK_IDENT TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_PRINT
+%token TOK_IDENT TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_PRINT TOK_MAIN
 %token TOK_SEMICOL TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
 %token TOK_STRING TOK_DO
 
@@ -381,6 +381,10 @@ ident       : TOK_IDENT
             {                
                 $$ = make_node_ident($1);
             }
+            | TOK_MAIN
+            {
+                $$ = make_node_ident("main");
+            }
             ;
 
 %%
@@ -501,7 +505,6 @@ node_t make_node_strval(char* string){
 void analyse_tree(node_t root) {
     dump_tree(root, "apres_syntaxe.dot");
     if (!stop_after_syntax) {
-        // TODO AFTER PASSE 1
         analyse_passe_1(root);
         dump_tree(root, "apres_passe_1.dot");
         // if (!stop_after_verif) {
@@ -512,7 +515,7 @@ void analyse_tree(node_t root) {
         // }
         // free_global_strings();
     }
-    //free_nodes(root);
+    free_nodes(root);
 }
 
 
