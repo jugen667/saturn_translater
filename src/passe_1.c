@@ -99,7 +99,7 @@ void check_ident_size(node_t node)
 {
 	if(strlen(node->ident) > VAR_MAX_SIZE)
 	{
-		printf("Error line %d: identifier name too long (max character : %d)\n", node->lineno, VAR_MAX_SIZE);
+		printf(RED "Error line" BOLD " %d " NC ": identifier name too long (max character : %d)\n", node->lineno, VAR_MAX_SIZE);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -140,7 +140,7 @@ void add_decl_node(node_t node)
 	}
 	else
 	{
-		printf("Error line %d: variable number overflow (max variable : %d)\n", node->lineno, VAR_MAX_NUMBER);
+		printf(RED "Error line" BOLD " %d " NC ": variable number overflow (max variable : %d)\n", node->lineno, VAR_MAX_NUMBER);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -148,173 +148,54 @@ void add_decl_node(node_t node)
 // ------------------------------------------------------------------------------------------------- //
 
 // check that operations have 2 same types
-void check_add_type(node_t node)
+void check_int_op_type(node_t node)
 {
-	if (node->opr[0]->type && node->opr[1]->type)
+	if (node->opr[0]->type && node->opr[1]->type) // type != NONE
 	{	
-		if(node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT)
+		if(node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT) 
 		{
-			printf("Error line %d: operator '+' wrong type on left operand\n", node->opr[0]->lineno);
+			printf(RED "Error line" BOLD " %d " NC ": operator " BOLD "%s" NC " wrong type on left operand\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
 		}
 		else if(node->opr[1]->type != TYPE_INT && node->opr[1]->type != TYPE_FLOAT)
 		{
-			printf("Error line %d: operator '+' wrong type on left operand\n", node->opr[1]->lineno);
+			printf(RED "Error line" BOLD " %d " NC ": operator " BOLD "%s" NC " wrong type on right operand\n", node->opr[1]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
-		}	
+		}
 	}
-	// case 'ident + number for' ex
+	// case 'ident + number for' ex and recursion
 	else if (node->opr[0]->nature == NODE_PLUS)
 	{
-		check_add_type(node->opr[0]);
+		check_int_op_type(node->opr[0]);
 	}
 	else if (node->opr[1]->nature == NODE_PLUS)
 	{
-		check_add_type(node->opr[1]);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------- //
-
-void check_minus_type(node_t node)
-{
-	if (node->opr[0]->type && node->opr[1]->type)
-	{
-		if(node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT)
-		{
-			printf("Error line %d: operator '-' wrong type on left operand\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-		else if(node->opr[1]->type != TYPE_INT && node->opr[1]->type != TYPE_FLOAT )
-		{
-			printf("Error line %d: operator '-' wrong type on left operand\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-	}
-	// case 'ident - number' for ex
-	else if (node->opr[0]->nature == NODE_MINUS)
-	{
-		check_minus_type(node->opr[0]);
-	}
-	else if (node->opr[1]->nature == NODE_MINUS)
-	{
-		check_minus_type(node->opr[1]);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------- //
-
-void check_mul_type(node_t node)
-{
-	if (node->opr[0]->type && node->opr[1]->type)
-	{		
-		if(node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT)
-		{
-			printf("Error line %d: operator '*' wrong type on left operand \n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-		else if(node->opr[1]->type != TYPE_INT && node->opr[1]->type != TYPE_FLOAT)
-		{
-			printf("Error line %d: operator '*' wrong type on right operand\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-	}
-	// case 'ident * number' for ex
-	else if (node->opr[0]->nature == NODE_MUL)
-	{
-		check_mul_type(node->opr[0]);
-	}
-	else if (node->opr[1]->nature == NODE_MUL)
-	{
-		check_mul_type(node->opr[1]);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------- //
-
-void check_div_type(node_t node)
-{
-	if (node->opr[0]->type && node->opr[1]->type)
-	{		
-		if(node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT)
-		{
-				printf("Error line %d: operator '/' wrong type on left operand\n", node->opr[0]->lineno);
-				exit(EXIT_FAILURE);
-		}
-		else if(node->opr[1]->type != TYPE_INT && node->opr[1]->type != TYPE_FLOAT)
-		{
-			printf("Error line %d: operator '/' wrong type on left operand\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-	}	
-	// case 'ident / number' for ex
-	else if (node->opr[0]->nature == NODE_DIV)
-	{
-		check_div_type(node->opr[0]);
-	}
-	else if (node->opr[1]->nature == NODE_DIV)
-	{
-		check_div_type(node->opr[1]);
-	}
-}
-
-// ------------------------------------------------------------------------------------------------- //
-
-void check_mod_type(node_t node)
-{
-	if (node->opr[0]->type && node->opr[1]->type)
-	{		
-		if(node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT)
-		{
-			printf("Error line %d: operator '%%' wrong type on left operand\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-		else if(node->opr[1]->type != TYPE_INT && node->opr[1]->type != TYPE_FLOAT)
-		{
-			printf("Error line %d: operator '%%' wrong type on left operand\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}	
-	}
-	// case 'ident % number' for ex
-	else if (node->opr[0]->nature == NODE_MOD)
-	{
-		check_div_type(node->opr[0]);
-	}
-	else if (node->opr[1]->nature == NODE_MOD)
-	{
-		check_div_type(node->opr[1]);
+		check_int_op_type(node->opr[1]);
 	}
 }
 
 // ------------------------------------------------------------------------------------------------- //
 
 // check that IF, DOWHILE, WHILE and FOR gives boolean type expression
-void check_bool_expr(node_t node, int positionnal)
+void check_bool_cond(node_t node, int positionnal)
 {
 	if (node->opr[positionnal]->type != TYPE_BOOL && 
 		node->opr[positionnal]->type != TYPE_INT && 
 		node->opr[positionnal]->type != TYPE_FLOAT && 
 		node->opr[positionnal]->type != TYPE_NONE)
 	{
-		if (node->nature == NODE_IF)
+		switch(node->nature)
 		{
-			printf("Error line %d: 'if' statement incorrect\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-		else if (node->nature == NODE_WHILE)
-		{
-			printf("Error line %d: 'while' statement incorrect\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-		else if (node->nature == NODE_DOWHILE)
-		{
-			printf("Error line %d: 'do ... while' statement incorrect\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
-		}
-		else if (node->nature == NODE_FOR)
-		{
-			printf("Error line %d: 'for' statement incorrect\n", node->opr[0]->lineno);
-			exit(EXIT_FAILURE);
+			case NODE_IF:
+			case NODE_WHILE :
+			case NODE_DOWHILE :
+			case NODE_FOR :
+				printf(RED "Error line" BOLD " %d " NC ": " BOLD CYAN "%s" NC " statement incorrect\n", node->opr[0]->lineno, node_nature2string(node->nature));
+				exit(EXIT_FAILURE);
+			break;
+
+			default:
+			break;
 		}
 	}
 }
@@ -330,7 +211,7 @@ void check_bool_op(node_t node)
 		{
 			if (node->opr[0]->type != node->opr[1]->type)
 			{	
-				printf("Error line %d: non 'bool' operands\n", node->opr[0]->lineno);
+				printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -339,7 +220,7 @@ void check_bool_op(node_t node)
 	{
 		if (node->opr[0]->type != TYPE_BOOL)
 		{	
-			printf("Error line %d: non 'bool' operands\n", node->opr[0]->lineno);
+			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -358,7 +239,7 @@ void check_int_op(node_t node)
 				((node->opr[0]->type != TYPE_INT) ||
 				 (node->opr[1]->type != TYPE_INT)))
 			{	
-				printf("Error line %d: operation '%s' only for integers\n", node->opr[0]->lineno, node_nature2symb(node->nature));
+				printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -367,7 +248,7 @@ void check_int_op(node_t node)
 	{
 		if (node->opr[0]->type != TYPE_INT) 
 		{	
-			printf("Error line %d: operation '%s' only for integers\n", node->opr[0]->lineno, node_nature2symb(node->nature));
+			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -386,7 +267,7 @@ void check_affect_type(node_t node)
 				((node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT) ||
 				 (node->opr[1]->type != TYPE_INT && node->opr[1]->type != TYPE_FLOAT))) 
 			{	
-				printf("Error line %d: uncompatible affectation\n", node->opr[0]->lineno);
+				printf(RED "Error line" BOLD " %d " NC ": uncompatible affectation\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
 			else
@@ -403,7 +284,7 @@ void check_affect_type(node_t node)
 	    	}
 	    	else if(node->opr[0]->type == TYPE_INT && node->opr[1]->type == TYPE_FLOAT)
 	    	{
-	    		printf("Error line %d: floating value on integer variable\n", node->opr[0]->lineno);
+	    		printf(RED "Error line" BOLD " %d " NC ": " PURPLE "float" NC " value on " PURPLE "int" NC " variable\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 	    	}
 	    }
@@ -423,7 +304,7 @@ void check_global_decl(node_t node)
 				&&  (node->opr[1]->nature != NODE_BOOLVAL)
 				&& 	(node->opr[1]->nature != NODE_FLOATVAL))
 			{
-				printf("Error line %d: global variables not constant\n", node->opr[0]->lineno);
+				printf(RED "Error line" BOLD " %d " NC ": global variables not constant\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -437,7 +318,7 @@ void check_intval_domain(node_t node)
 {
 		if(node->int_value > 0x00007fff && node->int_value < 0xffff8000)
 		{
-			printf("Error line %d: integer out of range, %x\n", node->lineno, node->int_value);
+			printf(RED "Error line" BOLD " %d " NC ": integer " BOLD RED "out of range", node->lineno);
 			exit(EXIT_FAILURE);
 		}
 }
@@ -523,13 +404,13 @@ void analyse_passe_1(node_t root)
 						// if trying to redeclare	
 						else if(variableDecl != NULL && declaration == 1)
 						{
-							printf("Error line %d : variable '%s' already declared : previous declaration line %d\n", root->opr[i]->lineno, root->opr[i]->ident, variableDecl->lineno);
+							printf(RED "Error line" BOLD " %d " NC ": variable " BOLD "'%s'" NC " already declared : previous declaration line %d\n", root->opr[i]->lineno, root->opr[i]->ident, variableDecl->lineno);
 							exit(EXIT_FAILURE);
 						}
 						// if undeclared
 						else 
 						{
-							printf("Error line %d : undeclared variable '%s'\n", root->opr[i]->lineno, root->opr[i]->ident);
+							printf(RED "Error line" BOLD " %d " NC ": undeclared variable " BOLD "'%s'" NC" \n", root->opr[i]->lineno, root->opr[i]->ident);
 							exit(EXIT_FAILURE);
 						}					
 					}
@@ -582,6 +463,7 @@ void analyse_passe_1(node_t root)
 				break;
 
 				case NODE_FUNC :
+
 				break;
 	
 				case NODE_STRINGVAL :
@@ -594,43 +476,36 @@ void analyse_passe_1(node_t root)
 		{
 			if(root->opr[0]->type != TYPE_VOID)
 			{
-				printf("Error line %d: 'main()' declaration must have a 'void' return type\n", root->opr[0]->lineno);
+				printf(RED "Error line" BOLD " %d " NC ": " BOLD CYAN "main()" NC " declaration must have " PURPLE "void" NC " return type\n", root->opr[0]->lineno);
+				exit(EXIT_FAILURE);
+			}
+			if(strcmp(root->opr[1]->ident, "main")) // only 1 func allowed : main
+			{
+				printf(RED "Error line" BOLD " %d " NC ": function name must be " BOLD CYAN "main()" NC " \n", root->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
 		}
 		// check that operations are between INT
-		if(root->nature == NODE_PLUS)
+		if(root->nature == NODE_PLUS ||
+		   root->nature == NODE_MINUS || 
+		   root->nature == NODE_MUL ||
+		   root->nature == NODE_DIV ||
+		   root->nature == NODE_MOD)
 		{
-			check_add_type(root);
-		}
-		if(root->nature == NODE_MINUS)
-		{
-			check_minus_type(root);
-		}
-		if(root->nature == NODE_DIV)
-		{
-			check_div_type(root);
-		}
-		if(root->nature == NODE_MUL)
-		{
-			check_mul_type(root);
-		}
-		if(root->nature == NODE_MOD)
-		{
-			check_mod_type(root);
+			check_int_op_type(root);
 		}
 		// check that condition returns boolean 
 		if(	root->nature == NODE_DOWHILE ||
 			root->nature == NODE_FOR)
 		{
-			check_bool_expr(root, 1);
-			//the do_while bool expression is the second son
+			//the 'do_while' & 'for' bool expression is the second son
+			check_bool_cond(root, 1);
 		}
 		if (root->nature == NODE_WHILE ||
 			root->nature == NODE_IF )
 		{
-			check_bool_expr(root, 0);
-			//the if & while bool expression is the first son
+			//the 'if' & 'while' bool expression is the first son
+			check_bool_cond(root, 0);
 		}
 		// check the coherence of type affectation
 		if(root->nature == NODE_AFFECT)
@@ -643,7 +518,7 @@ void analyse_passe_1(node_t root)
 			{
 				if (root->opr[0]->type != root->opr[1]->type)
 				{
-					printf("Error line %d: variable already declared\n", root->lineno);
+					printf(RED "Error line" BOLD " %d " NC ": variable already declared\n", root->lineno);
 					exit(EXIT_FAILURE);
 				}	
 			}
