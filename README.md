@@ -49,33 +49,3 @@ Fast test file with tree as png and svg :
 
 
 # KNOWN BUGS 
-
-- affectation between declaration in global scope throw syntax error :
-```C
-int start = 0;
-int end = 5;
-start = a + end;		<--- Throw Syntax Error
-float a = 191.01450;
-void main () {
-	int i, s = start , e = end ;
-	int sum = 0;
-	for (i = s; i < e; i = i + 1) {
- 		sum = sum + 1;	
- 	}
-	print("sum :", sum , "\n") ;
-}
-```
-```C
-int start = 0;
-int end = 5;
-float a = 191.01450;
-start = a + end;		<--- IS OKAY
-void main () {
-	int i, s = start , e = end ;
-	int sum = 0;
-	for (i = s; i < e; i = i + 1) {
- 		sum = sum + 1;	
- 	}
-	print("sum :", sum , "\n") ;
-}
-```
