@@ -18,6 +18,7 @@
 #include "../include/defs.h"
 #include "../include/common.h"
 #include "../include/passe_1.h"
+#include "../include/instruction_set.h"
 
 
 
