@@ -89,7 +89,12 @@ node_t make_node_strval(char* string);
 %%
 
 /* tree creation rules  */
-program:    listdeclnonnull maindecl // case of inst 
+program:    list maindecl // case of inst 
+        {
+            $$ = make_node(NODE_PROGRAM, 2, $1, $2);
+            *program_root = $$;
+        }
+        |   listdeclnonnull maindecl
         {
             $$ = make_node(NODE_PROGRAM, 2, $1, $2);
             *program_root = $$;
