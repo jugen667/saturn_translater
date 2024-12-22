@@ -33,9 +33,9 @@
 extern char * infile;
 extern char * outfile;
 int trace_level = DEFAULT_TRACE_LEVEL;
-//extern bool debug;
 extern bool stop_after_syntax;
 extern bool stop_after_verif;
+bool verboseDebug = 0;
 bool uncompatible=0;
 
 // ================================================================================================= //
@@ -68,6 +68,7 @@ void affiche_help()
 	printf("  -r <int> : Max register to use\n\tbetween 1 and 5 (default : 5)\n");
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
 	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
+    printf("  -d : activate debug\n");
 	printf("  -h : Print help\n");
     printf("  -v : Print build version of SaturnCC\n\n");
 }
@@ -173,7 +174,6 @@ void parse_args(int argc, char ** argv)
 					case 'c':
 						test_arg_compatibility("-s","-c",argv[i]);
 						stop_after_verif = 1;
-						//printf("arrêt après la phase de vérification \n");
 						break;
                     case 'v':
                         print_version();
@@ -182,6 +182,10 @@ void parse_args(int argc, char ** argv)
                     case 'h':
                         affiche_help();
                         exit(EXIT_FAILURE);
+                        break;
+                    case 'd':
+                        verboseDebug = 1;
+                        printf(BOLD "Compilation will be verbose\n" NC);
                         break;
 					default:
 						fprintf(stderr,NC "%s is not a valid option\n", argv[i]);
@@ -426,7 +430,7 @@ const char * node_nature2string(node_nature t)
         case NODE_FUNC:
             return "FUNC";
         case NODE_IF:
-            return "IF";
+            return "IF\t"; // \t for debug
         case NODE_WHILE:
             return "WHILE";
         case NODE_FOR:
@@ -444,21 +448,21 @@ const char * node_nature2string(node_nature t)
         case NODE_MOD:
             return "MOD";
         case NODE_LT:
-            return "LT";
+            return "LT\t"; // \t for debug
         case NODE_GT:
-            return "GT";
+            return "GT\t"; // \t for debug
         case NODE_LE:
-            return "LE";
+            return "LE\t"; // \t for debug
         case NODE_GE:
-            return "GE";
+            return "GE\t"; // \t for debug 
         case NODE_EQ:
-            return "EQ";
+            return "EQ\t"; // \t for debug
         case NODE_NE:
-            return "NE";
+            return "NE\t"; // \t for debug
         case NODE_AND:
             return "AND";
         case NODE_OR:
-            return "OR";
+            return "OR\t"; // \t for debug
         case NODE_BAND:
             return "BAND";
         case NODE_BOR:

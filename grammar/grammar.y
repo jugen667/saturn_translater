@@ -24,6 +24,7 @@
 /* Global variables */
 extern bool stop_after_syntax;
 extern bool stop_after_verif;
+extern bool verboseDebug;
 extern char * outfile;
 
 

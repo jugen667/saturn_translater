@@ -13,6 +13,6 @@ void main (){
  		sum = sum + 1;	
  	}
  	int y = 2;
- 	y + a;
+ 	y * a;
  	print("sum :", sum , "\n");
 }

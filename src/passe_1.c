@@ -50,7 +50,7 @@ void print_decl_table(void)
 			printf("\n"); 	
 			break;
 		}
-		printf("%d - %s | ", i, declaration_table[i].varName);
+		printf("Variable n°%d - %s | ", i, declaration_table[i].varName);
 	}
 }
 
@@ -58,7 +58,7 @@ void print_decl_table(void)
 
 void print_node_info(node_t root)
 {
-	printf("node nature:%s | node_type:%s | nops:%d\n",node_nature2string(root->nature), node_type2string(root->type), root->nops);
+	printf("Node Nature:%s \t\t| Node Type:%s \t\t| Nbr. Ops:%d\t\t|\n",node_nature2string(root->nature), node_type2string(root->type), root->nops);
 }
 
 // ------------------------------------------------------------------------------------------------- //
@@ -332,13 +332,82 @@ void check_intval_domain(node_t node)
 void analyse_passe_1(node_t root) 
 {	
 	node_t variableDecl;
-	// print_decl_table();
-	// print_node_info(root);
+	
 	// printf("declaration flag : %d\n", declaration);
 	if (root->nature == NODE_PROGRAM)
-	{
+	{ 
+		if(verboseDebug)
+		{	
+			for(char i = 0; i<36; i++)
+			{
+				printf("=");
+			}
+			printf(" Starting Program ");
+			for(char i = 0; i<35; i++)
+			{
+				printf("=");
+			}
+			printf("\n");
+
+		}
 		//flag to update the global_decl attribute
 		isGlobal=1; 
+		if(verboseDebug)
+		{	
+			for(char i = 0; i<33; i++)
+			{
+				printf("-");
+			}
+			printf(" Entering Global Scope ");
+			for(char i = 0; i<33; i++)
+			{
+				printf("-");
+			}
+			printf("\n");
+		}
+	}
+	if (root->nature == NODE_FUNC)
+	{ 
+		if(verboseDebug)
+		{	
+			for(char i = 0; i<33; i++)
+			{
+				printf("-");
+			}
+			printf(" Exiting  global scope ");
+			for(char i = 0; i<33; i++)
+			{
+				printf("-");
+			}
+			printf("\n");
+			for(char i = 0; i<89; i++)
+			{
+				printf("=");
+			}
+			printf("\n");
+		}
+		//flag to update the global_decl attribute
+		isGlobal=0; 
+		if(verboseDebug)
+		{	
+			for(char i = 0; i<33; i++)
+			{
+				printf("-");
+			}
+			printf(" Entering main() scope ");
+			for(char i = 0; i<33; i++)
+			{
+				printf("-");
+			}
+			printf("\n");
+
+		}
+	}
+	
+	if(verboseDebug)
+	{
+		//print_decl_table();
+		print_node_info(root);
 	}	
 	// parsing the tree
 	for(int i = 0; i < root->nops; i++)
@@ -465,7 +534,6 @@ void analyse_passe_1(node_t root)
 				break;
 
 				case NODE_FUNC :
-
 				break;
 	
 				case NODE_STRINGVAL :
