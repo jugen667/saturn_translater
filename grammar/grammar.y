@@ -43,7 +43,9 @@ node_t make_node_strval(char* string);
 
 %}
 
-%parse-param { node_t * program_root }
+%parse-param { 
+    node_t * program_root
+}
 
 %union {
     int32_t intval;
@@ -57,7 +59,7 @@ node_t make_node_strval(char* string);
 %type <strval> TOK_IDENT TOK_STRING;
 
 %token TOK_VOID TOK_INT TOK_INTVAL TOK_FLOAT TOK_FLOATVAL TOK_BOOL TOK_TRUE TOK_FALSE 
-%token TOK_IDENT TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_PRINT TOK_MAIN
+%token TOK_MAIN TOK_IDENT TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_PRINT 
 %token TOK_SEMICOL TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
 %token TOK_STRING TOK_DO
 
@@ -82,26 +84,24 @@ node_t make_node_strval(char* string);
 
 
 
-%type <ptr> program listdecl listdeclnonnull vardecl ident type listtypedecl decl maindecl listinst listinstnonnull inst block expr listparamprint paramprint
+%type <ptr> program listdecl listdeclnonnull vardecl ident type listtypedecl decl maindecl listinst listinstnonnull inst block expr listparamprint paramprint list 
 
 %%
 
-/* tree creation  */
-program:    
-        listdeclnonnull maindecl
+/* tree creation rules  */
+program:    listdeclnonnull maindecl // case of inst 
         {
             $$ = make_node(NODE_PROGRAM, 2, $1, $2);
             *program_root = $$;
         }
-        |
-        listdeclnonnull
+        |   listdeclnonnull // case of inst 
         {
             $$ = make_node(NODE_PROGRAM, 2, $1, NULL);
             *program_root = $$;
         }
-        | maindecl
+        |   maindecl
         {
-            $$ = make_node(NODE_PROGRAM, 2, NULL, $1);
+            $$ = make_node(NODE_PROGRAM, 1, $1);
             *program_root = $$;
         }
         ;
@@ -117,21 +117,22 @@ listdecl:   listdeclnonnull
         ;
 
 listdeclnonnull:vardecl
-             { $$ = $1; }
-            |
-            listdeclnonnull vardecl
+            { 
+                $$ = $1; 
+            }
+            | listdeclnonnull vardecl
             {
                 $$ = make_node(NODE_LIST, 2, $1, $2);
             }
             ;
 
-vardecl    : type listtypedecl TOK_SEMICOL
-            {
-                $$ = make_node(NODE_DECLS, 2, $1, $2);
-            }
-            ;
+vardecl : type listtypedecl TOK_SEMICOL
+        {
+            $$ = make_node(NODE_DECLS, 2, $1, $2);
+        }
+        ;
 
-type        : TOK_INT
+type    : TOK_INT
         {
             $$ = make_node_type(TYPE_INT);
         }	
@@ -178,10 +179,6 @@ maindecl        : type ident TOK_LPAR TOK_RPAR block
 listinst        : listinstnonnull
                 {
                     $$ =$1;
-                }
-                |
-                {
-                    $$ = NULL;
                 }
                 ;
 
@@ -231,11 +228,33 @@ inst        : expr TOK_SEMICOL
             {
                 $$ = make_node(NODE_PRINT, 1, $3);
             }
+            |
+            {
+                $$ = NULL;
+            }
             ;
 
-block       : TOK_LACC listdecl listinst TOK_RACC
+list        :   list listdecl 
             {
-                $$ = make_node(NODE_BLOCK, 2, $2, $3);
+                $$ = make_node(NODE_LIST, 2, $1, $2);
+            }
+            |   list listinst 
+            {
+                $$ = make_node(NODE_LIST, 2, $1, $2);
+            }
+            |   listdecl 
+            {
+                $$ = $1;
+            }
+            |   listinst 
+            {
+                $$ = $1;
+            }
+            ;
+
+block       :  TOK_LACC list TOK_RACC
+            {
+                $$ = make_node(NODE_BLOCK, 1, $2);
             }
             ;
 

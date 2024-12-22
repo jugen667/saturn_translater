@@ -334,6 +334,7 @@ void analyse_passe_1(node_t root)
 	node_t variableDecl;
 	// print_decl_table();
 	// print_node_info(root);
+	// printf("declaration flag : %d\n", declaration);
 	if (root->nature == NODE_PROGRAM)
 	{
 		//flag to update the global_decl attribute
@@ -457,6 +458,7 @@ void analyse_passe_1(node_t root)
 
 				case NODE_BLOCK :
 					isGlobal=0;
+					declaration = 0;
 				break;
 
 				case NODE_AFFECT :

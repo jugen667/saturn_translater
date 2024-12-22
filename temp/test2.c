@@ -1,7 +1,8 @@
-int start =0;
-int end = 10;
+int a;
+int x = 4;
 void main () {
-	int i;
-	int sum = 0;
-	print("sum :", sum , "\n") ;
+	x = a;
+	int b;
+	int c = 0;
+	c = b +a;
 }
