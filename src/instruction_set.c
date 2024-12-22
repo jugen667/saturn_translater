@@ -22,13 +22,24 @@
 // ================================================================================================= //
 // =========================================== GLOBALS ============================================= //
 // ================================================================================================= //
-bool available_reg[4] = {1, 1, 1, 1};
+static bool available_reg[4] = {1, 1, 1, 1};
 
 // ================================================================================================= //
 // =========================================== FUNCTIONS =========================================== //
 // ================================================================================================= //
 
-
+// check if register available for saving data
+short reg_available(void)
+{
+	for (short i = 0; i < 4; i++)
+	{
+		if(available_reg[i])
+		{
+			return i;
+		}
+	}
+	return -1;
+}
 // increment P value of 1
 void increment_P(void)
 {
@@ -72,10 +83,13 @@ void load_register(short value, bool speedFlag)
 	if(speedFlag) // need speed
 	{
 		sprintf(retStr, "LC %x",(short)value);
+		available_reg[C] = 0;
 	}
 	else
 	{
 		sprintf(retStr, "LA %x",(short)value);
+		available_reg[A] = 0;
+
 	}
 	//for debug
 	printf("%s\n",retStr);

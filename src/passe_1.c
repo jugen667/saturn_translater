@@ -32,8 +32,8 @@ extern int trace_level;
 // ================================================================================================= //
 
 short currentVar = -1; 		// declaration index 
-int declaration = 0;		// in a declaration part
-int isGlobal = 1;			// in global scope
+bool declaration = 0;		// in a declaration part
+bool isGlobal = 1;			// in global scope
 node_type current_type= 0;  // typing nodes
 
 // ================================================================================================= //

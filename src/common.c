@@ -14,11 +14,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
-#include <stdbool.h>
-#include <inttypes.h>
-#include <unistd.h>
-#include <getopt.h>
 
 #include "../include/defs.h"
 #include "../include/common.h"
@@ -333,9 +328,10 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
     	case NODE_AFFECT:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s|Nb. ops: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->nops);
             break;
-	default:
+	   default:
             printf("*** Error in %s: unknown nature : %s\n", __func__, node_nature2string(n->nature));
-            assert(false);
+        break;
+
     }
 
     n->node_num = node_num;
@@ -356,10 +352,18 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
 
 static void dump_tree2dot(FILE * f, node_t root) 
 {
-    assert(root->nature == NODE_PROGRAM);
+    if(root->nature == NODE_PROGRAM)
+    {
+        int32_t curr_node_num = 1;
+        dump_tree2dot_rec(f, root, curr_node_num);
+    }
+    else
+    {
+        printf(RED "Fatal error" NC " : root node not a NODE_PROGRAM but %s\n",node_nature2string(root->nature));
+        exit(EXIT_FAILURE);
+    }
 
-    int32_t curr_node_num = 1;
-    dump_tree2dot_rec(f, root, curr_node_num);
+    
 }
 
 // ------------------------------------------------------------------------------------------------- //
@@ -393,7 +397,8 @@ const char * node_type2string(node_type t)
         case TYPE_VOID:
             return "TYPE VOID";
         default:
-            assert(false);
+            return "";
+        break;
     }
 }
 

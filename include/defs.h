@@ -9,7 +9,6 @@
 #define _DEFS_H_
 
 #include <stdint.h>
-#include <stdbool.h>
 
 #define DEFAULT_OUTFILE "out.s"
 #define DEFAULT_TRACE_LEVEL 0
@@ -25,6 +24,7 @@
 })
 
 
+typedef enum { false = 0, true = !false } bool;
 
 typedef enum node_nature_s {
     NONE,
