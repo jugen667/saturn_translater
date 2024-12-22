@@ -1,9 +1,12 @@
 int a;
-int x = 4;
-a=0;
-void main () {
+a = 1;
+a = a +2;
+int x;
+float c = 1.0;
+a + 2;
+void main() {
 	x = a;
 	int b;
-	int c = 0;
-	c = b +a;
+	c = b + a;
+	int i = 0;
 }

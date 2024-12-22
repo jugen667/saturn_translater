@@ -474,14 +474,14 @@ void analyse_passe_1(node_t root)
 		}		
 
 		// CHECKS 
-		if(root->nature == NODE_FUNC)
+		if(root->nature == NODE_FUNC) // redundant
 		{
-			if(root->opr[0]->type != TYPE_VOID)
+			if(root->type != TYPE_VOID)
 			{
 				printf(RED "Error line" BOLD " %d " NC ": " BOLD CYAN "main()" NC " declaration must have " PURPLE "void" NC " return type\n", root->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
-			if(strcmp(root->opr[1]->ident, "main")) // only 1 func allowed : main
+			if(strcmp(root->ident, "main")) // only 1 func allowed : main
 			{
 				printf(RED "Error line" BOLD " %d " NC ": function name must be " BOLD CYAN "main()" NC " \n", root->opr[0]->lineno);
 				exit(EXIT_FAILURE);

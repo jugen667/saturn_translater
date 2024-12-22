@@ -33,6 +33,7 @@
 extern char * infile;
 extern char * outfile;
 int trace_level = DEFAULT_TRACE_LEVEL;
+//extern bool debug;
 extern bool stop_after_syntax;
 extern bool stop_after_verif;
 bool uncompatible=0;
@@ -86,7 +87,7 @@ void test_int_value(int min, int max, int test, char * argv )
         {
             fprintf(stderr,NC"\t-> value must be between 0 and 5\n");
         }
-		exit(1);	
+		exit(EXIT_FAILURE);	
 	}
 }
 
@@ -99,7 +100,7 @@ void testValideInFile(char * test)
     if (strstr(&test[i-2],".c") == NULL )
     {
         fprintf(stderr,NC"unvalid file name : %s\n",test);
-        exit(1);    
+        exit(EXIT_FAILURE);    
     }
 }
 
@@ -112,7 +113,7 @@ void testValideOutFile(char * test)
     if (strstr(&test[i-2],".s") == NULL )
     {
         fprintf(stderr,NC"unvalid file name : %s\n",test);
-        exit(1);    
+        exit(EXIT_FAILURE);    
     }
 }
 
@@ -127,7 +128,7 @@ void test_arg_compatibility(char *arg_1, char *arg_2, char *test)
 	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == 1)
     {
 		fprintf(stderr,NC"uncompatible options  : %s and %s \n", arg_1, arg_2);
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -176,16 +177,16 @@ void parse_args(int argc, char ** argv)
 						break;
                     case 'v':
                         print_version();
-                        exit(1);
+                        exit(EXIT_FAILURE);
                         break;
                     case 'h':
                         affiche_help();
-                        exit(1);
+                        exit(EXIT_FAILURE);
                         break;
 					default:
 						fprintf(stderr,NC "%s is not a valid option\n", argv[i]);
                         fprintf(stderr,NC "Show helps with \"saturncc -h\"\n");
-						exit(1);
+						exit(EXIT_FAILURE);
 						break;
 				}
 			}
@@ -194,7 +195,7 @@ void parse_args(int argc, char ** argv)
 	if (infile == NULL)
     {
 		fprintf(stderr,NC "No .c file to translate \n\n");
-		exit(1);
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -300,7 +301,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Nb. ops: %d}}\"];\n", node_num, node_nature2string(n->nature), n->nops);
             break;
         case NODE_FUNC:
-            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Nb. ops: %d}|{offset: %d}}\"];\n", node_num, node_nature2string(n->nature), n->nops, n->offset);
+            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Ident: %s|Nb. ops: %d}|{offset: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->ident, n->nops, n->offset);
             break;
         case NODE_PLUS:
         case NODE_MINUS:
@@ -484,7 +485,7 @@ const char * node_nature2string(node_nature t)
     	    return "ELSE";
     	default:
             fprintf(stderr, "*** Error in %s: Unknown node nature: %d\n", __func__, t);
-            exit(1);
+            exit(EXIT_FAILURE);
     }
 }
 
@@ -541,7 +542,7 @@ const char * node_nature2symb(node_nature t)
             return "-";
         default:
             fprintf(stderr, "*** Error in %s: Unknown node nature: %d\n", __func__, t);
-            exit(1);
+            exit(EXIT_FAILURE);
     }
 }
 
