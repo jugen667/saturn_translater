@@ -28,6 +28,19 @@ static bool available_reg[4] = {1, 1, 1, 1};
 // =========================================== FUNCTIONS =========================================== //
 // ================================================================================================= //
 
+// dumping management
+void dump_instruction(char * inst, FILE * fDest)
+{
+	if(fDest != NULL)
+	{
+		fprintf(fDest, "%s\n", inst);
+	}
+	else
+	{
+		printf("%s\n",inst);
+	}
+}
+
 // check if register available for saving data
 short reg_available(void)
 {
@@ -45,8 +58,7 @@ void increment_P(void)
 {
 	char retStr[6];
 	sprintf(retStr, "P=P+1");
-	//for debug
-	printf("%s\n",retStr);
+	dump_instruction(retStr, outfileDescriptor);
 }
 
 // decrement P value of 1
@@ -54,8 +66,7 @@ void decrement_P(void)
 {
 	char retStr[6];
 	sprintf(retStr, "P=P-1");
-	//for debug
-	printf("%s\n",retStr);
+	dump_instruction(retStr, outfileDescriptor);
 }
 
 // set value of P

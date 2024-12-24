@@ -30,6 +30,7 @@
 #define     BOLDWHITE       "\033[1m\033[37m"   /* Bold White */
 
 extern bool verboseDebug;
+extern FILE * outfileDescriptor;
 
 // ================================================================================================= //
 // ========================================== PROTOTYPE ============================================ //
@@ -42,7 +43,9 @@ void dump_tree(node_t prog_root, const char * filename);
 const char * node_type2string(node_type t);
 const char * node_nature2string(node_nature t);
 const char * node_nature2symb(node_nature t);
-
+// open file
+FILE * outfile_open(char * outfileName);
+void outfile_close(FILE * fileDesc);
 
 
 #endif

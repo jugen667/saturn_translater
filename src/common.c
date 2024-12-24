@@ -27,9 +27,10 @@
 
 extern char * infile;
 extern char * outfile;
-int trace_level = DEFAULT_TRACE_LEVEL;
 extern bool stop_after_syntax;
 extern bool stop_after_verif;
+FILE * outfileDescriptor = NULL;
+int trace_level = DEFAULT_TRACE_LEVEL;
 bool verboseDebug = 0;
 bool uncompatible=0;
 
@@ -554,6 +555,29 @@ const char * node_nature2symb(node_nature t)
             exit(EXIT_FAILURE);
     }
 }
+
+// 
+
+// outfile dumping management
+// open file
+FILE * outfile_open(char * outfileName)
+{
+    FILE * f;
+    f = fopen(outfileName, "w");
+    return f;
+}
+
+// close file
+void outfile_close(FILE * fileDesc)
+{
+    if(fileDesc != NULL)
+    {
+        fclose(fileDesc);
+    }
+}
+
+
+
 
 // ================================================================================================= //
 // ================================================================================================= //
