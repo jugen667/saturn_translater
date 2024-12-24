@@ -564,8 +564,16 @@ node_t make_node_main(node_t node_next){
 
 
 void analyse_tree(node_t root) {
+    if(verboseDebug)
+    {
+        printf(BOLD "> Syntax analysis\n" NC);
+    }    
     dump_tree(root, "apres_syntaxe.dot");
     if (!stop_after_syntax) {
+        if(verboseDebug)
+        {
+            printf(BOLD "> First parse\n" NC);
+        } 
         analyse_passe_1(root);
         dump_tree(root, "apres_passe_1.dot");
         // if (!stop_after_verif) {
