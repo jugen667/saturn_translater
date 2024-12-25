@@ -74,8 +74,7 @@ void set_PField_value(char value)
 {
 	char retStr[10];
 	sprintf(retStr, "P= %d",(short)value);
-	//for debug
-	printf("%s\n",retStr);
+	dump_instruction(retStr, outfileDescriptor);
 }
 
 // reset P value (should be called at end of program)
@@ -83,8 +82,7 @@ void reset_P(void)
 {
 	char retStr[5];
 	sprintf(retStr, "P= 0");
-	//for debug
-	printf("%s\n",retStr);
+	dump_instruction(retStr, outfileDescriptor);
 }
 
 // loading a register (ensure P value is correct)
@@ -102,8 +100,7 @@ void load_register(short value, bool speedFlag)
 		available_reg[A] = 0;
 
 	}
-	//for debug
-	printf("%s\n",retStr);
+	dump_instruction(retStr, outfileDescriptor);
 }
 
 // set a register to zero
@@ -157,9 +154,7 @@ void register_zero(short field, short reg_name)
 		break;
 	}
 	sprintf(retStr, "%s=0 %s",cReg,cField);
-
-	//for debug
-	printf("%s\n",retStr);
+	dump_instruction(retStr, outfileDescriptor);
 }
 
 
