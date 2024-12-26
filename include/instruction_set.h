@@ -24,13 +24,37 @@
 // ================================================================================================= //
 // ======================================== ENUM & STRUCTS ========================================= //
 // ================================================================================================= //
-enum REGISTER
+enum WORKING_REGISTER
 {
 	A,
 	B,
 	C,
 	D,
-	MAX_REGISTER,
+	MAX_WORKING_REGISTER,
+};
+
+enum SAVE_REGISTER
+{
+	R0,
+	R1,
+	R2,
+	R3,
+	R4,
+	MAX_SAVE_REGISTER,
+};
+
+enum POINTER_REGISTER
+{
+	D0,
+	D1,
+	MAX_POINTER_REGISTER
+};
+
+enum DIRECTION
+{
+	RIGHT,
+	LEFT,
+	MAX_DIRECTION,
 };
 
 enum REGISTER_FIELDS
@@ -53,13 +77,14 @@ enum REGISTER_FIELDS
 // ================================================================================================= //
 // =========================================== PROTOTYPES ========================================== //
 // ================================================================================================= //
-short reg_available(void);
+short work_reg_available(void);
 void increment_P(void);
 void decrement_P(void);
 void set_PField_value(unsigned char value);
 void reset_P(void);
 void clear_bit(short reg_name, char bit_nbr);
 void set_bit(short reg_name, char bit_nbr);
+
 void load_register(short value, bool speedflag);
 void register_zero(short reg_name, short field);
 void ex_register(short reg_1, short reg_2, short field);
@@ -72,3 +97,18 @@ void sub_register(short dest_reg, short reg_1, short field);
 void sub_const_register(short dest_reg, short field, short constant);
 void mul_register(short dest_reg, short reg_1, short field);
 void div_register(short dest_reg, short reg_1, short field);
+void one_complement(short dest_reg, short field);
+void two_complement(short dest_reg, short field);
+void logical_OR(short dest_reg, short reg_1, short field);
+void logical_AND(short dest_reg, short reg_1, short field);
+void logical_XOR(short dest_reg, short reg_1, short field);
+void shift_nibble(short dest_reg, short field, short direction);
+void rotate_nibble(short dest_reg, short direction);
+void shift_bit_right(short dest_reg, short field);
+void shift_reg_right(short dest_reg, short value_reg, short field);
+void shift_reg_left(short dest_reg, short value_reg, short field);
+
+void copy_reg_save_work(short reg_1, short reg_2, short field);
+void copy_reg_work_save(short reg_1, short reg_2, short field);
+void ex_reg_work_save(short reg_1, short reg_2, short field);
+

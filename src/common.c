@@ -152,7 +152,7 @@ void parse_args(int argc, char ** argv)
 					break;
 					case 'r':
 						test_int_value(1,5,atoi(argv[i+1]), argv[i]);
-						set_max_registers(atoi(argv[i+1]));
+						set_MAX_WORKING_REGISTERs(atoi(argv[i+1]));
 						i++;
 					break;
 					case 's':
@@ -331,7 +331,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
     	case NODE_AFFECT:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s|Nb. ops: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->nops);
             break;
-	   default:
+	    default:
             printf("*** Error in %s: unknown nature : %s\n", __func__, node_nature2string(n->nature));
         break;
 
