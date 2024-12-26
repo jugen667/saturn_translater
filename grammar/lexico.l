@@ -57,6 +57,7 @@ STRING              \"({STRING_CHAR}|\\\"|\\n)*\"
 COMMENT             \/\/({STRING_CHAR}|{STRING})*(\\n)*
 COMMENTMUL          \/\*({STRING_CHAR}|{STRING}|{SPECCHAR})*\*\/
 SEPARATOR           [ \t\n]+
+/* ==== TO DO POINTERS MAYBE ? ==== */
 
 %%
 

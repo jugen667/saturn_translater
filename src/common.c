@@ -30,7 +30,6 @@ extern char * outfile;
 extern bool stop_after_syntax;
 extern bool stop_after_verif;
 FILE * outfileDescriptor = NULL;
-int trace_level = DEFAULT_TRACE_LEVEL;
 bool verboseDebug = 0;
 bool uncompatible=0;
 
@@ -60,8 +59,6 @@ void affiche_help()
 	printf(BOLD "Translater for simplified C to Saturn HP assembly\n" NC);
     printf("Usage : ./saturncc <options> <infile>\n\n");
 	printf("  -o <filename> : Custom output filename\n\t(default : out.s)\n");
-	printf("  -t <int> : Trace level between 0 and 5 \n\t(0 = no trace ; 5 = alltraces) (default = 0)\n");
-	printf("  -r <int> : Max register to use\n\tbetween 1 and 5 (default : 5)\n");
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
 	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
     printf("  -d : activate debug\n");
@@ -96,7 +93,7 @@ void testValideInFile(char * test)
     i = strlen(test);
     if (strstr(&test[i-2],".c") == NULL )
     {
-        fprintf(stderr,NC"unvalid file name : %s\n",test);
+        fprintf(stderr,RED BOLD "unvalid file name : %s\n" NC,test);
         exit(EXIT_FAILURE);    
     }
 }
@@ -109,7 +106,7 @@ void testValideOutFile(char * test)
     i = strlen(test);
     if (strstr(&test[i-2],".s") == NULL )
     {
-        fprintf(stderr,NC"unvalid file name : %s\n",test);
+        fprintf(stderr,RED BOLD"unvalid file name : %s\n" NC,test);
         exit(EXIT_FAILURE);    
     }
 }
@@ -124,7 +121,7 @@ void test_arg_compatibility(char *arg_1, char *arg_2, char *test)
 	}
 	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == 1)
     {
-		fprintf(stderr,NC"uncompatible options  : %s and %s \n", arg_1, arg_2);
+		fprintf(stderr,BOLD "uncompatible options  : %s and %s \n" NC, arg_1, arg_2);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -152,49 +149,44 @@ void parse_args(int argc, char ** argv)
 						outfile = argv[i+1];
 						//printf("output file name : %s \n", outfile);
 						i++;
-						break;
-					case 't':
-						test_int_value(0,5,atoi(argv[i+1]), argv[i]);
-						trace_level = atoi(argv[i+1]);
-						i++;
-						break;
+					break;
 					case 'r':
 						test_int_value(1,5,atoi(argv[i+1]), argv[i]);
 						set_max_registers(atoi(argv[i+1]));
 						i++;
-						break;
+					break;
 					case 's':
 						test_arg_compatibility("-s","-c",argv[i]);
 						stop_after_syntax = 1;
-						break;
+					break;
 					case 'c':
 						test_arg_compatibility("-s","-c",argv[i]);
 						stop_after_verif = 1;
-						break;
+					break;
                     case 'v':
                         print_version();
                         exit(EXIT_FAILURE);
-                        break;
+                    break;
                     case 'h':
                         affiche_help();
                         exit(EXIT_FAILURE);
-                        break;
+                    break;
                     case 'd':
                         verboseDebug = 1;
                         printf(BOLD "Compilation will be verbose\n" NC);
-                        break;
+                    break;
 					default:
-						fprintf(stderr,NC "%s is not a valid option\n", argv[i]);
-                        fprintf(stderr,NC "Show helps with \"saturncc -h\"\n");
+						fprintf(stderr,BOLD "%s is not a valid option\n" NC, argv[i]);
+                        fprintf(stderr,BOLD "Show helps with \"saturncc -h\"\n" NC);
 						exit(EXIT_FAILURE);
-						break;
+					break;
 				}
 			}
 		}
     }
 	if (infile == NULL)
     {
-		fprintf(stderr,NC "No .c file to translate \n\n");
+		fprintf(stderr,RED BOLD "No .c file to translate\n" NC);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -203,10 +195,14 @@ void parse_args(int argc, char ** argv)
 
 void free_nodes(node_t n) 
 {
-    short currnops;
     // input : root node 
     // Parse until no more node
     // come back and free nodes
+    short currnops;
+    if(n->nature == NODE_PROGRAM)
+    {
+        printf(BOLD "> Freeing nodes\n" NC);
+    }
     if(n->nops != 0)
     {   
         for(int i = 0; i<n->nops; i++){
@@ -215,12 +211,18 @@ void free_nodes(node_t n)
                 free_nodes(n->opr[i]);
             }
         }
-        // printf("Debug > freeing %s\n", node_nature2string(n->nature));
+        if(verboseDebug)
+        {
+            printf("\t > freeing %s\n", node_nature2string(n->nature));
+        }
         free(n);
     }
     else
     {
-        // printf("Debug > freeing %s\n", node_nature2string(n->nature));
+        if(verboseDebug)
+        {
+            printf("\t > freeing %s\n", node_nature2string(n->nature));
+        }        
         free(n);
     }
 }
@@ -563,7 +565,24 @@ const char * node_nature2symb(node_nature t)
 FILE * outfile_open(char * outfileName)
 {
     FILE * f;
+    if(verboseDebug){
+        printf(BOLD "> Creating and opening file : %s\n" NC, outfile);
+    }
     f = fopen(outfileName, "w");
+    if(f != NULL){
+        fprintf(f, "%% Filename : %s\n", infile);
+        fprintf(f, "%% Compiled with saturn_translater\n");
+        fprintf(f, "%% https://github.com/jugen667/saturn_translater\n");
+        fprintf(f, "\n\n");
+        if(verboseDebug)
+        {
+            printf(BOLD "\t > %s created and opened\n" NC, outfile);
+        }
+    }
+    else{
+        printf(RED "Fatal error : " NC "could not open/create file %s\n", outfile);
+        printf(BOLD GREEN "Printing program in stdout\n" NC);
+    }
     return f;
 }
 
@@ -573,6 +592,10 @@ void outfile_close(FILE * fileDesc)
     if(fileDesc != NULL)
     {
         fclose(fileDesc);
+        if(verboseDebug)
+        {
+            printf(BOLD "\t > %s closed\n" NC, outfile);
+        }
     }
 }
 
