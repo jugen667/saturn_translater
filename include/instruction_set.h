@@ -112,3 +112,8 @@ void copy_reg_save_work(short reg_1, short reg_2, short field);
 void copy_reg_work_save(short reg_1, short reg_2, short field);
 void ex_reg_work_save(short reg_1, short reg_2, short field);
 
+void load_pointer(short reg_1, int adress);
+void adding_pointer(short reg_1, short n);
+void subing_pointer(short reg_1, short n);
+void copying_pointer(short reg_1, short reg_2, short fourflag);
+void exchanging_pointer(short reg_1, short reg_2);

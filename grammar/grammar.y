@@ -585,7 +585,7 @@ void analyse_tree(node_t root) {
         add_register(A, D, W_FIELD);
         add_const_register(C, W_FIELD, 15);
         clear_bit(A, 3);
-        sub_const_register(C, S_FIELD, 13);
+        load_pointer(D0, 0x01045);
         outfile_close(outfileDescriptor);
         // =============================
         // if (!stop_after_verif) {

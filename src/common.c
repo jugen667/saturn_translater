@@ -152,7 +152,7 @@ void parse_args(int argc, char ** argv)
 					break;
 					case 'r':
 						test_int_value(1,5,atoi(argv[i+1]), argv[i]);
-						set_MAX_WORKING_REGISTERs(atoi(argv[i+1]));
+						set_max_registers(atoi(argv[i+1]));
 						i++;
 					break;
 					case 's':

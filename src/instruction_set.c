@@ -40,7 +40,7 @@ static char * save_register_str[MAX_SAVE_REGISTER] = {
 	"R3",
 	"R4"
 };
-static char * pointers_register_str[MAX_POINTER_REGISTER] = {
+static char * pointer_register_str[MAX_POINTER_REGISTER] = {
 	"D0",
 	"D1"
 };
@@ -388,6 +388,44 @@ void ex_reg_work_save(short reg_1, short reg_2, short field)
 }
 // -------------------------------------------
 
+
+// ----- Operations on pointers registers ----
+// load a pointer (adress or nibble is size 2, 4 or 5 only)
+void load_pointer(short reg_1, int adress) 
+{
+	char retStr[9];
+	sprintf(retStr, "%s= %.05x",pointer_register_str[reg_1],adress);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// adding in pointer (n from 1 to 16)
+void adding_pointer(short reg_1, short n) 
+{
+	char retStr[12];
+	sprintf(retStr, "%s=%s+ %d",pointer_register_str[reg_1],pointer_register_str[reg_1],n);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// sub-ing in pointer (n from 1 to 16)
+void subing_pointer(short reg_1, short n) 
+{
+	char retStr[12];
+	sprintf(retStr, "%s=%s- %d",pointer_register_str[reg_1],pointer_register_str[reg_1],n);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// copyng A or C in pointer (copying A field ?), fourflag only for copying four nibbles of A
+void copying_pointer(short reg_1, short reg_2, short fourflag) 
+{
+
+}
+
+// exchanging the field A of  A or C in pointer
+void exchanging_pointer(short reg_1, short reg_2) 
+{
+
+}
+// -------------------------------------------
 // ================================================================================================= //
 // ================================================================================================= //
 // ================================================================================================= //
