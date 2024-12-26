@@ -318,7 +318,7 @@ void check_intval_domain(node_t node)
 {
 		if(node->int_value > 0x00007fff && node->int_value < 0xffff8000)
 		{
-			printf(RED "Error line" BOLD " %d " NC ": integer " BOLD RED "out of range", node->lineno);
+			printf(RED "Error line" BOLD " %d " NC ": integer " BOLD RED "out of range\n", node->lineno);
 			exit(EXIT_FAILURE);
 		}
 }
@@ -539,7 +539,13 @@ void analyse_passe_1(node_t root)
 				case NODE_STRINGVAL :
 				break;
 			}	
-		}		
+		}
+
+		//Recursion 
+		if(root->opr[i] != NULL)
+		{
+			analyse_passe_1(root->opr[i]);
+		}
 
 		// CHECKS 
 		if(root->nature == NODE_FUNC) // redundant
@@ -637,11 +643,6 @@ void analyse_passe_1(node_t root)
 			check_int_op(root);
 		}
 
-		//Recursion 
-		if(root->opr[i] != NULL)
-		{
-			analyse_passe_1(root->opr[i]);
-		}
 	}
 }
 
