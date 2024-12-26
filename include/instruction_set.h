@@ -53,10 +53,22 @@ enum REGISTER_FIELDS
 // ================================================================================================= //
 // =========================================== PROTOTYPES ========================================== //
 // ================================================================================================= //
+short reg_available(void);
 void increment_P(void);
 void decrement_P(void);
-void set_PField_value(char value);
+void set_PField_value(unsigned char value);
 void reset_P(void);
-short reg_available(void);
+void clear_bit(short reg_name, char bit_nbr);
+void set_bit(short reg_name, char bit_nbr);
 void load_register(short value, bool speedflag);
-void register_zero(short field, short reg_name);
+void register_zero(short reg_name, short field);
+void ex_register(short reg_1, short reg_2, short field);
+void copy_register(short src_reg_name, short dest_reg_name, short field);
+void inc_register(short reg_name, short field);
+void dec_register(short reg_name, short field);
+void add_register(short dest_reg, short reg_1, short field);
+void add_const_register(short dest_reg, short field, short constant);
+void sub_register(short dest_reg, short reg_1, short field);
+void sub_const_register(short dest_reg, short field, short constant);
+void mul_register(short dest_reg, short reg_1, short field);
+void div_register(short dest_reg, short reg_1, short field);
