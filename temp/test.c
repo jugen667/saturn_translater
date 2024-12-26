@@ -1,6 +1,6 @@
 /* Test file */ 
 // Test Comment
-int start = 32767;
+int start = 32766;
 int end = -5;
 bool x = true;
 start = end;
