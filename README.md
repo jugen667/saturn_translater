@@ -33,16 +33,17 @@ Fast test file with tree as png and svg :
 
 #### TO DO ####
 
-- Global context to check (if func supported)
-- Offset management (func loop etc)
-- String support ?
-- Add support for more C function ? (incremental operator ?)
+- Pointers
+- Address management (func loop etc)
+- String support
+- Add support for more C function (incremental operator ?)
+
 
 ## Instruction Set implementation 
 
 - registers setups
 - instuctions list
-- dump in a file
+
 
 ## 2nd parsing : translate nodes to instructions with the instructions set
 
