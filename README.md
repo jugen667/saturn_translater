@@ -12,6 +12,9 @@ This subset is limited by the instruction set of the Saturn CPU.
 
 More about the subset under [grammar/rules.md](https://github.com/jugen667/saturn_translater/blob/master/grammar/rules.md)
 
+## Useful ressources
+- Instruction set and documentation: [Introduction to Saturn Asembly Language](https://www.keesvandersanden.nl/calculators/downloads/Saturn_tutorial.pdf)
+
 ## Utils
 Clone the repo : ```git clone https://github.com/jugen667/saturn_translater```
 
