@@ -28,28 +28,24 @@ Fast test file with tree as png and svg :
 
 ## ~~Ensure tree is correct~~
 
-## 1st parsing : ensure we are doing operations correctly (type checks etc)
+## ~~1st parsing : ensure we are doing operations correctly (type checks etc)~~
 
-### ~~Check if we need it in our arch~~
 
-#### TO TEST ####
+## Instruction Set implementation 
 
-#### TO DO ####
+### ~~Check what we need it in our arch~~
+
+- registers setups
+- instuctions list
+- add ARM instruction set compatibility and compilation option
+- 
+## TO DO IN THE FUTURE ##
 
 - Pointers maybe ?
 - Address management (func loop etc)
 - String support
 - Add support for more C function (incremental operator ?)
 
-
-## Instruction Set implementation 
-
-- registers setups
-- instuctions list
-- add ARM instruction set compatibility and compilation option
-
 ## 2nd parsing : translate nodes to instructions with the instructions set
-
-
 
 # KNOWN BUGS 
