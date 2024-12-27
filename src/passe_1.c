@@ -610,12 +610,7 @@ void analyse_passe_1(node_t root)
 		// case if(...) else ...
 		if(root->nature == NODE_IF && root->nops == 3)
 		{
-			// if 3 node then 3rd is else stamenet (to check)
-			printf("Debug >> Nops %d\n", root->nops);
-			for(int i=0;i<root->nops;i++)
-			{
-        			printf("Debug >> Nopr %d %d\n", i, root->opr[i]->nature);
-    			}
+			// if 3 node then 3rd is else stamenet (to check) (statement, block, else)
 			root->opr[2]->nature = NODE_ELSE;
 		}
 
