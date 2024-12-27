@@ -362,7 +362,10 @@ void shift_reg_left(short dest_reg, short value_reg, short field)
 // -------------------------------------------
 
 
+
+
 // ------- Operations on save registers ------
+
 // saving save register to work register (A or C) 
 void copy_reg_save_work(short reg_1, short reg_2, short field) 
 {
@@ -389,7 +392,9 @@ void ex_reg_work_save(short reg_1, short reg_2, short field)
 // -------------------------------------------
 
 
+
 // ----- Operations on pointers registers ----
+
 // load a pointer (adress or nibble is size 2, 4 or 5 only)
 void load_pointer(short reg_1, int adress) 
 {
@@ -414,16 +419,172 @@ void subing_pointer(short reg_1, short n)
 	dump_instruction(retStr, outfileDescriptor);
 }
 
-// copyng A or C in pointer (copying A field ?), fourflag only for copying four nibbles of A
-void copying_pointer(short reg_1, short reg_2, short fourflag) 
+// copyng A or C in pointer (copying A field ?), LSBflag only for copying four LSB nibbles of A
+void copying_pointer(short reg_1, short reg_2, short LSBFlag) 
 {
-
+	char retStr[6];
+	if(LSBFlag)
+	{
+		sprintf(retStr, "%s=%sS",pointer_register_str[reg_1],working_register_str[reg_2]);
+		dump_instruction(retStr, outfileDescriptor);
+	}
+	else
+	{
+		sprintf(retStr, "%s=%s",pointer_register_str[reg_1],working_register_str[reg_2]);
+		dump_instruction(retStr, outfileDescriptor);
+	}
 }
 
-// exchanging the field A of  A or C in pointer
-void exchanging_pointer(short reg_1, short reg_2) 
+// exchanging the field A of  A or C in pointer, LSBflag only for copying four LSB nibbles of A
+void exchanging_pointer(short reg_1, short reg_2, short LSBFlag) 
 {
+	char retStr[6];
+	if(LSBFlag)
+	{
+		sprintf(retStr, "%s%sXS",pointer_register_str[reg_1],working_register_str[reg_2]);
+		dump_instruction(retStr, outfileDescriptor);
+	}
+	else
+	{
+		sprintf(retStr, "%s%sEX",working_register_str[reg_1],pointer_register_str[reg_2]);
+		dump_instruction(retStr, outfileDescriptor);
+	}
+}
 
+// -------------------------------------------
+
+
+
+// ----------- Operations on memory ----------
+
+// reading memory ( read the dat pointed by Dx in a register) TO DO with value
+void reading_memory(short pointer, short working, short field)
+{
+	char retStr[12];
+	sprintf(retStr, "%s=DAT%d %s",working_register_str[working],pointer, field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// writing memory ( read the dat pointed by Dx in a register) TO DO with value
+void writing_memory(short pointer, short working, short field)
+{
+	char retStr[12];
+	sprintf(retStr, "DAT%d=%s %s",pointer,working_register_str[working],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+// -------------------------------------------
+
+
+
+// ------------- Jumping and tests -----------
+
+// create label lets say 16 char max
+void create_label(char * label)
+{
+	char retStr[18];
+	sprintf(retStr, "*%s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// jump if carry is set (+127 nibbles or -128 niblles afetr present position)
+void go_if_carry(char * label)
+{
+	char retStr[21];
+	sprintf(retStr, "GOC %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// jump if carry is not set (+127 nibbles or -128 niblles afetr present position)
+void go_if_no_carry(char * label)
+{
+	char retStr[22];
+	sprintf(retStr, "GONC %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// unconditionnal (+2047 nibbles or -2048 niblles afetr present position)
+void go_to(char * label)
+{
+	char retStr[22];
+	sprintf(retStr, "GOTO %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// unconditionnal (+32767 nibbles or -32768 niblles afetr present position)
+void go_long(char * label)
+{
+	char retStr[24];
+	sprintf(retStr, "GOLONG %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// unconditionnal (any point in memory position)
+void go_very_long(char * label)
+{
+	char retStr[24];
+	sprintf(retStr, "GOVLNG %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// unconditionnal jump to adress in A or C, copy A or C in PC
+void go_reg_adress(short reg_1)
+{
+	char retStr[5];
+	sprintf(retStr, "PC=%s",working_register_str[reg_1]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// unconditionnal jump to adress in A and C and exchange PC with A field
+void goex_reg_adress(short reg_1)
+{
+	char retStr[6];
+	sprintf(retStr, "%sPCEX",working_register_str[reg_1]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// indirect jump to adress in A and C (read the adress stored in A field of register and jump at this adress)
+void ind_jump(short reg_1)
+{
+	char retStr[7];
+	sprintf(retStr, "PC=(%s)",working_register_str[reg_1]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// save content of PC in A field of A or C
+void save_PC(short reg_1)
+{
+	char retStr[5];
+	sprintf(retStr, "%s=PC",working_register_str[reg_1]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+// -------------------------------------------
+
+
+
+// ---------------- Subroutines --------------
+
+// go to subroutine (+2047 nibbles or -2048 niblles afetr present position)
+void go_subroutine(char * label)
+{
+	char retStr[23];
+	sprintf(retStr, "GOSUB %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// go to subroutine long (+32767 nibbles or -32768 niblles afetr present position)
+void go_subroutine_long(char * label)
+{
+	char retStr[24];
+	sprintf(retStr, "GOSUBL %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// go to subroutine very long (everywhere in code)
+void go_subroutine_very_long(char * label)
+{
+	char retStr[24];
+	sprintf(retStr, "GOSBVL %s",label);
+	dump_instruction(retStr, outfileDescriptor);
 }
 // -------------------------------------------
 // ================================================================================================= //

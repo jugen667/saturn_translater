@@ -115,5 +115,23 @@ void ex_reg_work_save(short reg_1, short reg_2, short field);
 void load_pointer(short reg_1, int adress);
 void adding_pointer(short reg_1, short n);
 void subing_pointer(short reg_1, short n);
-void copying_pointer(short reg_1, short reg_2, short fourflag);
-void exchanging_pointer(short reg_1, short reg_2);
+void copying_pointer(short reg_1, short reg_2, short LSBFlag);
+void exchanging_pointer(short reg_1, short reg_2, short LSBFlag);
+
+void reading_memory(short pointer, short working, short field);
+void writing_memory(short pointer, short working, short field);
+
+void create_label(char * label);
+void go_if_carry(char * label);
+void go_if_no_carry(char * label);
+void go_to(char * label);
+void go_long(char * label);
+void go_very_long(char * label);
+void go_reg_adress(short reg_1);
+void goex_reg_adress(short reg_1);
+void ind_jump(short reg_1);
+void save_PC(short reg_1);
+
+void go_subroutine(char * label);
+void go_subroutine_long(char * label);
+void go_subroutine_very_long(char * label);
