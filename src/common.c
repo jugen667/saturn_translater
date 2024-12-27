@@ -18,7 +18,6 @@
 #include "../include/defs.h"
 #include "../include/common.h"
 #include "../include/passe_1.h"
-#include "../include/arch.h"
 
 
 // ================================================================================================= //
@@ -153,7 +152,6 @@ void parse_args(int argc, char ** argv)
 					break;
 					case 'r':
 						test_int_value(1,5,atoi(argv[i+1]), argv[i]);
-						set_max_registers(atoi(argv[i+1]));
 						i++;
 					break;
 					case 's':
@@ -200,7 +198,7 @@ void free_nodes(node_t n)
     // Parse until no more node
     // come back and free nodes
     short currnops;
-    if(n->nature == NODE_PROGRAM)
+    if((n->nature == NODE_PROGRAM) && verboseDebug)
     {
         printf(BOLD "> Freeing nodes\n" NC);
     }
