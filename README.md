@@ -30,13 +30,13 @@ Fast test file with tree as png and svg :
 
 ## 1st parsing : ensure we are doing operations correctly (type checks etc)
 
-### Check if we need it in our arch
+### ~~Check if we need it in our arch~~
 
 #### TO TEST ####
 
 #### TO DO ####
 
-- Pointers
+- Pointers maybe ?
 - Address management (func loop etc)
 - String support
 - Add support for more C function (incremental operator ?)
@@ -46,7 +46,7 @@ Fast test file with tree as png and svg :
 
 - registers setups
 - instuctions list
-
+- add ARM instruction set compatibility and compilation option
 
 ## 2nd parsing : translate nodes to instructions with the instructions set
 
