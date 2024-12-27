@@ -14,6 +14,9 @@ More about the subset under [grammar/rules.md](https://github.com/jugen667/satur
 
 ## Useful ressources
 - Instruction set and documentation: [Introduction to Saturn Asembly Language](https://www.keesvandersanden.nl/calculators/downloads/Saturn_tutorial.pdf)
+- General information about Saturn Architecture : [HP Saturn](https://en.wikipedia.org/wiki/HP_Saturn)
+- The HP 48 that inspired that project : [HP 48 series](https://en.wikipedia.org/wiki/HP_48_series)
+- HP Calc archive : [hpcalc.org](https://www.hpcalc.org/)
 
 ## Utils
 Clone the repo : ```git clone https://github.com/jugen667/saturn_translater```
