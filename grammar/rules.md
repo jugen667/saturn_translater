@@ -5,13 +5,13 @@ This file describes the rules of the C subset allowed
 
 ## Subset of C
 This <u>subset of C</u> used fot simple program and as a proof-of-concept for a Saturn compiler. It has the same syntax.
-It allows global variables, a *main()* function, loops, branches and *print()*.
+It allows global variables, a *main()* function, loops, branches and *printf()*.
 However, it is a very primitive language and thus its functionnalities are limited, by the Saturn HP CPU limitations.
 
 ## Removed functionnalities
 - **No functions** are allowed except the *main()*
 
-- **No pointers**, implying the language is strongly typed
+- **No pointers**, and **casting** variable is **not supported** implying the language is strongly typed
 
 - Currently impossible to add composite data types (such as **struct**, **typedef**, **union**)
 
@@ -23,14 +23,12 @@ However, it is a very primitive language and thus its functionnalities are limit
 - **bool** : classic boolean type : *true (1)* or *false (0)* 
 - **float** : supported 
 - **void** : void type used for *main()* function
-- Strings allowed in *print()* function
+- Strings allowed in *printf()* function
 
 ### Not Supported 
 - **char** and **string <u>as variable</u>**
 - **short** 
 - **unsigned** types
-
-**Casting** variable is **not supported**
 
 Variables propreties such as **volatile**, **register**, **packed**, **inline**, **static** and **extern** are **not implemented**.
 

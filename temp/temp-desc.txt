@@ -1,2 +1,3 @@
-This folder contains temporary file
+This folder contains test files
 For debug purpose only
+Further tests to be implemented

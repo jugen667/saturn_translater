@@ -14,5 +14,5 @@ void main (){
  	}
  	int y = 2;
  	y * a;
- 	print("sum :", sum , "\n");
+ 	printf("sum :", sum , "\n");
 }

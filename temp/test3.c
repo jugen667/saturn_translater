@@ -5,5 +5,5 @@ void main(){
 		a = a+ a;
 	}
 			
-	print(a);
+	printf(a);
 }

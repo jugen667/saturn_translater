@@ -72,7 +72,7 @@ SEPARATOR           [ \t\n]+
 "while"         RETURN(TOK_WHILE);
 "for"           RETURN(TOK_FOR);
 "do"            RETURN(TOK_DO);
-"print"         RETURN(TOK_PRINT);
+"printf"        RETURN(TOK_PRINT);
 "main"          RETURN(TOK_MAIN);
 
 "+"             RETURN(TOK_PLUS);

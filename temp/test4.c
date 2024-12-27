@@ -6,5 +6,5 @@ void main () {
 	do{
 		sum = sum + 1;
 	} while(sum<10);
-	print("sum :", sum , "\n") ;
+	printf("sum :", sum , "\n") ;
 }

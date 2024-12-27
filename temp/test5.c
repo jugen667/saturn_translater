@@ -9,5 +9,5 @@ void main () {
 	while(sum >= start){
 		a = a || b;
 	}
-	print("sum :", sum , "\n") ;
+	printf("sum :", sum , "\n") ;
 }
