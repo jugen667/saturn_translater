@@ -58,6 +58,8 @@ static char * field_str[MAX_FIELD] = {
 // =========================================== FUNCTIONS =========================================== //
 // ================================================================================================= //
 
+
+// ------------- Specific functions -----------
 // dumping management in this scope only
 void dump_instruction(char * inst, FILE * fDest)
 {
@@ -84,6 +86,33 @@ short work_reg_available(void)
 	return -1;
 }
 
+// -------------------------------------------
+
+
+
+// ------------ Special instructions ----------
+
+// save pointer at start
+void save_pointers(void)
+{
+	char retStr[13];
+	sprintf(retStr, "GOSBVL 0679B");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// restore pointers 
+void restore_pointers(void)
+{
+	char retStr[13];
+	sprintf(retStr, "GOSBVL 067D2");
+	dump_instruction(retStr, outfileDescriptor);
+}
+// -------------------------------------------
+
+
+
+// ------------------ P Value ----------------
+
 // increment P value of 1
 void increment_P(void)
 {
@@ -101,10 +130,10 @@ void decrement_P(void)
 }
 
 // set value of P (char atm because less than 256)
-void set_PField_value(unsigned char value)
+void set_PField_value(short value)
 {
 	char retStr[10];
-	sprintf(retStr, "P= %d",(short)value);
+	sprintf(retStr, "P= %d",value);
 	dump_instruction(retStr, outfileDescriptor);
 }
 
@@ -115,6 +144,58 @@ void reset_P(void)
 	sprintf(retStr, "P= 0");
 	dump_instruction(retStr, outfileDescriptor);
 }
+
+// set value of P to nibble n of register C
+void set_PField_C_value(short nibble_nbr)
+{
+	char retStr[12];
+	sprintf(retStr, "C=P %d",nibble_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// set value of nibble n of register C to P
+void set_C_value_PField(short nibble_nbr)
+{
+	char retStr[12];
+	sprintf(retStr, "P=C %d",nibble_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// exchnage nibble
+void exchange_C_P(short nibble_nbr)
+{
+	char retStr[12];
+	sprintf(retStr, "CPEX %d",nibble_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// value of field A of C + P + 1 to field A of C - always hexa mode (dont ask me)
+void strange_instruction(void)
+{
+	char retStr[6];
+	sprintf(retStr, "C+P+1");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// === ALWAYS FOLLOWED BY 'GOYES label' or 'RTNYES' ===
+// test equal to n (carry will be set if true)
+void check_P_value(short n)
+{
+	char retStr[12];
+	sprintf(retStr, "?P= %d",n);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// test different to n (carry will be set if true)
+void check_P_diff_value(short n)
+{
+	char retStr[12];
+	sprintf(retStr, "?P# %d",n);
+	dump_instruction(retStr, outfileDescriptor);
+}
+// -------------------------------------------
+
+
 
 // ----- Operations on working registers -----
 
@@ -486,6 +567,22 @@ void create_label(char * label)
 	dump_instruction(retStr, outfileDescriptor);
 }
 
+// jump if test true (always put after test)
+void GOYES(char * label)
+{
+	char retStr[24];
+	sprintf(retStr, "GOYES %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// return if test true (always put after test)
+void RTNYES(char * label)
+{
+	char retStr[24];
+	sprintf(retStr, "RTNYES %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
 // jump if carry is set (+127 nibbles or -128 niblles afetr present position)
 void go_if_carry(char * label)
 {
@@ -584,6 +681,150 @@ void go_subroutine_very_long(char * label)
 {
 	char retStr[24];
 	sprintf(retStr, "GOSBVL %s",label);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// return from subroutine
+void sub_return(void)
+{
+	char retStr[4];
+	sprintf(retStr, "RTN");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// return from subroutine set carry
+void sub_return_set_carry(void)
+{
+	char retStr[6];
+	sprintf(retStr, "RTNSC");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// return from subroutine clear carry
+void sub_return_clear_carry(void)
+{
+	char retStr[6];
+	sprintf(retStr, "RTNCC");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// return from subroutine allow interrupt
+void sub_return_allow_int(void)
+{
+	char retStr[4];
+	sprintf(retStr, "RTI");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// return from subroutine set XM (eXternal Module)
+void sub_return_set_XM(void)
+{
+	char retStr[7];
+	sprintf(retStr, "RTNSXM");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// return from subroutine if carry 
+void sub_return_if_carry(void)
+{
+	char retStr[5];
+	sprintf(retStr, "RTNC");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// return from subroutine if carry not set
+void sub_return_if_no_carry(void)
+{
+	char retStr[6];
+	sprintf(retStr, "RTNNC");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+
+// -------------------------------------------
+
+
+
+// ------------------- Tests -----------------
+
+// === ALWAYS FOLLOWED BY 'GOYES label' or 'RTNYES' ===
+// equal to zero
+void equal_to_zero(short reg_name, short field)
+{
+	char retStr[8];
+	sprintf(retStr, "?%s=0 %s",working_register_str[reg_name],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// different from zero
+void different_from_zero(short reg_name, short field)
+{
+	char retStr[8];
+	sprintf(retStr, "?%s#0 %s",working_register_str[reg_name],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// register equality
+void register_equal(short reg_1,short reg_2, short field)
+{
+	char retStr[8];
+	sprintf(retStr, "?%s=%s %s",working_register_str[reg_1],working_register_str[reg_2],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// register inequality
+void register_not_equal(short reg_1,short reg_2, short field)
+{
+	char retStr[8];
+	sprintf(retStr, "?%s#%s %s",working_register_str[reg_1],working_register_str[reg_2],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// register less than
+void register_LT(short reg_1,short reg_2, short field)
+{
+	char retStr[8];
+	sprintf(retStr, "?%s<%s %s",working_register_str[reg_1],working_register_str[reg_2],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// register greater than
+void register_GT(short reg_1,short reg_2, short field)
+{
+	char retStr[8];
+	sprintf(retStr, "?%s>%s %s",working_register_str[reg_1],working_register_str[reg_2],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// register less than or equal
+void register_LTE(short reg_1,short reg_2, short field)
+{
+	char retStr[9];
+	sprintf(retStr, "?%s<=%s %s",working_register_str[reg_1],working_register_str[reg_2],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// register greater than or equal
+void register_GTE(short reg_1,short reg_2, short field)
+{
+	char retStr[9];
+	sprintf(retStr, "?%s>=%s %s",working_register_str[reg_1],working_register_str[reg_2],field_str[field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// testing a bit = 0 in a register
+void testing_bit_0(short reg_name, short bit_nbr)
+{
+	char retStr[14];
+	sprintf(retStr, "?%sBIT=0 %d",working_register_str[reg_name],bit_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// testing a bit = 1 in a register
+void testing_bit_1(short reg_name, short bit_nbr)
+{
+	char retStr[14];
+	sprintf(retStr, "?%sBIT=0 %d",working_register_str[reg_name],bit_nbr);
 	dump_instruction(retStr, outfileDescriptor);
 }
 // -------------------------------------------

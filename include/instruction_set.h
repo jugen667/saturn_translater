@@ -14,7 +14,7 @@
 //												 <----------A---------->		//
 //															 <----X---->		//
 //															 <XS>				//
-//															  <----B--->		//
+//															     <--B-->		//
 //		     <-----------------------M--------------------->					//
 //		 <S>																	//
 //																				//
@@ -24,7 +24,7 @@
 // ================================================================================================= //
 // ======================================== ENUM & STRUCTS ========================================= //
 // ================================================================================================= //
-enum WORKING_REGISTER
+enum WORKING_REGISTER 	// each of 64 bits (16 nibbles)
 {
 	A,
 	B,
@@ -33,7 +33,7 @@ enum WORKING_REGISTER
 	MAX_WORKING_REGISTER,
 };
 
-enum SAVE_REGISTER
+enum SAVE_REGISTER  	// each of 64 bits (16 nibbles)
 {
 	R0,
 	R1,
@@ -43,31 +43,32 @@ enum SAVE_REGISTER
 	MAX_SAVE_REGISTER,
 };
 
-enum POINTER_REGISTER
+enum POINTER_REGISTER  	// 5 nibbles each (an adress is 5 nibbles)
 {
 	D0,
 	D1,
 	MAX_POINTER_REGISTER
 };
 
-enum DIRECTION
+enum REGISTER_FIELDS
+{
+	W_FIELD,			// WORD (64 bits = 16 nibbles)
+	A_FIELD,			// ADRESS (5 lowest nibbes)
+	B_FIELD,			// BYTE (1 BYTE nibble 1 & nibble 0)
+	X_FIELD,			// X go along OUT coponent of the CPU (3 nibbles)
+	XS_FIELD,			// XS MSB of X_FIELD (1 nibble) [XS = eXponent Sign]
+	M_FIELD,			// MANTISSA, nibble 3 to 14
+	S_FIELD,			// SIGN, last nibble of the register; nibble 15
+	WP_FIELD,  			// user defined, start at the value of P
+	P_FIELD,			// definition for WP field (can be used as a field can store one nibble but is a register)
+	MAX_FIELD,
+};
+
+enum DIRECTION 			// for bit/nibble shift
 {
 	RIGHT,
 	LEFT,
 	MAX_DIRECTION,
-};
-
-enum REGISTER_FIELDS
-{
-	W_FIELD,		// WORD (64 bits = 16 nibbles)
-	A_FIELD,		// ADRESS (5 lowest nibbes)
-	B_FIELD,		// BYTE (1 BYTE nibble 1 & nibble 0)
-	X_FIELD,		// X go along OUT coponent of the CPU (3 nibbles)
-	XS_FIELD,		// XS MSB of X_FIELD (1 nibble) [XS = eXponent Sign]
-	M_FIELD,		// MANTISSA, nibble 3 to 14
-	S_FIELD,		// SIGN, last nibble of the register; nibble 15
-	WP_FIELD,  		// user defined, start at the value of P
-	MAX_FIELD,
 };
 
 // ================================================================================================= //
@@ -80,11 +81,20 @@ enum REGISTER_FIELDS
 short work_reg_available(void);
 void increment_P(void);
 void decrement_P(void);
-void set_PField_value(unsigned char value);
+void set_PField_value(short value);
 void reset_P(void);
+void set_PField_C_value(short nibble_nbr);
+void set_C_value_PField(short nibble_nbr);
+void exchange_C_P(short nibble_nbr);
+void strange_instruction(void);
+void check_P_value(short n);
+void check_P_diff_value(short n);
+
+void save_pointers(void);
+void restore_pointers(void);
+
 void clear_bit(short reg_name, char bit_nbr);
 void set_bit(short reg_name, char bit_nbr);
-
 void load_register(short value, bool speedflag);
 void register_zero(short reg_name, short field);
 void ex_register(short reg_1, short reg_2, short field);
@@ -122,6 +132,8 @@ void reading_memory(short pointer, short working, short field);
 void writing_memory(short pointer, short working, short field);
 
 void create_label(char * label);
+void GOYES(char * label);
+void RTNYES(char * label);
 void go_if_carry(char * label);
 void go_if_no_carry(char * label);
 void go_to(char * label);
@@ -135,3 +147,21 @@ void save_PC(short reg_1);
 void go_subroutine(char * label);
 void go_subroutine_long(char * label);
 void go_subroutine_very_long(char * label);
+void sub_return(void);
+void sub_return_set_carry(void);
+void sub_return_clear_carry(void);
+void sub_return_allow_int(void);
+void sub_return_set_XM(void);
+void sub_return_if_carry(void);
+void sub_return_if_no_carry(void);
+
+void equal_to_zero(short reg_name, short field);
+void different_from_zero(short reg_name, short field);
+void register_equal(short reg_1,short reg_2, short field);
+void register_not_equal(short reg_1,short reg_2, short field);
+void register_LT(short reg_1,short reg_2, short field);
+void register_GT(short reg_1,short reg_2, short field);
+void register_LTE(short reg_1,short reg_2, short field);
+void register_GTE(short reg_1,short reg_2, short field);
+void testing_bit_0(short reg_name, short bit_nbr);
+void testing_bit_1(short reg_name, short bit_nbr);
