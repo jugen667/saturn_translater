@@ -61,7 +61,8 @@ void affiche_help()
 	printf("  -o <filename> : Custom output filename\n\t(default : out.s)\n");
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
 	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
-    printf("  -d : activate debug\n");
+    printf("  -d : Activate debug\n");
+    // add 48 or 49 choice
 	printf("  -h : Print help\n");
     printf("  -v : Print build version of SaturnCC\n\n");
 }

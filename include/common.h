@@ -15,7 +15,7 @@
 // ================================================================================================= //
 
 #define     MAIN_VERSION    "0"                 /*dev phase*/
-#define     SUB_VERSION     "1"                 /*first iteration*/
+#define     SUB_VERSION     "1"                 /*iteration*/
 
 #define     NC              "\e[0m"
 #define     BLACK           "\033[30m"          /* Black */

@@ -43,6 +43,15 @@ enum SAVE_REGISTER  	// each of 64 bits (16 nibbles)
 	MAX_SAVE_REGISTER,
 };
 
+enum HARDWARE_STATUS  
+{
+	SR,					// Service Request
+	SB,					// Sticky Bit
+	MP,					// Module Pulled
+	XM,					// eXternal Module missing
+	MAX_HST,
+};
+
 enum POINTER_REGISTER  	// 5 nibbles each (an adress is 5 nibbles)
 {
 	D0,
@@ -92,6 +101,8 @@ void check_P_diff_value(short n);
 
 void save_pointers(void);
 void restore_pointers(void);
+void set_hexmode(void);
+void set_hexmode(void);
 
 void clear_bit(short reg_name, char bit_nbr);
 void set_bit(short reg_name, char bit_nbr);
@@ -165,3 +176,38 @@ void register_LTE(short reg_1,short reg_2, short field);
 void register_GTE(short reg_1,short reg_2, short field);
 void testing_bit_0(short reg_name, short bit_nbr);
 void testing_bit_1(short reg_name, short bit_nbr);
+
+void C_to_RSTK(void);
+void RSTK_to_C(void);
+void save_n0_OUT(void);
+void save_X_OUT(void);
+void save_IN_A(void);
+void save_IN_C(void);
+void clear_ST(void);
+void store_ST_C(void);
+void store_C_ST(void);
+void exchange_ST_C(void);
+void set_bit_ST(short bit_nbr);
+void clear_bit_ST(short bit_nbr);
+void check_ST_bit_zero(short bit_nbr);
+void check_ST_bit_one(short bit_nbr);
+void clear_HST_bit(short bit_nbr);
+void clear_HST_field(short hst_field);
+void clear_HST(void);
+void check_HST_bit(short bit_nbr);
+void check_HST_field(short hst_field);
+
+void disable_kb_interrupt(void);
+void enable_kb_interrupt(void);
+void reset_interrupt(void);
+void disable_all_interrupt(void);
+void enable_all_interrupt(void);
+
+void bus_reset(void);
+void bus_config(void);
+void bus_unconfig(void);
+void bus_ID(void);
+void bus_shutdown(void);
+// ================================================================================================= //
+// ================================================================================================= //
+// ================================================================================================= //

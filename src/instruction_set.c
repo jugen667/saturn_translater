@@ -54,6 +54,12 @@ static char * field_str[MAX_FIELD] = {
 	"S",
 	"WP"
 };
+static char * hst_str[MAX_HST] = {
+	"SR",
+	"SB",
+	"MP",
+	"XM"
+};
 // ================================================================================================= //
 // =========================================== FUNCTIONS =========================================== //
 // ================================================================================================= //
@@ -105,6 +111,22 @@ void restore_pointers(void)
 {
 	char retStr[13];
 	sprintf(retStr, "GOSBVL 067D2");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// set Saturn to Hex mode
+void set_hexmode(void)
+{
+	char retStr[7];
+	sprintf(retStr, "SETHEX");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// set Saturn to dec mode
+void set_decmode(void)
+{
+	char retStr[7];
+	sprintf(retStr, "SETDEC");
 	dump_instruction(retStr, outfileDescriptor);
 }
 // -------------------------------------------
@@ -824,9 +846,279 @@ void testing_bit_0(short reg_name, short bit_nbr)
 void testing_bit_1(short reg_name, short bit_nbr)
 {
 	char retStr[14];
-	sprintf(retStr, "?%sBIT=0 %d",working_register_str[reg_name],bit_nbr);
+	sprintf(retStr, "?%sBIT=1 %d",working_register_str[reg_name],bit_nbr);
 	dump_instruction(retStr, outfileDescriptor);
 }
+
+// -------------------------------------------
+
+
+
+// ------------------- Misc ------------------
+
+// field A of C = RSTK
+void C_to_RSTK(void)
+{
+	char retStr[7];
+	sprintf(retStr, "C=RSTK");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// RSTK = field A of C
+void RSTK_to_C(void)
+{
+	char retStr[7];
+	sprintf(retStr, "RSTK=C");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// save nibble 0 of C in OUT 
+void save_n0_OUT(void)
+{
+	char retStr[7];
+	sprintf(retStr, "OUT=CS");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// save field X of C in OUT 
+void save_X_OUT(void)
+{
+	char retStr[6];
+	sprintf(retStr, "OUT=C");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// IN in four nibble of field A of A
+void save_IN_A(void)
+{
+	// === BUG USING 'A=IN' ===
+	// === USE A SUBROUTINE ===
+	// char retStr[6];
+	// sprintf(retStr, "A=IN");
+	char retStr[13];
+	sprintf(retStr, "GOSBVL 0115A"); // =AINRTN in 48
+	//sprintf(retStr, "GOSBVL 0020A"); // =AINRTN in 49
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// IN in four nibble of field A of C
+void save_IN_C(void)
+{
+	// === BUG USING 'C=IN' ===
+	// === USE A SUBROUTINE ===
+	// char retStr[6];
+	// sprintf(retStr, "C=IN");
+	char retStr[13];
+	sprintf(retStr, "GOSBVL 01160"); // =CINRTN in 48
+	//sprintf(retStr, "GOSBVL 00212"); // =CINRTN in 49
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+//clear STatus Register (first 3 nibbles of ST, last nibble contains special values for processor)
+void clear_ST(void)
+{
+	char retStr[6];
+	sprintf(retStr, "CLRST");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+//store ST in X field of C
+void store_ST_C(void)
+{
+	char retStr[5];
+	sprintf(retStr, "C=ST");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+//store X field of C in ST
+void store_C_ST(void)
+{
+	char retStr[5];
+	sprintf(retStr, "ST=C");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+//exchange X field of C and ST
+void exchange_ST_C(void)
+{
+	char retStr[6];
+	sprintf(retStr, "CSTEX");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+//set bit n to 1 in ST reg 
+void set_bit_ST(short bit_nbr)
+{
+	char retStr[12];
+	sprintf(retStr, "ST=1 %d", bit_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+//clear bit n to 1 in ST reg 
+void clear_bit_ST(short bit_nbr)
+{
+	char retStr[12];
+	sprintf(retStr, "ST=0 %d", bit_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// === ALWAYS FOLLOWED BY 'GOYES label' or 'RTNYES' ===
+//check if bit n to 0 in ST reg 
+void check_ST_bit_zero(short bit_nbr)
+{
+	char retStr[13];
+	sprintf(retStr, "?ST=0 %d", bit_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+//check if bit n to 1 in ST reg 
+void check_ST_bit_one(short bit_nbr)
+{
+	char retStr[13];
+	sprintf(retStr, "?ST=1 %d", bit_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// set HST bit to 0
+void clear_HST_bit(short bit_nbr)
+{
+	char retStr[13];
+	sprintf(retStr, "HST=0 %d", bit_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// set a HST field to 0
+void clear_HST_field(short hst_field)
+{
+	char retStr[5];
+	sprintf(retStr, "%s=0", hst_str[hst_field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// set all HST to 0
+void clear_HST(void)
+{
+	char retStr[7];
+	sprintf(retStr, "CLRHST");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// === ALWAYS FOLLOWED BY 'GOYES label' or 'RTNYES' ===
+// check HST bit  0
+void check_HST_bit(short bit_nbr)
+{
+	char retStr[14];
+	sprintf(retStr, "?HST=0 %d", bit_nbr);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// check HST field  0
+void check_HST_field(short hst_field)
+{
+	char retStr[6];
+	sprintf(retStr, "?%s=0", hst_str[hst_field]);
+	dump_instruction(retStr, outfileDescriptor);
+}
+// -------------------------------------------
+
+
+// --------- Interruptions management --------
+
+// disable keyboards interrupt
+void disable_kb_interrupt(void)
+{
+	char retStr[7];
+	sprintf(retStr, "INTOFF");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// enable keyboards interrupt
+void enable_kb_interrupt(void)
+{
+	char retStr[6];
+	sprintf(retStr, "INTON");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// reset interrupt
+void reset_interrupt(void)
+{
+	char retStr[4];
+	sprintf(retStr, "RSI");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// disable all interrupt
+void disable_all_interrupt(void)
+{
+	char retStr[13];
+	sprintf(retStr, "GOSBVL 01115"); // =DisableIntr on 48
+	// sprintf(retStr, "GOSBVL 26791"); // =DisableIntr on 49
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// enable all interrupt
+void enable_all_interrupt(void)
+{
+	char retStr[13];
+	sprintf(retStr, "GOSBVL 010E5"); // =AllowIntr on 48
+	// sprintf(retStr, "GOSBVL 26767"); // =AllowIntr on 49
+	dump_instruction(retStr, outfileDescriptor);
+}
+// -------------------------------------------
+
+
+// --------- Bus-related instructions --------
+// maybe not necessary
+
+// bus reset : all modules go to unconfigured state
+void bus_reset(void)
+{
+	char retStr[6];
+	sprintf(retStr, "RESET");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// configure a memory module
+void bus_config(void)
+{
+	char retStr[7];
+	sprintf(retStr, "CONFIG");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// un-configure a memory module
+void bus_unconfig(void)
+{
+	char retStr[7];
+	sprintf(retStr, "UNCNFG");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// copy module ID in A field of C
+void bus_ID(void)
+{
+	char retStr[5];
+	sprintf(retStr, "C=ID");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// low power usage mode
+void bus_shutdown(void)
+{
+	char retStr[7];
+	sprintf(retStr, "SHUTDN");
+	dump_instruction(retStr, outfileDescriptor);
+}
+// -------------------------------------------
+
+
+// ------------ Unused instructions ----------
+// Unused on 48 and 49 
+// BUSCx => only for Saturn + => not implemented
+// SREQ? => old legacy instruction
+// All ARM Instructions
+// Custom fields F1-F7
 // -------------------------------------------
 // ================================================================================================= //
 // ================================================================================================= //
