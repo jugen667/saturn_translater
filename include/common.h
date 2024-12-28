@@ -30,6 +30,7 @@
 #define     BOLDWHITE       "\033[1m\033[37m"   /* Bold White */
 
 extern bool verboseDebug;
+extern short target;
 extern FILE * outfileDescriptor;
 
 // ================================================================================================= //

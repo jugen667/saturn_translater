@@ -49,7 +49,7 @@ y.tab.o: y.tab.c
 	@echo "| Compiling $<"
 	@gcc $(YACC_FLAGS) $(CFLAGS) $(INCLUDE) -o $@ -c $(SRC_DIR)/$<
 
-common.o: $(SRC_DIR)/common.c $(INC_DIR)/common.h $(INC_DIR)/arch.h $(INC_DIR)/defs.h Makefile
+common.o: $(SRC_DIR)/common.c $(INC_DIR)/common.h $(INC_DIR)/defs.h Makefile
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 

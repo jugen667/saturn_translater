@@ -585,7 +585,7 @@ void analyse_tree(node_t root) {
         add_register(A, D, W_FIELD);
         add_const_register(C, W_FIELD, 15);
         clear_bit(A, 3);
-        go_very_long("LABEL12345");
+        save_IN_A();
         outfile_close(outfileDescriptor);
         // =============================
         // if (!stop_after_verif) {

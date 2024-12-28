@@ -30,6 +30,7 @@ extern bool stop_after_syntax;
 extern bool stop_after_verif;
 FILE * outfileDescriptor = NULL;
 bool verboseDebug = 0;
+short target = 48;
 bool uncompatible=0;
 
 // ================================================================================================= //
@@ -60,8 +61,8 @@ void affiche_help()
 	printf("  -o <filename> : Custom output filename\n\t(default : out.s)\n");
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
 	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
+    printf("  -t : Define compilation target (HP-48 or HP-49)\n\t(default=48)\n");
     printf("  -d : Activate debug\n");
-    // add 48 or 49 choice
 	printf("  -h : Print help\n");
     printf("  -v : Print build version of SaturnCC\n\n");
 }
@@ -73,13 +74,9 @@ void test_int_value(int min, int max, int test, char * argv )
 	if (test > max || test < min)
     {
 		fprintf(stderr,NC"value %d out of range for option %s\n",test, argv);
-        if (argv[1] == 'r')
+        if (argv[1] == 't')
         {
-            fprintf(stderr,NC"\t-> value must be between 1 and 5\n");
-        }
-        else if (argv[1] == 't')
-        {
-            fprintf(stderr,NC"\t-> value must be between 0 and 5\n");
+            fprintf(stderr,NC"\t > value must be 48 or 49\n");
         }
 		exit(EXIT_FAILURE);	
 	}
@@ -150,8 +147,9 @@ void parse_args(int argc, char ** argv)
 						//printf("output file name : %s \n", outfile);
 						i++;
 					break;
-					case 'r':
-						test_int_value(1,5,atoi(argv[i+1]), argv[i]);
+					case 't':
+						test_int_value(48,49,atoi(argv[i+1]), argv[i]);
+                        target = atoi(argv[i+1]);
 						i++;
 					break;
 					case 's':
@@ -164,11 +162,11 @@ void parse_args(int argc, char ** argv)
 					break;
                     case 'v':
                         print_version();
-                        exit(EXIT_FAILURE);
+                        exit(EXIT_SUCCESS);
                     break;
                     case 'h':
                         affiche_help();
-                        exit(EXIT_FAILURE);
+                        exit(EXIT_SUCCESS);
                     break;
                     case 'd':
                         verboseDebug = 1;
@@ -571,6 +569,7 @@ FILE * outfile_open(char * outfileName)
     if(f != NULL){
         fprintf(f, "%% Filename : %s\n", infile);
         fprintf(f, "%% Compiled with saturn_translater\n");
+        fprintf(f, "%% Target of this program : HP-%d series\n", target);
         fprintf(f, "%% https://github.com/jugen667/saturn_translater\n");
         fprintf(f, "\n\n");
         if(verboseDebug)

@@ -896,8 +896,14 @@ void save_IN_A(void)
 	// char retStr[6];
 	// sprintf(retStr, "A=IN");
 	char retStr[13];
-	sprintf(retStr, "GOSBVL 0115A"); // =AINRTN in 48
-	//sprintf(retStr, "GOSBVL 0020A"); // =AINRTN in 49
+	if (target == 48)
+	{
+		sprintf(retStr, "GOSBVL 0115A"); // =AINRTN in 48
+	}
+	else if (target == 49)
+	{
+		sprintf(retStr, "GOSBVL 0020A"); // =AINRTN in 49
+	}
 	dump_instruction(retStr, outfileDescriptor);
 }
 
@@ -909,8 +915,14 @@ void save_IN_C(void)
 	// char retStr[6];
 	// sprintf(retStr, "C=IN");
 	char retStr[13];
-	sprintf(retStr, "GOSBVL 01160"); // =CINRTN in 48
-	//sprintf(retStr, "GOSBVL 00212"); // =CINRTN in 49
+	if (target == 48)
+	{
+		sprintf(retStr, "GOSBVL 01160"); // =CINRTN in 48
+	}
+	else if (target == 49)
+	{
+		sprintf(retStr, "GOSBVL 00212"); // =CINRTN in 49
+	}
 	dump_instruction(retStr, outfileDescriptor);
 }
 
@@ -1052,8 +1064,14 @@ void reset_interrupt(void)
 void disable_all_interrupt(void)
 {
 	char retStr[13];
-	sprintf(retStr, "GOSBVL 01115"); // =DisableIntr on 48
-	// sprintf(retStr, "GOSBVL 26791"); // =DisableIntr on 49
+	if (target == 48)
+	{
+		sprintf(retStr, "GOSBVL 01115"); // =DisableIntr on 48
+	}
+	else if (target == 49)
+	{
+		sprintf(retStr, "GOSBVL 26791"); // =DisableIntr on 49
+	}
 	dump_instruction(retStr, outfileDescriptor);
 }
 
@@ -1061,8 +1079,14 @@ void disable_all_interrupt(void)
 void enable_all_interrupt(void)
 {
 	char retStr[13];
-	sprintf(retStr, "GOSBVL 010E5"); // =AllowIntr on 48
-	// sprintf(retStr, "GOSBVL 26767"); // =AllowIntr on 49
+	if (target == 48)
+	{
+		sprintf(retStr, "GOSBVL 010E5"); // =AllowIntr on 48
+	}
+	else if (target == 49)
+	{
+		sprintf(retStr, "GOSBVL 26767"); // =AllowIntr on 49
+	}
 	dump_instruction(retStr, outfileDescriptor);
 }
 // -------------------------------------------
