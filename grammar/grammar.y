@@ -568,14 +568,20 @@ void analyse_tree(node_t root) {
     {
         printf(BOLD "> Syntax analysis\n" NC);
     }    
-    dump_tree(root, "after_syntax.dot");
+    if(!disable_tree_dump)
+    {
+        dump_tree(root, "after_syntax.dot");
+    }
     if (!stop_after_syntax) {
         if(verboseDebug)
         {
             printf(BOLD "> First parse\n" NC);
         } 
         analyse_passe_1(root);
-        dump_tree(root, "after_passe_1.dot");
+        if(!disable_tree_dump)
+        {
+            dump_tree(root, "after_passe_1.dot");
+        }
         
         if (!stop_after_verif) {
             outfileDescriptor = outfile_open(outfile);

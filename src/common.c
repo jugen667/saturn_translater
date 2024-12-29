@@ -31,6 +31,7 @@ extern bool stop_after_verif;
 FILE * outfileDescriptor = NULL;
 bool verboseDebug = 0;
 short target = 48;
+short disable_tree_dump = 0;
 bool uncompatible=0;
 
 // ================================================================================================= //
@@ -62,6 +63,7 @@ void affiche_help()
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
 	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
     printf("  -t : Define compilation target (HP-48 or HP-49)\n\t(default=48)\n");
+    printf("  -a : Disable the tree dumping in a file\n\t(default=no)");
     printf("  -d : Activate debug\n");
 	printf("  -h : Print help\n");
     printf("  -v : Print build version of SaturnCC\n\n");
@@ -147,9 +149,15 @@ void parse_args(int argc, char ** argv)
 						//printf("output file name : %s \n", outfile);
 						i++;
 					break;
+                    case 'a':
+                        disable_tree_dump = 1;
+                        printf(BOLD "Compilation tree won't be dumped\n" NC);
+                        printf(BOLD "No .dot files will be created\n" NC);
+                    break;
 					case 't':
 						test_int_value(48,49,atoi(argv[i+1]), argv[i]);
                         target = atoi(argv[i+1]);
+                        printf(BOLD "Compilation target : HP-%d series\n" NC, target);
 						i++;
 					break;
 					case 's':
@@ -173,7 +181,7 @@ void parse_args(int argc, char ** argv)
                         printf(BOLD "Compilation will be verbose\n" NC);
                     break;
 					default:
-						fprintf(stderr,BOLD "%s is not a valid option\n" NC, argv[i]);
+						fprintf(stderr,RED BOLD "%s is not a valid option\n" NC, argv[i]);
                         fprintf(stderr,BOLD "Show helps with \"saturncc -h\"\n" NC);
 						exit(EXIT_FAILURE);
 					break;
@@ -567,7 +575,7 @@ FILE * outfile_open(char * outfileName)
     }
     f = fopen(outfileName, "w");
     if(f != NULL){
-        fprintf(f, "%% Filename : %s\n", infile);
+        fprintf(f, "%% Source file name : %s\n", infile);
         fprintf(f, "%% Compiled with saturn_translater\n");
         fprintf(f, "%% Target of this program : HP-%d series\n", target);
         fprintf(f, "%% https://github.com/jugen667/saturn_translater\n");

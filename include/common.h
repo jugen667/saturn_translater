@@ -31,6 +31,7 @@
 
 extern bool verboseDebug;
 extern short target;
+extern short disable_tree_dump;
 extern FILE * outfileDescriptor;
 
 // ================================================================================================= //
