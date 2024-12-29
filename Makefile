@@ -67,7 +67,7 @@ instruction_set.o: $(SRC_DIR)/instruction_set.c $(INC_DIR)/defs.h $(INC_DIR)/com
 
 # keeping the binary
 clean-soft:  
-	@echo "| Cleaning all files"
+	@echo "| Cleaning all files except binary"
 	@echo "| Cleaning .o files"
 	@rm -f *.o
 	@echo "| Cleaning lex and grammar files"

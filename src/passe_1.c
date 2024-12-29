@@ -74,16 +74,6 @@ void change_int2float(node_t node, double value){
 
 // ------------------------------------------------------------------------------------------------- //
 
-// useless
-void change_float2int(node_t node, int32_t value){
-    node->nature = NODE_INTVAL;
-    node->type = TYPE_INT;      // init but update in passe 1
-    node->int_value = value;
-    node->float_value = 0;
-}
-
-// ------------------------------------------------------------------------------------------------- //
-
 bool check_var_number(void)
 {
 	if(currentVar <= VAR_MAX_NUMBER)

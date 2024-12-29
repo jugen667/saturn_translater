@@ -1,11 +1,10 @@
 #! /bin/bash
 
-echo "Creating graph : .dot to .png AND .dot to .svg"
+echo "> Creating graph : .dot to .png AND .dot to .svg"
 #launched from bash in saturncc dir
 cd tools 
-mkdir graph-last-program
-dot -Tpng ../apres_syntaxe.dot -o graph-last-program/apres_syntaxe.png
-dot -Tsvg ../apres_syntaxe.dot -o graph-last-program/apres_syntaxe.svg
-dot -Tpng ../apres_passe_1.dot -o graph-last-program/apres_passe_1.png
-dot -Tsvg ../apres_passe_1.dot -o graph-last-program/apres_passe_1.svg
-
+mkdir -p graph-last-program
+dot -Tpng ../after_syntax.dot -o graph-last-program/after_syntax.png
+dot -Tsvg ../after_syntax.dot -o graph-last-program/after_syntax.svg
+dot -Tpng ../after_passe_1.dot -o graph-last-program/after_passe_1.png
+dot -Tsvg ../after_passe_1.dot -o graph-last-program/after_passe_1.svg

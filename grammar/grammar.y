@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include <stdarg.h>
 #include <string.h>
-#include <assert.h>
+#include <unistd.h>
 
 #include "../include/defs.h"
 #include "../include/common.h"
@@ -568,45 +568,32 @@ void analyse_tree(node_t root) {
     {
         printf(BOLD "> Syntax analysis\n" NC);
     }    
-    dump_tree(root, "apres_syntaxe.dot");
+    dump_tree(root, "after_syntax.dot");
     if (!stop_after_syntax) {
         if(verboseDebug)
         {
             printf(BOLD "> First parse\n" NC);
         } 
         analyse_passe_1(root);
-        dump_tree(root, "apres_passe_1.dot");
-        // =============================
-        //testing instruction set and file dumping
-        outfileDescriptor = outfile_open(outfile);
-        increment_P();
-        register_zero(B, W_FIELD);
-        copy_register(C, D, W_FIELD);
-        add_register(A, D, W_FIELD);
-        add_const_register(C, W_FIELD, 15);
-        clear_bit(A, 3);
-        save_IN_A();
-        outfile_close(outfileDescriptor);
-        // =============================
-        // if (!stop_after_verif) {
-        //     outfileDescriptor = outfile_open(outfile);
-        //     if(verboseDebug)
-        //     {
-        //         printf(BOLD "> Compiling." NC);
-        //     }
-        //     gen_code_passe_2(root);
-        //     if(verboseDebug)
-        //     {
-        //         printf(BOLD "." NC);
-        //     }
-        //     dump_mips_program(outfile);
-        //     if(verboseDebug)
-        //     {
-        //         printf(BOLD ".\n" NC);
-        //     }
-        //     outfile_close(outfileDescriptor);
-        // }
-        // free_global_strings();
+        dump_tree(root, "after_passe_1.dot");
+        
+        if (!stop_after_verif) {
+            outfileDescriptor = outfile_open(outfile);
+            //gen_code_passe_2(root);
+            //dump_mips_program(outfile);
+            // =============================
+            //testing instruction set and file dumping
+            increment_P();
+            register_zero(B, W_FIELD);
+            copy_register(C, D, W_FIELD);
+            add_register(A, D, W_FIELD);
+            add_const_register(C, W_FIELD, 15);
+            clear_bit(A, 3);
+            save_IN_A();
+            // =============================
+            outfile_close(outfileDescriptor);
+        }
+        //free_global_strings();
     }
     free_nodes(root);
     if(verboseDebug)
