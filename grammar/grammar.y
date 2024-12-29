@@ -17,6 +17,7 @@
 #include "../include/defs.h"
 #include "../include/common.h"
 #include "../include/passe_1.h"
+#include "../include/passe_2.h"
 #include "../include/instruction_set.h"
 
 
@@ -587,19 +588,19 @@ void analyse_tree(node_t root) {
             outfileDescriptor = outfile_open(outfile);
             // =============================
             //testing instruction set and file dumping
-            increment_P();
-            register_zero(B, W_FIELD);
-            copy_register(C, D, W_FIELD);
-            add_register(A, D, W_FIELD);
-            add_const_register(C, W_FIELD, 15);
-            clear_bit(A, 3);
-            save_IN_A();
+            // increment_P();
+            // register_zero(B, W_FIELD);
+            // copy_register(C, D, W_FIELD);
+            // add_register(A, D, W_FIELD);
+            // add_const_register(C, W_FIELD, 15);
+            // clear_bit(A, 3);
+            // save_IN_A();
             // =============================
-            //gen_code_passe_2(root);
+            gen_code_passe_2(root);
             //dump_mips_program(outfile);
             outfile_close(outfileDescriptor);
         }
-        //free_global_strings();
+        // free_global_strings();
     }
     free_nodes(root);
     if(verboseDebug)

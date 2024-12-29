@@ -18,6 +18,7 @@
 #include "../include/defs.h"
 #include "../include/common.h"
 #include "../include/passe_1.h"
+#include "../include/passe_2.h"
 
 
 // ================================================================================================= //
@@ -597,6 +598,7 @@ void outfile_close(FILE * fileDesc)
 {
     if(fileDesc != NULL)
     {
+        fprintf(fileDesc, "\n%% End of File \n\n");
         fclose(fileDesc);
         if(verboseDebug)
         {
