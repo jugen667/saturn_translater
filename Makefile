@@ -20,12 +20,10 @@ INCLUDE=-I$(INC_DIR)
 
 all: $(EXE)
 
-# $(EXE) : y.tab.o lex.yy.o arch.o common.o passe_1.o passe_2.o
-#	@gcc $(CFLAGS) $(INCLUDE) -L$(UTILS) y.tab.o lex.yy.o arch.o common.o passe_1.o passe_2.o -o $@ -lminiccutils
-$(EXE) :  y.tab.o lex.yy.o common.o passe_1.o instruction_set.o 
+$(EXE) :  y.tab.o lex.yy.o common.o passe_1.o instruction_set.o passe_2.o
 	@echo "| Linking files : $^"
 	@echo "| Creating binary $@"
-	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o passe_1.o instruction_set.o -o $@
+	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o passe_1.o instruction_set.o passe_2.o -o $@
 	@echo "| Cleaning .o files"
 	@rm -f *.o
 	@echo "| Finished compilation"
@@ -61,9 +59,9 @@ instruction_set.o: $(SRC_DIR)/instruction_set.c $(INC_DIR)/defs.h $(INC_DIR)/com
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
-# passe_2.o: $(SRC_DIR)/passe_2.c $(INC_DIR)/passe_2.h $(INC_DIR)/arch.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
-# 	@echo "| Compiling $@"
-# 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
+passe_2.o: $(SRC_DIR)/passe_2.c $(INC_DIR)/passe_2.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
+	@echo "| Compiling $<"
+	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
 # keeping the binary
 clean-soft:  

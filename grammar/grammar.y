@@ -585,8 +585,6 @@ void analyse_tree(node_t root) {
         
         if (!stop_after_verif) {
             outfileDescriptor = outfile_open(outfile);
-            //gen_code_passe_2(root);
-            //dump_mips_program(outfile);
             // =============================
             //testing instruction set and file dumping
             increment_P();
@@ -597,6 +595,8 @@ void analyse_tree(node_t root) {
             clear_bit(A, 3);
             save_IN_A();
             // =============================
+            //gen_code_passe_2(root);
+            //dump_mips_program(outfile);
             outfile_close(outfileDescriptor);
         }
         //free_global_strings();
