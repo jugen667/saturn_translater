@@ -88,8 +88,8 @@ typedef struct _node_s {
     node_type type;
 
     int32_t int_value;
-    double float_value; // double for accuracy 
-    int32_t offset;
+    double float_value;         // double for accuracy 
+    int32_t address;            // adress on 5 nibbles (20 bits)
     bool global_decl;
     int32_t lineno;
 
@@ -98,7 +98,7 @@ typedef struct _node_s {
     
     struct _node_s * decl_node;
 
-    char * ident;   // array ? 
+    char * ident;               // array ? 
     char * str;
 
     // Pour l'affichage du graphe

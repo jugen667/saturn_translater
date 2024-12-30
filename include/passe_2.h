@@ -35,4 +35,3 @@ void create_srl_instr(node_t node);
 void create_bxor_instr(node_t node);
 
 #endif
-

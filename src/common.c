@@ -260,7 +260,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
         case NODE_IDENT:
             {
                 node_t decl_node = n->decl_node;
-                fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{<decl>Global: %d|Ident: %s|Offset: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->global_decl, n->ident, n->offset);
+                fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{<decl>Global: %d|Ident: %s|Offset: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->global_decl, n->ident, n->address);
                 if (decl_node != NULL && decl_node != n) 
                 {
                     fprintf(f, "    edge[tailclip=false];\n");
@@ -309,7 +309,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Nb. ops: %d}}\"];\n", node_num, node_nature2string(n->nature), n->nops);
             break;
         case NODE_FUNC:
-            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Ident: %s|Nb. ops: %d}|{offset: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->ident, n->nops, n->offset);
+            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Ident: %s|Nb. ops: %d}|{offset: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->ident, n->nops, n->address);
             break;
         case NODE_PLUS:
         case NODE_MINUS:

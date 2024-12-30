@@ -457,7 +457,7 @@ node_t make_node_ident(char* identifier){
     node->nops = 0; 
     node->ident = identifier;
     node->type = TYPE_NONE;         // init but update in passe 1
-    node->offset = 0;               // init but update in passe 1
+    node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // init but update in passe 1
     node->decl_node = NULL;
     node->opr = NULL;
@@ -474,7 +474,7 @@ node_t make_node_type(node_type type){
     node->nops = 0; 
     node->ident = NULL;
     node->type = type;              // init but update in passe 1
-    node->offset = 0;               // init but update in passe 1
+    node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // init but update in passe 1
     node->decl_node = NULL;
     node->opr = NULL;
@@ -491,7 +491,7 @@ node_t make_node_intval(int32_t value){
     node->nops = 0; 
     node->ident = NULL;
     node->type = TYPE_INT;          // init but update in passe 1
-    node->offset = 0;               // init but update in passe 1
+    node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // init but update in passe 1
     node->int_value = value;
     node->decl_node = NULL;
@@ -507,7 +507,7 @@ node_t make_node_floatval(double value){
     node->nops = 0; 
     node->ident = NULL;
     node->type = TYPE_FLOAT;        // init but update in passe 1
-    node->offset = 0;               // init but update in passe 1
+    node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // init but update in passe 1
     node->float_value = value;
     node->decl_node = NULL;
@@ -523,7 +523,7 @@ node_t make_node_boolval(bool value){
     node->nops = 0; 
     node->ident = NULL;
     node->type = TYPE_BOOL;         // init but update in passe 1
-    node->offset = 0;               // init but update in passe 1
+    node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // init but update in passe 1
     node->int_value = value;
     node->decl_node = NULL;
@@ -539,7 +539,7 @@ node_t make_node_strval(char* string){
     node->nops = 0; 
     node->ident = NULL;
     node->type = TYPE_NONE;         // init but update in passe 1
-    node->offset = 0;               // init but update in passe 1
+    node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // maj dans passe 1
     node->str = string;
     node->decl_node = NULL;
@@ -555,7 +555,7 @@ node_t make_node_main(node_t node_next){
     node->nops = 1; 
     node->ident = "main";
     node->type = TYPE_VOID;
-    node->offset = 0;              
+    node->address = 0;              
     node->global_decl = true;      
     node->decl_node = NULL;
     node->opr = (node_t *) malloc(sizeof(node_s)); // child block

@@ -87,7 +87,10 @@ enum DIRECTION 			// for bit/nibble shift
 // ================================================================================================= //
 // =========================================== PROTOTYPES ========================================== //
 // ================================================================================================= //
-short work_reg_available(void);
+short reg_available(node_t array[]);
+node_t get_current_node(void);
+void set_current_node(node_t node);
+
 void increment_P(void);
 void decrement_P(void);
 void set_PField_value(short value);
@@ -103,6 +106,10 @@ void save_pointers(void);
 void restore_pointers(void);
 void set_hexmode(void);
 void set_hexmode(void);
+void filler(short nibble_amount); 	// not recognised by MASD and HP ASM
+void filler_3n(void);				// using raw opcode
+void filler_4n(void);				// using raw opcode
+void filler_5n(void);				// using raw opcode
 
 void clear_bit(short reg_name, char bit_nbr);
 void set_bit(short reg_name, char bit_nbr);

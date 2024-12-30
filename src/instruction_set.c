@@ -22,7 +22,14 @@
 // ================================================================================================= //
 // =========================================== GLOBALS ============================================= //
 // ================================================================================================= //
-static bool work_available_reg[MAX_WORKING_REGISTER] = {1, 1, 1, 1};
+// array to point to registers
+static node_t work_reg[MAX_WORKING_REGISTER] = {NULL, NULL, NULL, NULL};
+static node_t save_reg[MAX_SAVE_REGISTER] = {NULL, NULL, NULL, NULL, NULL};
+static node_t point_reg[MAX_POINTER_REGISTER] = {NULL, NULL};
+
+// for association with parsing
+static node_t current_node;
+
 static char * direction_str[MAX_DIRECTION] = {
 	"R",
 	"L"
@@ -79,17 +86,55 @@ void dump_instruction(char * inst, FILE * fDest)
 	}
 }
 
-// check if register available for saving data
+// check if register available for working with data
 short work_reg_available(void)
 {
 	for (short i = 0; i < MAX_WORKING_REGISTER; i++)
 	{
-		if(work_available_reg[i])
+		if(work_reg[i] == NULL)
 		{
 			return i;
 		}
 	}
 	return -1;
+}
+
+// check if register available for saving data
+short save_reg_available(void)
+{
+	for (short i = 0; i < MAX_SAVE_REGISTER; i++)
+	{
+		if(save_reg[i] == NULL)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+// check if register available for pointers
+short point_reg_available(void)
+{
+	for (short i = 0; i < MAX_POINTER_REGISTER; i++)
+	{
+		if(point_reg[i] == NULL)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+// getter for  current node
+node_t get_current_node(void)
+{
+	return current_node;
+}
+
+// setter for current node
+void set_current_node(node_t node)
+{
+	current_node = node;
 }
 
 // -------------------------------------------
@@ -127,6 +172,38 @@ void set_decmode(void)
 {
 	char retStr[7];
 	sprintf(retStr, "SETDEC");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// filler (not recognised by MASD or HP-ASM)
+void filler(short nibble_amount)
+{
+	char retStr[10];
+	sprintf(retStr, "NOP%d", nibble_amount);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// filler using the opcode for 3nibble
+void filler_3n(void)
+{
+	char retStr[5];
+	sprintf(retStr, "$420");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// filler using the opcode for 4nibble
+void filler_4n(void)
+{
+	char retStr[6];
+	sprintf(retStr, "$6300");
+	dump_instruction(retStr, outfileDescriptor);
+}
+
+// filler using the opcode for 5nibble
+void filler_5n(void)
+{
+	char retStr[7];
+	sprintf(retStr, "$64000");
 	dump_instruction(retStr, outfileDescriptor);
 }
 // -------------------------------------------
@@ -244,13 +321,10 @@ void load_register(short value, bool speedFlag)
 	if(speedFlag) // need speed
 	{
 		sprintf(retStr, "LC %x",(short)value);
-		work_available_reg[C] = 0;
 	}
 	else
 	{
 		sprintf(retStr, "LA %x",(short)value);
-		work_available_reg[A] = 0;
-
 	}
 	dump_instruction(retStr, outfileDescriptor);
 }
