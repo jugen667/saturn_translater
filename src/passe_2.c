@@ -41,10 +41,26 @@ void decl_inblock(node_t node)
 // affectation of a variable
 void affect_variable(node_t node)
 {
+
+
+	// affetcation
+	// check register availability 
+	
 	// affect an ident with an ident
 	if(node->opr[0]->nature == NODE_IDENT && 
 		node->opr[1]->nature == NODE_IDENT)
 	{
+		switch(node->opr[0]->type)
+		{
+			case TYPE_INT:
+				node->opr[0]->int_value = node->opr[1]->int_value;
+			break;
+			case TYPE_FLOAT:
+				node->opr[0]->float_value = node->opr[1]->float_value;
+			break;
+			default :
+			break;
+		}
 	}
 
 	// affect an ident with a intval

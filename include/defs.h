@@ -14,7 +14,7 @@
 #define DEFAULT_TRACE_LEVEL 0
 
 #define VAR_MAX_SIZE 32
-#define VAR_MAX_NUMBER 256
+#define VAR_MAX_NUMBER 32
 
 
 #define printf_level(level, ...) ({         \

@@ -583,11 +583,11 @@ void analyse_tree(node_t root) {
         {
             dump_tree(root, "after_passe_1.dot");
         }
-        
-        if (!stop_after_verif) {
+        if (!stop_after_verif)
+        {
             outfileDescriptor = outfile_open(outfile);
-            // =============================
-            //testing instruction set and file dumping
+            // ============================================== //
+            // == testing instruction set and file dumping == //
             // increment_P();
             // register_zero(B, W_FIELD);
             // copy_register(C, D, W_FIELD);
@@ -595,7 +595,7 @@ void analyse_tree(node_t root) {
             // add_const_register(C, W_FIELD, 15);
             // clear_bit(A, 3);
             // save_IN_A();
-            // =============================
+            // ============================================== //
             gen_code_passe_2(root);
             //dump_mips_program(outfile);
             outfile_close(outfileDescriptor);

@@ -459,6 +459,8 @@ void analyse_passe_1(node_t root)
 							    case TYPE_FLOAT :
 									root->opr[i]->float_value = variableDecl->float_value;
 								break;
+								default :
+								break;
 							}
 						}
 						// if trying to redeclare	

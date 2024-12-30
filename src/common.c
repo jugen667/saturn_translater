@@ -564,7 +564,55 @@ const char * node_nature2symb(node_nature t)
     }
 }
 
-// 
+// Useful functions
+short extract_sign(void * value)
+{
+    if (*(short*)value < 0 || *(float*)value < 0)
+    {
+        return 1;           // negative
+    }
+    else
+    {
+        return 0;           // positive
+    }
+}
+
+// not precise floating past 5 decimal points
+short extract_exponent(double value)
+{
+    short i=0;
+    if (value < 0)
+    {
+        value *= -1;
+    }
+    value = value - (int) value;
+    while(value - (int) value >= 0.000001  && i < 256)
+    {
+        value *= 10;
+        printf("value - int = %lf| i= %d\n", value - (int) value,i);
+        printf("value = %lf| i= %d\n", value,i);
+        i++;
+    }
+    return i;
+}
+
+
+int decimal2BCD(int value)
+{
+    int result = 0;
+    int shift = 0;
+    if (value < 0)
+    {
+        value *= -1;
+    }
+    while(value > 0)
+    {
+        result |= (value % 10) << (shift++ << 2);
+        value /= 10;
+    }
+    return result;
+}
+
 
 // outfile dumping management
 // open file
