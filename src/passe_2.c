@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../include/defs.h"
 #include "../include/passe_2.h"
 #include "../include/instruction_set.h"
@@ -15,7 +16,8 @@
 
 // global utility variables
 int launch = 1;
-int32_t label = 0;
+int label = 0;
+char labelStr[16];
 int inFunc_Decl = 0;
 int inBlockFunc = 0;
 int parsingLoopFor = 0;
@@ -33,6 +35,15 @@ int inIf = 0;
 
 /* --------------- Instruction creation functions --------------- */
 
+// automation of label creation
+char * label_formatting(void)
+{
+	memset(labelStr, 0x0, 16);
+	sprintf(labelStr, "L%d", label);
+	label++; 						// create a new label
+	return labelStr;
+}
+
 // declaration of variable inside the function
 void decl_inblock(node_t node)
 {
@@ -43,9 +54,8 @@ void affect_variable(node_t node)
 {
 
 
-	// affetcation
-	// check register availability 
-	
+	// affetcation = UPDATE NODES 
+
 	// affect an ident with an ident
 	if(node->opr[0]->nature == NODE_IDENT && 
 		node->opr[1]->nature == NODE_IDENT)
