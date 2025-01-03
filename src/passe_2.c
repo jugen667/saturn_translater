@@ -47,13 +47,58 @@ char * label_formatting(void)
 // declaration of variable inside the function
 void decl_inblock(node_t node)
 {
+	short index;
+	create_comment(node->opr[0]->ident);
+	// TO DO OPTIMIZE THE VALUE
+	if(node->opr[1] != NULL)
+	{
+		if(node->opr[1]->type == NODE_IDENT)
+		{
+			index = get_node_ident(T_SAVE, node->opr[1]->ident);
+			if(index >= 0)
+			{
+				switch (node->opr[1]->type)
+				{
+					case TYPE_INT:
+						load_register(get_node_val(T_SAVE, index)->int_value, 0);
+					break;
+					case TYPE_FLOAT:
+						load_register(get_node_val(T_SAVE, index)->float_value, 0);
+					break;
+					default :
+					break;
+				}
+			}
+		}
+		else
+		{
+			switch (node->opr[1]->type)
+			{
+				case TYPE_INT:
+					load_register(node->opr[1]->int_value, 0);
+				break;
+				case TYPE_FLOAT:
+					load_register(node->opr[1]->float_value, 0);
+				break;
+				default :
+				break;
+			}
+		}
+	}
+	else
+	{
+		load_register(0, 0); // default value = 0 => maybe not save it for optimisation ? 
+	}
+	if(save_reg_available() >= 0)
+	{
+		ex_reg_work_save(A, save_reg_available(), W_FIELD); // global var => in save reg direct
+		add_node_register(T_SAVE, node->opr[1], node->opr[0], save_reg_available());
+	}
 }
 
 // affectation of a variable
 void affect_variable(node_t node)
 {
-
-
 	// affetcation = UPDATE NODES 
 
 	// affect an ident with an ident
@@ -156,50 +201,60 @@ void create_lt_instr(node_t node)
 // create an addition
 void create_plus_instr(node_t node)
 {
+	short index;
 	// check register available
-
 	if(node->opr[0]->nature == NODE_IDENT)
 	{
-		if(node->opr[0]->global_decl)
+		index = get_node_ident(T_SAVE, node->opr[0]->ident);
+		if(index >= 0)
 		{
-		}
-		else
-		{
+			ex_reg_work_save(A, index, W_FIELD);
 		}
 	}
 
 	// handling multiples operations
 	else if (node->opr[0]->nature == NODE_PLUS)
 	{
+		create_plus_instr(node->opr[0]);
 	}
 	else
 	{
-		if (node->opr[0]->int_value <= 0xffff) // immediate ? case int atm
+		switch (node->opr[0]->type)
 		{
-		}
-		else
-		{
+			case TYPE_INT:
+				add_const_register(A, W_FIELD, node->opr[0]->int_value);
+			break;
+			case TYPE_FLOAT:
+				add_const_register(A, W_FIELD, node->opr[0]->float_value);
+			break;
+			default :
+			break;
 		}
 	}
 	if(node->opr[1]->nature == NODE_IDENT)
 	{
-		if(node->opr[1]->global_decl)
+		index = get_node_ident(T_SAVE, node->opr[1]->ident);
+		if(index >= 0)
 		{
-		}
-		else
-		{
+			ex_reg_work_save(A, index, W_FIELD);
 		}
 	}
 	else if (node->opr[1]->nature == NODE_PLUS)
 	{
+		create_plus_instr(node->opr[1]);
 	}
 	else
 	{
-		if (node->opr[1]->int_value <= 0xffff) // immediate ? case int atm
+		switch (node->opr[1]->type)
 		{
-		}
-		else
-		{
+			case TYPE_INT:
+				add_const_register(A, W_FIELD, node->opr[1]->int_value);
+			break;
+			case TYPE_FLOAT:
+				add_const_register(A, W_FIELD, node->opr[1]->float_value);
+			break;
+			default :
+			break;
 		}
 	}
 }
@@ -234,6 +289,7 @@ void gen_code_passe_2(node_t root)
 	}
 	for(int i = 0; i < root->nops; i++)
 	{
+		//set_current_node(root->opr[i]);
 		if (root->opr[i] != NULL)
 		{
 			switch(root->opr[i]->nature)
@@ -242,15 +298,42 @@ void gen_code_passe_2(node_t root)
 				case NODE_DECL :
 					if(root->opr[i]->opr[0]->global_decl)
 					{
+						create_comment(root->opr[i]->opr[0]->ident);
+						if(root->opr[i]->opr[1] != NULL)
+						{
+							switch (root->opr[i]->opr[1]->type)
+							{
+								case TYPE_INT:
+									load_register(root->opr[i]->opr[1]->int_value, 0);
+								break;
+								case TYPE_FLOAT:
+									load_register(root->opr[i]->opr[1]->float_value, 0);
+								break;
+								default :
+								break;
+							}
+						}
+						else
+						{
+							load_register(0, 0); // default value = 0 => maybe not save it for optimisation ? 
+						}
+						if(save_reg_available() >= 0)
+						{
+							ex_reg_work_save(A, save_reg_available(), W_FIELD); // global var => in save reg direct
+							add_node_register(T_SAVE, root->opr[i]->opr[1], root->opr[i]->opr[0], save_reg_available());
+						}
 					}
 					else
 					{
+						decl_inblock(root->opr[i]);
 					}
 				break;
 
 				// FUNC initilization 
 				case NODE_FUNC :
 					// create label
+					create_comment("label for main (useless ?)");
+					create_label("MAIN_FUNC");
 				break;		
 
 				case NODE_AFFECT :
@@ -264,6 +347,7 @@ void gen_code_passe_2(node_t root)
 					// instruction creation
 					if (root->opr[i]->opr[1]->nature == NODE_PLUS)
 					{
+						create_plus_instr(root->opr[i]->opr[1]);
 					}
 					if (root->opr[i]->opr[1]->nature == NODE_MINUS)
 					{
@@ -327,6 +411,9 @@ void gen_code_passe_2(node_t root)
 
 				// case if the FOR index initialisation is a ident not an affectation
 				case NODE_FOR :
+					create_comment("STARTING FOR LOOP :");
+					create_label(label_formatting());
+					inLoopFor = 1;
 				break;
 
 				// creation of the While loop

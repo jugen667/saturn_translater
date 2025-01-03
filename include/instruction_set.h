@@ -24,6 +24,13 @@
 // ================================================================================================= //
 // ======================================== ENUM & STRUCTS ========================================= //
 // ================================================================================================= //
+enum REGISTER_TYPE 	// each of 64 bits (16 nibbles)
+{
+	T_WORKING,
+	T_SAVE,
+	T_POINTER,
+	MAX_REGISTER_TYPE,
+};
 enum WORKING_REGISTER 	// each of 64 bits (16 nibbles)
 {
 	A,
@@ -87,9 +94,17 @@ enum DIRECTION 			// for bit/nibble shift
 // ================================================================================================= //
 // =========================================== PROTOTYPES ========================================== //
 // ================================================================================================= //
-short reg_available(node_t array[]);
+short work_reg_available(void);
+short save_reg_available(void);
+short point_reg_available(void);
+void add_node_register(short reg_type, node_t node_val, node_t node_ident, short index);
+node_t get_node_val(short reg_type, short index);
+short get_node_ident(short reg_type, char * ident);
+
+// ==== Useless - to delete but idc atm ==== 
 node_t get_current_node(void);
 void set_current_node(node_t node);
+// =========================================  
 
 void increment_P(void);
 void decrement_P(void);
@@ -110,6 +125,7 @@ void filler(short nibble_amount); 	// not recognised by MASD and HP ASM
 void filler_3n(void);				// using raw opcode
 void filler_4n(void);				// using raw opcode
 void filler_5n(void);				// using raw opcode
+void create_comment(const char* comment);
 
 void clear_bit(short reg_name, char bit_nbr);
 void set_bit(short reg_name, char bit_nbr);

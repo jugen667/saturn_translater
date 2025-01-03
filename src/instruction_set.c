@@ -23,9 +23,14 @@
 // =========================================== GLOBALS ============================================= //
 // ================================================================================================= //
 // array to point to registers
-static node_t work_reg[MAX_WORKING_REGISTER] = {NULL, NULL, NULL, NULL};
-static node_t save_reg[MAX_SAVE_REGISTER] = {NULL, NULL, NULL, NULL, NULL};
-static node_t point_reg[MAX_POINTER_REGISTER] = {NULL, NULL};
+static node_t work_reg_val[MAX_WORKING_REGISTER] = {NULL, NULL,NULL, NULL};
+static node_t work_reg_ident[MAX_WORKING_REGISTER] = {NULL, NULL, NULL, NULL};
+
+static node_t save_reg_val[MAX_SAVE_REGISTER] = {NULL, NULL, NULL, NULL, NULL};
+static node_t save_reg_ident[MAX_SAVE_REGISTER] = {NULL, NULL, NULL, NULL, NULL};
+
+static node_t point_reg_val[MAX_POINTER_REGISTER] = {NULL, NULL};
+static node_t point_reg_ident[MAX_POINTER_REGISTER] = {NULL, NULL};
 
 // for association with parsing
 static node_t current_node;
@@ -91,7 +96,7 @@ short work_reg_available(void)
 {
 	for (short i = 0; i < MAX_WORKING_REGISTER; i++)
 	{
-		if(work_reg[i] == NULL)
+		if(save_reg_ident[i] == NULL)
 		{
 			return i;
 		}
@@ -104,7 +109,7 @@ short save_reg_available(void)
 {
 	for (short i = 0; i < MAX_SAVE_REGISTER; i++)
 	{
-		if(save_reg[i] == NULL)
+		if(save_reg_ident[i] == NULL)
 		{
 			return i;
 		}
@@ -117,7 +122,7 @@ short point_reg_available(void)
 {
 	for (short i = 0; i < MAX_POINTER_REGISTER; i++)
 	{
-		if(point_reg[i] == NULL)
+		if(save_reg_ident[i] == NULL)
 		{
 			return i;
 		}
@@ -135,6 +140,84 @@ node_t get_current_node(void)
 void set_current_node(node_t node)
 {
 	current_node = node;
+}
+
+//add node to register descriptor and add the ident
+void add_node_register(short reg_type, node_t node_val, node_t node_ident, short index)
+{
+	switch(reg_type)
+	{
+		case T_WORKING: 
+			work_reg_val[index] = node_val;
+			work_reg_ident[index] = node_ident;
+		break;
+		case T_SAVE: 
+			save_reg_val[index] = node_val;
+			save_reg_ident[index] = node_ident;
+		break;
+		case T_POINTER: 
+			point_reg_val[index] = node_val;
+			point_reg_ident[index] = node_ident;
+		break;
+		default : 
+		break;
+	}
+}
+
+//getting the node value stored
+node_t get_node_val(short reg_type, short index)
+{
+	switch(reg_type)
+	{
+		case T_WORKING: 
+			return work_reg_val[index];
+		break;
+		case T_SAVE: 
+			return save_reg_val[index];
+		break;
+		case T_POINTER: 
+			return point_reg_val[index];
+		break;
+		default : 
+		break;
+	}
+}
+
+//getting the node ident stored
+short get_node_ident(short reg_type, char * ident)
+{
+	short max_index;
+	node_t * reg_desc;
+	switch(reg_type)
+	{
+		case T_WORKING: 
+			max_index = MAX_WORKING_REGISTER;
+			reg_desc = work_reg_ident;
+		break;
+		case T_SAVE: 
+			max_index = MAX_SAVE_REGISTER;
+			reg_desc = save_reg_ident;
+		break;
+		case T_POINTER: 
+			max_index = MAX_POINTER_REGISTER;
+			reg_desc = point_reg_ident;
+		break;
+		default : 
+		break;
+	}
+	for(int i = 0; i < max_index; i++)
+	{
+		if(reg_desc[i] != NULL)
+		{
+			//printf("%s\n", reg_desc[i]->ident);
+			if(!strncmp(reg_desc[i]->ident, ident, VAR_MAX_SIZE))
+			{
+
+				return i;
+			}
+		}
+	}
+	return -1;
 }
 
 // -------------------------------------------
@@ -206,6 +289,14 @@ void filler_5n(void)
 	sprintf(retStr, "$64000");
 	dump_instruction(retStr, outfileDescriptor);
 }
+
+void create_comment(const char* comment)
+{
+	char retStr[128];
+	sprintf(retStr, "%% %s", comment);
+	dump_instruction(retStr, outfileDescriptor);
+}
+
 // -------------------------------------------
 
 
