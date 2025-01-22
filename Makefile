@@ -20,10 +20,10 @@ INCLUDE=-I$(INC_DIR)
 
 all: $(EXE)
 
-$(EXE) :  y.tab.o lex.yy.o common.o passe_1.o instruction_set.o passe_2.o
+$(EXE) :  y.tab.o lex.yy.o common.o passe_1.o instruction_set.o objects.o passe_2.o
 	@echo "| Linking files : $^"
 	@echo "| Creating binary $@"
-	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o passe_1.o instruction_set.o passe_2.o -o $@
+	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o passe_1.o instruction_set.o objects.o passe_2.o -o $@
 	@echo "| Cleaning .o files"
 	@rm -f *.o
 	@echo "| Finished building $(EXE)"
@@ -56,6 +56,10 @@ passe_1.o: $(SRC_DIR)/passe_1.c $(INC_DIR)/passe_1.h $(INC_DIR)/defs.h $(INC_DIR
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
 instruction_set.o: $(SRC_DIR)/instruction_set.c $(INC_DIR)/defs.h $(INC_DIR)/common.h $(INC_DIR)/instruction_set.h Makefile
+	@echo "| Compiling $<"
+	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
+
+objects.o: $(SRC_DIR)/objects.c $(INC_DIR)/defs.h $(INC_DIR)/common.h $(INC_DIR)/objects.h Makefile
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
