@@ -1,6 +1,6 @@
 // ========================================
 // > Author :   jugen 667 
-// > Title  :   lexico.l 
+// > Title  :   grammar.y 
 // > Desc.  :   Node creation and tree   
 //              creation 
 // > Associated header : 
@@ -16,6 +16,7 @@
 
 #include "../include/defs.h"
 #include "../include/common.h"
+#include "../include/objects.h"
 #include "../include/passe_1.h"
 #include "../include/passe_2.h"
 #include "../include/instruction_set.h"
@@ -461,8 +462,7 @@ node_t make_node_ident(char* identifier){
     node->global_decl = false;      // init but update in passe 1
     node->decl_node = NULL;
     node->opr = NULL;
-    node->int_value = 0;
-    node->float_value = 0;
+    node->value = 0;
     return node;
 }
 
@@ -478,8 +478,7 @@ node_t make_node_type(node_type type){
     node->global_decl = false;      // init but update in passe 1
     node->decl_node = NULL;
     node->opr = NULL;
-    node->int_value = 0;
-    node->float_value = 0;
+    node->value = 0;
     return node;
 }
 
@@ -493,7 +492,7 @@ node_t make_node_intval(int32_t value){
     node->type = TYPE_INT;          // init but update in passe 1
     node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // init but update in passe 1
-    node->int_value = value;
+    node->value = value;            // to update in passe1
     node->decl_node = NULL;
     node->opr = NULL;
     return node;
@@ -509,7 +508,7 @@ node_t make_node_floatval(double value){
     node->type = TYPE_FLOAT;        // init but update in passe 1
     node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // init but update in passe 1
-    node->float_value = value;
+    node->value = value;            // to update in passe 1
     node->decl_node = NULL;
     node->opr = NULL;
     return node;
@@ -525,7 +524,7 @@ node_t make_node_boolval(bool value){
     node->type = TYPE_BOOL;         // init but update in passe 1
     node->address = 0;               // init but update in passe 1
     node->global_decl = false;      // init but update in passe 1
-    node->int_value = value;
+    node->value = (uint64_t) value;
     node->decl_node = NULL;
     node->opr = NULL;
     return node;
@@ -586,18 +585,7 @@ void analyse_tree(node_t root) {
         if (!stop_after_verif)
         {
             outfileDescriptor = outfile_open(outfile);
-            // ============================================== //
-            // == testing instruction set and file dumping == //
-            // increment_P();
-            // register_zero(B, W_FIELD);
-            // copy_register(C, D, W_FIELD);
-            // add_register(A, D, W_FIELD);
-            // add_const_register(C, W_FIELD, 15);
-            // clear_bit(A, 3);
-            // save_IN_A();
-            // ============================================== //
             gen_code_passe_2(root);
-            //dump_mips_program(outfile);
             outfile_close(outfileDescriptor);
         }
         // free_global_strings();

@@ -406,19 +406,21 @@ void set_bit(short reg_name, char bit_nbr)
 }
 
 // loading a register (ensure P value is correct)
-void load_register(short value, bool speedFlag)
+void load_register(uint64_t value, bool speedFlag)
 {
-	char retStr[12];
+	char retStr[20];
 	if(speedFlag) // need speed
 	{
-		sprintf(retStr, "LC %x",(short)value);
+		sprintf(retStr, "LC %lX",(uint64_t)value);
 	}
 	else
 	{
-		sprintf(retStr, "LA %x",(short)value);
+		sprintf(retStr, "LA %lX",(uint64_t)value);
 	}
 	dump_instruction(retStr, outfileDescriptor);
 }
+
+
 
 // set a register to zero
 void register_zero(short reg_name, short field)

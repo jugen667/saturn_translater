@@ -47,8 +47,8 @@ FIGURE              [0-9]
 FIGURE_NON_NUL      [1-9]
 INTEGER_DEC         0|{FIGURE_NON_NUL}{FIGURE}*
 LETTER_HEXA         [a-fA-F]
-INTEGER_HEXA        0x({FIGURE}|{LETTER_HEXA})+
-INTEGER             \-?{INTEGER_DEC}|{INTEGER_HEXA}
+INTEGER_HEXA        0[xX]({FIGURE}|{LETTER_HEXA})+
+INTEGER             \-?{INTEGER_DEC}
 FLOAT               \-?({INTEGER_DEC}*\.{INTEGER_DEC}*)
 IDF                 {LETTER}({LETTER}|{FIGURE}|'_')*
 SPECCHAR            [\x09-\x0E]
@@ -121,6 +121,13 @@ SEPARATOR           [ \t\n]+
                 RETURN(TOK_INTVAL);
 }
 
+{INTEGER_HEXA} {
+                #if !LEX_DEBUG
+                yylval.intval = strtol(yytext, NULL, 16);
+                #endif
+                RETURN(TOK_INTVAL);
+}
+
 {FLOAT} {
                 #if !LEX_DEBUG
                 yylval.floatval = atof(yytext);
@@ -145,8 +152,8 @@ SEPARATOR           [ \t\n]+
 [ \t\n]+
 
 . {
-                fprintf(stderr, RED "Error line" BOLD " %d " NC ": Lexical error\n", yylineno);
-                exit(1);
+    fprintf(stderr, RED "Error line" BOLD " %d " NC ": Lexical error\n", yylineno);
+    exit(1);
 }
 
 

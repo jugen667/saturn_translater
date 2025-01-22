@@ -270,10 +270,8 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
             }
         case NODE_INTVAL:
         case NODE_BOOLVAL:
-            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Value: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->int_value);
-            break;
         case NODE_FLOATVAL:
-            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Value: %f}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->float_value);
+            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Value: %ld}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->value);
             break;
         case NODE_STRINGVAL:
             {

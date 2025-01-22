@@ -65,15 +65,6 @@ void print_node_info(node_t root)
 
 /* ========================= Check-Up functions ========================= */
 
-void change_int2float(node_t node, double value){
-    node->nature = NODE_FLOATVAL;
-    node->type = TYPE_FLOAT;
-    node->int_value = 0;
-    node->float_value = value;
-}
-
-// ------------------------------------------------------------------------------------------------- //
-
 bool check_var_number(void)
 {
 	if(currentVar <= VAR_MAX_NUMBER)
@@ -268,11 +259,7 @@ void check_affect_type(node_t node)
 		// check that FLOAT are not considered INTVAL and that float value are not affected to INT
 		if (node->opr[0]->type != node->opr[1]->type) 
 	    {
-	    	if(node->opr[0]->type == TYPE_FLOAT && node->opr[1]->type == TYPE_INT)
-	    	{
-	    		change_int2float(node->opr[1], node->opr[1]->int_value);
-	    	}
-	    	else if(node->opr[0]->type == TYPE_INT && node->opr[1]->type == TYPE_FLOAT)
+			if(node->opr[0]->type == TYPE_INT && node->opr[1]->type == TYPE_FLOAT)
 	    	{
 	    		printf(RED "Error line" BOLD " %d " NC ": " PURPLE "float" NC " value on " PURPLE "int" NC " variable\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
@@ -299,18 +286,6 @@ void check_global_decl(node_t node)
 			}
 		}
 	}
-}
-
-// ------------------------------------------------------------------------------------------------- //
-
-// check if int € [-32767; 32767]
-void check_intval_domain(node_t node)
-{
-		if(node->int_value > 0x00007fff && node->int_value < 0xffff8000)
-		{
-			printf(RED "Error line" BOLD " %d " NC ": integer " BOLD RED "out of range\n", node->lineno);
-			exit(EXIT_FAILURE);
-		}
 }
 
 // ------------------------------------------------------------------------------------------------- //
@@ -416,11 +391,9 @@ void analyse_passe_1(node_t root)
 
 				case NODE_INTVAL :
 					root->opr[i]->type = TYPE_INT;
-					check_intval_domain(root->opr[i]);
 				break;
 				case NODE_FLOATVAL :
 					root->opr[i]->type = TYPE_FLOAT;
-					// add float range ?
 				break;
 
 				case NODE_IDENT : // ENHANCE 
@@ -454,13 +427,11 @@ void analyse_passe_1(node_t root)
 							switch(root->opr[i]->type)
 							{
     							case TYPE_INT :
-									root->opr[i]->int_value = variableDecl->int_value;
-								break;
 							    case TYPE_FLOAT :
-									root->opr[i]->float_value = variableDecl->float_value;
+									root->opr[i]->value = variableDecl->value;
 								break;
 								default :
-								break;
+								break;  
 							}
 						}
 						// if trying to redeclare	

@@ -129,7 +129,7 @@ void create_comment(const char* comment);
 
 void clear_bit(short reg_name, char bit_nbr);
 void set_bit(short reg_name, char bit_nbr);
-void load_register(short value, bool speedflag);
+void load_register(uint64_t value, bool speedFlag);
 void register_zero(short reg_name, short field);
 void ex_register(short reg_1, short reg_2, short field);
 void copy_register(short src_reg_name, short dest_reg_name, short field);

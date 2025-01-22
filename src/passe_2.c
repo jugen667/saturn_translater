@@ -60,10 +60,8 @@ void decl_inblock(node_t node)
 				switch (node->opr[1]->type)
 				{
 					case TYPE_INT:
-						load_register(get_node_val(T_SAVE, index)->int_value, 0);
-					break;
 					case TYPE_FLOAT:
-						load_register(get_node_val(T_SAVE, index)->float_value, 0);
+						load_register(get_node_val(T_SAVE, index)->value, 0);
 					break;
 					default :
 					break;
@@ -75,10 +73,8 @@ void decl_inblock(node_t node)
 			switch (node->opr[1]->type)
 			{
 				case TYPE_INT:
-					load_register(node->opr[1]->int_value, 0);
-				break;
 				case TYPE_FLOAT:
-					load_register(node->opr[1]->float_value, 0);
+					load_register(node->opr[1]->value, 0);
 				break;
 				default :
 				break;
@@ -108,10 +104,8 @@ void affect_variable(node_t node)
 		switch(node->opr[0]->type)
 		{
 			case TYPE_INT:
-				node->opr[0]->int_value = node->opr[1]->int_value;
-			break;
 			case TYPE_FLOAT:
-				node->opr[0]->float_value = node->opr[1]->float_value;
+				node->opr[0]->value = node->opr[1]->value;
 			break;
 			default :
 			break;
@@ -222,10 +216,8 @@ void create_plus_instr(node_t node)
 		switch (node->opr[0]->type)
 		{
 			case TYPE_INT:
-				add_const_register(A, W_FIELD, node->opr[0]->int_value);
-			break;
 			case TYPE_FLOAT:
-				add_const_register(A, W_FIELD, node->opr[0]->float_value);
+				add_const_register(A, W_FIELD, node->opr[0]->value);
 			break;
 			default :
 			break;
@@ -248,10 +240,8 @@ void create_plus_instr(node_t node)
 		switch (node->opr[1]->type)
 		{
 			case TYPE_INT:
-				add_const_register(A, W_FIELD, node->opr[1]->int_value);
-			break;
 			case TYPE_FLOAT:
-				add_const_register(A, W_FIELD, node->opr[1]->float_value);
+				add_const_register(A, W_FIELD, node->opr[1]->value);
 			break;
 			default :
 			break;
@@ -304,10 +294,8 @@ void gen_code_passe_2(node_t root)
 							switch (root->opr[i]->opr[1]->type)
 							{
 								case TYPE_INT:
-									load_register(root->opr[i]->opr[1]->int_value, 0);
-								break;
 								case TYPE_FLOAT:
-									load_register(root->opr[i]->opr[1]->float_value, 0);
+									load_register(root->opr[i]->opr[1]->value, 0);
 								break;
 								default :
 								break;

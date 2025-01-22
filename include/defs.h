@@ -23,7 +23,7 @@
     }                                       \
 })
 
-
+// for pre-C99 standard
 typedef enum { false = 0, true = !false } bool;
 
 typedef enum node_nature_s {
@@ -69,7 +69,6 @@ typedef enum node_nature_s {
     NODE_AFFECT,
     NODE_PRINT,
     NODE_ELSE,
-
 } node_nature;
 
 
@@ -84,26 +83,23 @@ typedef enum node_type_s {
 
 // === NODE STRUCT ===
 typedef struct _node_s {
+    // node info
     node_nature nature;
     node_type type;
-
-    int32_t int_value;
-    double float_value;         // double for accuracy 
+    int32_t nops;
+    struct _node_s ** opr;
+    struct _node_s * decl_node;
+    
+    // node values
+    uint64_t value;
     int32_t address;            // adress on 5 nibbles (20 bits)
     bool global_decl;
     int32_t lineno;
-
-    int32_t nops;
-    struct _node_s ** opr;
-    
-    struct _node_s * decl_node;
-
-    char * ident;               // array ? 
+    char * ident;
     char * str;
 
-    // Pour l'affichage du graphe
+    // for tree dump
     int32_t node_num;
-
 } node_s;
 
 typedef node_s * node_t;
