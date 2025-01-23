@@ -14,7 +14,13 @@
 #define DEFAULT_TRACE_LEVEL 0
 
 #define     MAIN_VERSION    "0"                 /*dev phase*/
-#define     SUB_VERSION     "1"                 /*iteration*/
+#define     SUB_VERSION     "2"                 /*iteration*/
+
+// ============== LOGGING =================	\\
+// > v0.1 : first iteration = start		 	\\	
+// > v0.2 : final dev architecture 		 	\\
+// >										\\
+// ========================================	\\
 
 #define     NC              "\e[0m"
 #define     BLACK           "\033[30m"          /* Black */
