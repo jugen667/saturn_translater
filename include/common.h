@@ -7,12 +7,11 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
-#include "../include/defs.h"
-
-
 // ================================================================================================= //
 // =========================================== DEFINES ============================================= //
 // ================================================================================================= //
+#define DEFAULT_OUTFILE "out.s"
+#define DEFAULT_TRACE_LEVEL 0
 
 #define     MAIN_VERSION    "0"                 /*dev phase*/
 #define     SUB_VERSION     "1"                 /*iteration*/
@@ -49,6 +48,8 @@ const char * node_nature2symb(node_nature t);
 short extract_sign(void * value);
 short extract_exponent(double value);
 int decimal2BCD(int value);
+
+uint32_t assign_address(void);
 
 // open file
 FILE * outfile_open(char * outfileName);

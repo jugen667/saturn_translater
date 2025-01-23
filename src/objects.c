@@ -19,11 +19,14 @@
 //===============
 // - FUNCTIONS -
 //===============
-typedef union{
-    struct {
+typedef union
+{
+    struct 
+    {
         uint64_t fullNumber;
     };
-    struct {
+    struct 
+    {
         uint64_t sign:4;        // 1 nibbles = 4 bits
         uint64_t mantissa:48;   // 12 nibbles = 48 bits
         uint64_t exponent:12;   // 3 nibbles = 12 bits

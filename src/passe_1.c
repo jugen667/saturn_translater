@@ -23,7 +23,7 @@
 // ========================================== PROTOTYPES =========================================== //
 // ================================================================================================= //
 
-static decl_table declaration_table[VAR_MAX_NUMBER]; // max 256 variable
+static decl_table declaration_table[VAR_MAX_NUMBER]; // max 32 variable
 
 extern int trace_level;
 
@@ -403,6 +403,7 @@ void analyse_passe_1(node_t root)
 					// If ident == 'main' => setup the type to void and jump to the next node
 					if (!(strcmp(root->opr[i]->ident, "main")))
 				    {
+				    	root->opr[i]->address = assign_address();
 				    	add_decl_node(root->opr[i]);
 						root->opr[i]->type = TYPE_VOID;
 						break;
@@ -413,15 +414,17 @@ void analyse_passe_1(node_t root)
 					if (variableDecl == NULL && declaration == 1)
 					{
 						//If undeclared, we add it to the table
+						root->opr[i]->address = assign_address();
 						add_decl_node(root->opr[i]);
 						declaration = 0;
 					}
 					else 
 					{
-						// Else we get the adress of declaration and associate it with the current variable
+						// Else we get the address of declaration and associate it with the current variable
 						// using the variable
 						if (variableDecl != NULL && declaration == 0)
 						{
+							root->opr[i]->address = variableDecl->address;
 							root->opr[i]->global_decl = variableDecl->global_decl;
 							root->opr[i]->type = variableDecl->type;
 							switch(root->opr[i]->type)

@@ -249,6 +249,62 @@ void create_plus_instr(node_t node)
 	}
 }
 
+// create an substraction
+void create_minus_instr(node_t node)
+{
+	short index;
+	// check register available
+	if(node->opr[0]->nature == NODE_IDENT)
+	{
+		index = get_node_ident(T_SAVE, node->opr[0]->ident);
+		if(index >= 0)
+		{
+			ex_reg_work_save(A, index, W_FIELD);
+		}
+	}
+
+	// handling multiples operations
+	else if (node->opr[0]->nature == NODE_PLUS)
+	{
+		create_minus_instr(node->opr[0]);
+	}
+	else
+	{
+		switch (node->opr[0]->type)
+		{
+			case TYPE_INT:
+			case TYPE_FLOAT:
+				sub_const_register(A, W_FIELD, node->opr[0]->value);
+			break;
+			default :
+			break;
+		}
+	}
+	if(node->opr[1]->nature == NODE_IDENT)
+	{
+		index = get_node_ident(T_SAVE, node->opr[1]->ident);
+		if(index >= 0)
+		{
+			ex_reg_work_save(A, index, W_FIELD);
+		}
+	}
+	else if (node->opr[1]->nature == NODE_PLUS)
+	{
+		create_minus_instr(node->opr[1]);
+	}
+	else
+	{
+		switch (node->opr[1]->type)
+		{
+			case TYPE_INT:
+			case TYPE_FLOAT:
+				sub_const_register(A, W_FIELD, node->opr[1]->value);
+			break;
+			default :
+			break;
+		}
+	}
+}
 // dupe above for every operation possible
 // NODE_PLUS
 // NODE_MINUS
@@ -320,7 +376,6 @@ void gen_code_passe_2(node_t root)
 				// FUNC initilization 
 				case NODE_FUNC :
 					// create label
-					create_comment("label for main (useless ?)");
 					create_label("MAIN_FUNC");
 				break;		
 
@@ -339,18 +394,19 @@ void gen_code_passe_2(node_t root)
 					}
 					if (root->opr[i]->opr[1]->nature == NODE_MINUS)
 					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_UMINUS)
-					{
+						create_minus_instr(root->opr[i]->opr[1]);
 					}
 					if (root->opr[i]->opr[1]->nature == NODE_MUL)
 					{
+						// create_mul_instr(root->opr[i]->opr[1]);
 					}
 					if (root->opr[i]->opr[1]->nature == NODE_DIV)
 					{
+						// create_div_instr(root->opr[i]->opr[1]);
 					}
 					if (root->opr[i]->opr[1]->nature == NODE_MOD)
 					{
+						// create_mod_instr(root->opr[i]->opr[1]);
 					}
 					if (root->opr[i]->opr[1]->nature == NODE_BAND)
 					{
