@@ -52,7 +52,7 @@ node_t make_node_main(node_t node_next);
 }
 
 %union {
-    int32_t intval;
+    int64_t intval;
     double floatval; // double for accuracy
     char * strval;
     node_t ptr;
@@ -436,10 +436,11 @@ node_t make_node(node_nature nature, int nops, ...) {
     node->nops = nops;
     node->lineno = yylineno;
     node->nature = nature;
-
+    node->type = TYPE_NONE;
+    node->value = 0; 
     va_start(ap, nops);
 
-    node->opr = (node_t *) malloc(nops*sizeof(node_s));
+    node->opr = (node_t *) calloc(nops, sizeof(node_s)); // ensure every sub nodes are initialized
 
     for(int i=0;i<nops;i++){
         node->opr[i] = va_arg(ap, node_t);
@@ -460,7 +461,6 @@ node_t make_node_ident(char* identifier){
     node->type = TYPE_NONE;              // init but update in passe 1
     node->address = 0;                   // init but update in passe 1
     node->global_decl = false;           // init but update in passe 1
-    node->decl_node = NULL;
     node->opr = NULL;
     node->value = 0;
     return node;
@@ -476,7 +476,6 @@ node_t make_node_type(node_type type){
     node->type = type;                  // init but update in passe 1
     node->address = 0;                  // init but update in passe 1
     node->global_decl = false;          // init but update in passe 1
-    node->decl_node = NULL;
     node->opr = NULL;
     node->value = 0;
     return node;
@@ -493,7 +492,6 @@ node_t make_node_intval(int32_t value){
     node->address = 0;                  // init but update in passe 1
     node->global_decl = false;          // init but update in passe 1
     node->value = value;                // to update in passe1
-    node->decl_node = NULL;
     node->opr = NULL;
     return node;
 }
@@ -509,7 +507,6 @@ node_t make_node_floatval(double value){
     node->address = 0;                  // init but update in passe 1
     node->global_decl = false;          // init but update in passe 1
     node->value = value;                // to update in passe 1
-    node->decl_node = NULL;
     node->opr = NULL;
     return node;
 }
@@ -525,7 +522,6 @@ node_t make_node_boolval(bool value){
     node->address = 0;                  // init but update in passe 1
     node->global_decl = false;          // init but update in passe 1
     node->value = (uint64_t) value;
-    node->decl_node = NULL;
     node->opr = NULL;
     return node;
 }
@@ -541,7 +537,6 @@ node_t make_node_strval(char* string){
     node->address = 0;                  // init but update in passe 1
     node->global_decl = false;          // maj dans passe 1
     node->str = string;
-    node->decl_node = NULL;
     node->opr = NULL;
     return node;
 }
@@ -556,7 +551,6 @@ node_t make_node_main(node_t node_next){
     node->type = TYPE_VOID;
     node->address = 0;                  // init but update in passe 1
     node->global_decl = true;      
-    node->decl_node = NULL;
     node->opr = (node_t *) malloc(sizeof(node_s)); // child block
     node->opr[0] = node_next;
     return node;

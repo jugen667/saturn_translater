@@ -32,7 +32,7 @@ extern bool stop_after_verif;
 FILE * outfileDescriptor = NULL;
 bool verboseDebug = 0;
 short target = 48;
-short disable_tree_dump = 0;
+short disable_tree_dump = 1;
 bool uncompatible=0;
 
 // ================================================================================================= //
@@ -64,8 +64,8 @@ void affiche_help()
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
 	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
     printf("  -t : Define compilation target (HP-48 or HP-49)\n\t(default=48)\n");
-    printf("  -a : Disable the tree dumping in a file\n\t(default=no)");
-    printf("  -d : Activate debug\n");
+    printf("  -a : Enable the tree dumping in a file\n\t(default=on)");
+    printf("  -d : Activate verbose compilation\n");
 	printf("  -h : Print help\n");
     printf("  -v : Print build version of SaturnCC\n\n");
 }
@@ -147,13 +147,12 @@ void parse_args(int argc, char ** argv)
 					case 'o':
 						testValideOutFile(argv[i+1]);
 						outfile = argv[i+1];
-						//printf("output file name : %s \n", outfile);
 						i++;
 					break;
                     case 'a':
-                        disable_tree_dump = 1;
-                        printf(BOLD "Compilation tree won't be dumped\n" NC);
-                        printf(BOLD "No .dot files will be created\n" NC);
+                        disable_tree_dump = 0;
+                        printf(BOLD "Compilation tree will be dumped\n" NC);
+                        printf(BOLD ".dot files will be created\n" NC);
                     break;
 					case 't':
 						test_int_value(48,49,atoi(argv[i+1]), argv[i]);
@@ -221,6 +220,7 @@ void free_nodes(node_t n)
         {
             printf("\t > freeing %s\n", node_nature2string(n->nature));
         }
+        free(n->opr); // free the pointer to sub nodes
         free(n);
     }
     else
@@ -228,7 +228,15 @@ void free_nodes(node_t n)
         if(verboseDebug)
         {
             printf("\t > freeing %s\n", node_nature2string(n->nature));
-        }        
+        }     
+        if(n->nature == NODE_IDENT)
+        {
+            free(n->ident); // free the pointer identifier string
+        }
+        if(n->nature == NODE_STRINGVAL)
+        {
+            free(n->str); // free the pointer string value
+        }
         free(n);
     }
 }
@@ -259,13 +267,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
     {
         case NODE_IDENT:
             {
-                node_t decl_node = n->decl_node;
                 fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{<decl>Global: %d|Ident: %s|address: %05X}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->global_decl, n->ident, n->address);
-                if (decl_node != NULL && decl_node != n) 
-                {
-                    fprintf(f, "    edge[tailclip=false];\n");
-                    fprintf(f, "    \"N%d\":decl:c -> \"N%d\" [style=dashed]\n", node_num, decl_node->node_num);
-                }
                 break;
             }
         case NODE_INTVAL:
@@ -562,7 +564,10 @@ const char * node_nature2symb(node_nature t)
     }
 }
 
-// Useful functions
+// ------------------------------------------------------------------------------------------------- //
+
+// =================== Useful functions =================== //
+// not that useful I dont either it exist or not
 short extract_sign(void * value)
 {
     if (*(short*)value < 0 || *(float*)value < 0)
@@ -611,7 +616,7 @@ int decimal2BCD(int value)
     return result;
 }
 
-// assign an address to a node (useful for real numbers)
+// assign an address to a node (maybe the most useful func here)
 uint32_t assign_address(void)
 {
     current_address+=0x20;
@@ -625,7 +630,9 @@ uint32_t assign_address(void)
     }
 }
 
-// outfile dumping management
+// ------------------------------------------------------------------------------------------------- //
+
+// =================== Outfile dumping functions =================== //
 // open file
 FILE * outfile_open(char * outfileName)
 {
@@ -666,7 +673,7 @@ void outfile_close(FILE * fileDesc)
     }
 }
 
-
+// ------------------------------------------------------------------------------------------------- //
 
 
 // ================================================================================================= //

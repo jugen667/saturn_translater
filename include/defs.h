@@ -179,7 +179,6 @@ typedef struct _node_s {
     node_type type;
     int32_t nops;
     struct _node_s ** opr;
-    struct _node_s * decl_node;
     
     // node values
     uint64_t value;
