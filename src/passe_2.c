@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "../include/defs.h"
+#include "../include/common.h"
 #include "../include/passe_2.h"
 #include "../include/instruction_set.h"
 
@@ -47,69 +48,54 @@ char * label_formatting(void)
 // declaration of variable inside the function
 void decl_inblock(node_t node)
 {
-	short index;
 	create_comment(node->opr[0]->ident);
-	// TO DO OPTIMIZE THE VALUE
 	if(node->opr[1] != NULL)
 	{
-		if(node->opr[1]->type == NODE_IDENT)
+		if(node->opr[1]->nature == NODE_IDENT)
 		{
-			index = get_node_ident(T_SAVE, node->opr[1]->ident);
-			if(index >= 0)
-			{
-				switch (node->opr[1]->type)
-				{
-					case TYPE_INT:
-					case TYPE_FLOAT:
-						load_register(get_node_val(T_SAVE, index)->value, 0);
-					break;
-					default :
-					break;
-				}
-			}
+			// pointer = address 
+			load_pointer(D0, node->opr[0]->address);
+			load_pointer(D1, node->opr[1]->address);
+			// read memory into A
+			reading_memory(D1, A, W_FIELD);
+			// exchnage A and DAT
+			writing_memory(D0, A, W_FIELD);
 		}
-		else
+		else // IT IS A IMMEDIATE 
 		{
-			switch (node->opr[1]->type)
-			{
-				case TYPE_INT:
-				case TYPE_FLOAT:
-					load_register(node->opr[1]->value, 0);
-				break;
-				default :
-				break;
-			}
+			// pointer = address 
+			load_pointer(D0, node->opr[0]->address);
+			// A = value
+			load_register(node->opr[1]->value, 0);
+			// exchnage A and DAT
+			writing_memory(D0, A, W_FIELD);
 		}
 	}
 	else
 	{
-		load_register(0, 0); // default value = 0 => maybe not save it for optimisation ? 
-	}
-	if(save_reg_available() >= 0)
-	{
-		ex_reg_work_save(A, save_reg_available(), W_FIELD); // global var => in save reg direct
-		add_node_register(T_SAVE, node->opr[1], node->opr[0], save_reg_available());
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// A = value
+		load_register(0, 0);
+		// exchnage A and DAT
+		writing_memory(D0, A, W_FIELD);
 	}
 }
 
 // affectation of a variable
 void affect_variable(node_t node)
 {
-	// affetcation = UPDATE NODES 
-
 	// affect an ident with an ident
 	if(node->opr[0]->nature == NODE_IDENT && 
 		node->opr[1]->nature == NODE_IDENT)
 	{
-		switch(node->opr[0]->type)
-		{
-			case TYPE_INT:
-			case TYPE_FLOAT:
-				node->opr[0]->value = node->opr[1]->value;
-			break;
-			default :
-			break;
-		}
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		load_pointer(D1, node->opr[1]->address);
+		// read memory into A
+		reading_memory(D1, A, W_FIELD);
+		// exchnage A and DAT
+		writing_memory(D0, A, W_FIELD);
 	}
 
 	// affect an ident with a intval
@@ -117,6 +103,12 @@ void affect_variable(node_t node)
 		node->opr[0]->type == TYPE_INT) && 
 		(node->opr[1]->nature == NODE_INTVAL))
 	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// A = value
+		load_register(node->opr[1]->value, 0);
+		// exchnage A and DAT
+		writing_memory(D0, A, W_FIELD);
 	}
 
 	// affect an ident with a floatval
@@ -124,13 +116,25 @@ void affect_variable(node_t node)
 		node->opr[0]->type == TYPE_FLOAT)&& 
 		(node->opr[1]->nature == NODE_FLOATVAL))
 	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// A = value
+		load_register(node->opr[1]->value, 0);
+		// exchnage A and DAT
+		writing_memory(D0, A, W_FIELD);
 	}
 
 	// affect an ident with a boolval
 	if((node->opr[0]->nature == NODE_IDENT && 
 		node->opr[0]->type == TYPE_BOOL) && 
 		node->opr[1]->nature == NODE_BOOLVAL)
-	{	
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// A = value
+		load_register(node->opr[1]->value, 0);
+		// exchnage A and DAT
+		writing_memory(D0, A, S_FIELD);	// value of bool on a S field only
 	}
 }
 
@@ -195,15 +199,12 @@ void create_lt_instr(node_t node)
 // create an addition
 void create_plus_instr(node_t node)
 {
-	short index;
-	// check register available
 	if(node->opr[0]->nature == NODE_IDENT)
 	{
-		index = get_node_ident(T_SAVE, node->opr[0]->ident);
-		if(index >= 0)
-		{
-			ex_reg_work_save(A, index, W_FIELD);
-		}
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
 	}
 
 	// handling multiples operations
@@ -213,23 +214,14 @@ void create_plus_instr(node_t node)
 	}
 	else
 	{
-		switch (node->opr[0]->type)
-		{
-			case TYPE_INT:
-			case TYPE_FLOAT:
-				add_const_register(A, W_FIELD, node->opr[0]->value);
-			break;
-			default :
-			break;
-		}
+		add_const_register(A, W_FIELD, node->opr[0]->value);
 	}
 	if(node->opr[1]->nature == NODE_IDENT)
 	{
-		index = get_node_ident(T_SAVE, node->opr[1]->ident);
-		if(index >= 0)
-		{
-			ex_reg_work_save(A, index, W_FIELD);
-		}
+		// pointer = address 
+		load_pointer(D0, node->opr[1]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
 	}
 	else if (node->opr[1]->nature == NODE_PLUS)
 	{
@@ -237,78 +229,49 @@ void create_plus_instr(node_t node)
 	}
 	else
 	{
-		switch (node->opr[1]->type)
-		{
-			case TYPE_INT:
-			case TYPE_FLOAT:
-				add_const_register(A, W_FIELD, node->opr[1]->value);
-			break;
-			default :
-			break;
-		}
+		add_const_register(A, W_FIELD, node->opr[1]->value);
 	}
 }
 
 // create an substraction
 void create_minus_instr(node_t node)
 {
-	short index;
-	// check register available
 	if(node->opr[0]->nature == NODE_IDENT)
 	{
-		index = get_node_ident(T_SAVE, node->opr[0]->ident);
-		if(index >= 0)
-		{
-			ex_reg_work_save(A, index, W_FIELD);
-		}
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
 	}
 
 	// handling multiples operations
-	else if (node->opr[0]->nature == NODE_PLUS)
+	else if (node->opr[0]->nature == NODE_MINUS)
 	{
 		create_minus_instr(node->opr[0]);
 	}
 	else
 	{
-		switch (node->opr[0]->type)
-		{
-			case TYPE_INT:
-			case TYPE_FLOAT:
-				sub_const_register(A, W_FIELD, node->opr[0]->value);
-			break;
-			default :
-			break;
-		}
+		sub_const_register(A, W_FIELD, node->opr[0]->value);
 	}
 	if(node->opr[1]->nature == NODE_IDENT)
 	{
-		index = get_node_ident(T_SAVE, node->opr[1]->ident);
-		if(index >= 0)
-		{
-			ex_reg_work_save(A, index, W_FIELD);
-		}
+		// pointer = address 
+		load_pointer(D0, node->opr[1]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
 	}
-	else if (node->opr[1]->nature == NODE_PLUS)
+	else if (node->opr[1]->nature == NODE_MINUS)
 	{
 		create_minus_instr(node->opr[1]);
 	}
 	else
 	{
-		switch (node->opr[1]->type)
-		{
-			case TYPE_INT:
-			case TYPE_FLOAT:
-				sub_const_register(A, W_FIELD, node->opr[1]->value);
-			break;
-			default :
-			break;
-		}
+		sub_const_register(A, W_FIELD, node->opr[1]->value);
 	}
 }
 // dupe above for every operation possible
-// NODE_PLUS
-// NODE_MINUS
-// NODE_UMINUS
+// NODE_PLUS OK
+// NODE_MINUS OK
 // NODE_MUL
 // NODE_DIV
 // NODE_MOD
@@ -347,24 +310,20 @@ void gen_code_passe_2(node_t root)
 						create_comment(root->opr[i]->opr[0]->ident);
 						if(root->opr[i]->opr[1] != NULL)
 						{
-							switch (root->opr[i]->opr[1]->type)
-							{
-								case TYPE_INT:
-								case TYPE_FLOAT:
-									load_register(root->opr[i]->opr[1]->value, 0);
-								break;
-								default :
-								break;
-							}
+							// pointer = address
+							load_pointer(D0, root->opr[i]->opr[0]->address);
+							// A = value
+							load_register(root->opr[i]->opr[1]->value, 0);
+							// exchange A and DAT
+							writing_memory(D0, A, W_FIELD);
 						}
-						else
+						else // IF NO VALUE : VALUE = 0
 						{
-							load_register(0, 0); // default value = 0 => maybe not save it for optimisation ? 
-						}
-						if(save_reg_available() >= 0)
-						{
-							ex_reg_work_save(A, save_reg_available(), W_FIELD); // global var => in save reg direct
-							add_node_register(T_SAVE, root->opr[i]->opr[1], root->opr[i]->opr[0], save_reg_available());
+							load_pointer(D0, root->opr[i]->opr[0]->address);
+							// A = value
+							load_register(0, 0);
+							// exchnage A and DAT
+							writing_memory(D0, A, W_FIELD);
 						}
 					}
 					else
@@ -391,10 +350,12 @@ void gen_code_passe_2(node_t root)
 					if (root->opr[i]->opr[1]->nature == NODE_PLUS)
 					{
 						create_plus_instr(root->opr[i]->opr[1]);
+						writing_memory(D0, A, W_FIELD);
 					}
 					if (root->opr[i]->opr[1]->nature == NODE_MINUS)
 					{
 						create_minus_instr(root->opr[i]->opr[1]);
+						writing_memory(D0, A, W_FIELD);
 					}
 					if (root->opr[i]->opr[1]->nature == NODE_MUL)
 					{
@@ -463,19 +424,21 @@ void gen_code_passe_2(node_t root)
 				// creation of the While loop
 				case NODE_WHILE :
 					inLoopWhile = 1;
-					label++;
-					// create a label
+					create_comment("STARTING WHILE LOOP :");
+					create_label(label_formatting());
 					break;
 
 				// creation of the Do While loop
 				case NODE_DOWHILE :
-					label++;
-					// create a label
+					create_comment("STARTING DO_WHILE LOOP :");
+					create_label(label_formatting());
 					break;
 
 				// creation of the If Statement
 				case NODE_IF :
 					inIf = 1;
+					create_comment("IF :");
+					create_label(label_formatting());
 					break;	
 			}		
 		}

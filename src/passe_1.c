@@ -371,7 +371,7 @@ void analyse_passe_1(node_t root)
 	
 	if(verboseDebug)
 	{
-		//print_decl_table();
+		print_decl_table();
 		print_node_info(root);
 	}	
 	// parsing the tree
@@ -382,7 +382,7 @@ void analyse_passe_1(node_t root)
 			switch(root->opr[i]->nature)
 			{
 				case NODE_TYPE :
-					if (root->opr[i]->type != 0)
+					if (root->opr[i]->type != TYPE_NONE)
 					{
 						current_type = root->opr[i]->type;
 					}
@@ -396,19 +396,10 @@ void analyse_passe_1(node_t root)
 					root->opr[i]->type = TYPE_FLOAT;
 				break;
 
-				case NODE_IDENT : // ENHANCE 
+				case NODE_IDENT :
 					// Check if variable has been declared already
 					variableDecl = get_decl_node(root->opr[i]);  // 2 ENTRY ARRAY FOR IDENT ASSOCIATION WITH A NODE
-
-					// If ident == 'main' => setup the type to void and jump to the next node
-					if (!(strcmp(root->opr[i]->ident, "main")))
-				    {
-				    	root->opr[i]->address = assign_address();
-				    	add_decl_node(root->opr[i]);
-						root->opr[i]->type = TYPE_VOID;
-						break;
-					}
-					root->opr[i]->type = current_type;
+					root->opr[i]->type = current_type; 
 					
 					// if first time seeing the ident (not fully operationnal : to pair with declaration flag)
 					if (variableDecl == NULL && declaration == 1)
@@ -500,11 +491,16 @@ void analyse_passe_1(node_t root)
 				break;
 
 				case NODE_FUNC :
+					root->opr[i]->address = assign_address();
+			    	add_decl_node(root->opr[i]);
+					root->opr[i]->type = TYPE_VOID;
 				break;
 	
 				case NODE_STRINGVAL :
 				break;
-			}	
+
+				default:
+				break;			}	
 		}
 
 		//Recursion 
@@ -514,14 +510,14 @@ void analyse_passe_1(node_t root)
 		}
 
 		// CHECKS 
-		if(root->nature == NODE_FUNC) // redundant
+		if(root->nature == NODE_FUNC)
 		{
 			if(root->type != TYPE_VOID)
 			{
 				printf(RED "Error line" BOLD " %d " NC ": " BOLD CYAN "main()" NC " declaration must have " PURPLE "void" NC " return type\n", root->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
-			if(strcmp(root->ident, "main")) // only 1 func allowed : main
+			if(strcmp(root->ident, "main")) // only 1 func allowed : main -- REDUNDANT checks done at syntax
 			{
 				printf(RED "Error line" BOLD " %d " NC ": function name must be " BOLD CYAN "main()" NC " \n", root->opr[0]->lineno);
 				exit(EXIT_FAILURE);
