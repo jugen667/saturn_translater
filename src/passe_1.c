@@ -371,7 +371,7 @@ void analyse_passe_1(node_t root)
 	
 	if(verboseDebug)
 	{
-		print_decl_table();
+		//print_decl_table();
 		print_node_info(root);
 	}	
 	// parsing the tree
@@ -500,7 +500,8 @@ void analyse_passe_1(node_t root)
 				break;
 
 				default:
-				break;			}	
+				break;			
+			}	
 		}
 
 		//Recursion 
