@@ -11,7 +11,7 @@ However, it is a very primitive language and thus its functionnalities are limit
 ## Removed functionnalities
 - **No functions** are allowed except the *main()*
 
-- **No pointers**, and **casting** variable is **not supported** implying the language is strongly typed
+- **No pointers**, and **casting** variable is **not supported**
 
 - Currently impossible to add composite data types (such as **struct**, **typedef**, **union**)
 
@@ -19,15 +19,14 @@ However, it is a very primitive language and thus its functionnalities are limit
 
 ## About data types
 ### Supported
-- **int** : 16-bit integer [-32767; +32767]
+- **int** : 12-bit (as real numbers) 
 - **bool** : classic boolean type : *true (1)* or *false (0)* 
-- **float** : supported 
+- **float** : 12-bit (as real numbers)  
 - **void** : void type used for *main()* function
 - Strings allowed in *printf()* function
 
 ### Not Supported 
 - **char** and **string <u>as variable</u>**
-- **short** 
 - **unsigned** types
 
 Variables propreties such as **volatile**, **register**, **packed**, **inline**, **static** and **extern** are **not implemented**.

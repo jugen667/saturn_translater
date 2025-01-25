@@ -23,7 +23,7 @@ Clone the repo : ```git clone https://github.com/jugen667/saturn_translater```
 
 Fast test file with tree as png and svg :
 
-```make clean && make all && bin/saturncc temp/test.c && tools/graph-create.sh```
+```make clean && make all && bin/saturncc -a temp/test.c && tools/graph-create.sh```
 
 # Road Map
 
@@ -34,21 +34,32 @@ Fast test file with tree as png and svg :
 ## ~~1st parsing : ensure we are doing operations correctly (type checks etc)~~
 
 
-## Instruction Set implementation 
+## ~~Instruction Set implementation~~ 
 
 ### ~~Check what we need it in our arch~~
 
-- registers setups
-- instuctions list
-- add ARM instruction set compatibility and compilation option
-- 
-## TO DO IN THE FUTURE ##
+- ~~registers setups~~
+- ~~instuctions list~~
+- add ARM instruction set compatibility and compilation option 
 
-- Pointers maybe ?
-- Address management (func loop etc)
-- String support
-- Add support for more C function (incremental operator ?)
 
 ## 2nd parsing : translate nodes to instructions with the instructions set
 
+
+## TO DO IN THE FUTURE ##
+
+- Pointers maybe ?
+- ~~Address management (func loop etc)~~
+- String support
+- Add support for more C function (incremental operator ?)
+
+
 # KNOWN BUGS 
+
+- Having more than one multi-line comment will consider the code in between the 2 comment block as a whole comment block
+```C
+/* Test file */    
+// Test Comment
+int start = 0;
+/* int end = 5; */   <-- Will consider this comment terminator as the terminator of the first comment
+```
