@@ -54,7 +54,7 @@ IDF                 {LETTER}({LETTER}|{FIGURE}|'_')*
 SPECCHAR            [\x09-\x0E]
 STRING_CHAR         [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E] 
 STRING              \"({STRING_CHAR}|\\\"|\\n)*\"
-COMMENT             \/\/({STRING_CHAR}|{STRING})*(\\n)*
+COMMENT             \/\/({STRING_CHAR}|{STRING}|\t)*(\\n)*
 COMMENTMUL          \/\*({STRING_CHAR}|{STRING}|{SPECCHAR})*\*\/
 SEPARATOR           [ \t\n]+
 /* ==== TO DO POINTERS MAYBE ? ==== */
