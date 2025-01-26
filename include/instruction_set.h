@@ -59,6 +59,7 @@ void add_const_register(short dest_reg, short field, short constant);
 void sub_register(short dest_reg, short reg_1, short field);
 void sub_const_register(short dest_reg, short field, short constant);
 void mul_register(short dest_reg, short reg_1, short field);
+void mod_register(short dest_reg, short reg_1, short field);
 void div_register(short dest_reg, short reg_1, short field);
 void one_complement(short dest_reg, short field);
 void two_complement(short dest_reg, short field);
