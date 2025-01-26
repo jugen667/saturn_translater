@@ -460,7 +460,6 @@ void analyse_passe_1(node_t root)
 				case NODE_BOR :
 				case NODE_BXOR :
 				case NODE_SRL :
-				case NODE_SRA :
 				case NODE_SLL :
 					root->opr[i]->type = TYPE_INT;
 				break;
@@ -595,7 +594,6 @@ void analyse_passe_1(node_t root)
 			root->nature == NODE_BOR ||
 			root->nature == NODE_BXOR ||
 			root->nature == NODE_SRL ||
-			root->nature == NODE_SRA ||
 			root->nature == NODE_SLL )
 		{
 			check_int_op(root);

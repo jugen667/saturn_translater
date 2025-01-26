@@ -101,7 +101,7 @@ void affect_variable(node_t node)
 	// affect an ident with a intval
 	if((node->opr[0]->nature == NODE_IDENT && 
 		node->opr[0]->type == TYPE_INT) && 
-		(node->opr[1]->nature == NODE_INTVAL))
+		node->opr[1]->nature == NODE_INTVAL)
 	{
 		// pointer = address 
 		load_pointer(D0, node->opr[0]->address);
@@ -113,8 +113,8 @@ void affect_variable(node_t node)
 
 	// affect an ident with a floatval
 	if((node->opr[0]->nature == NODE_IDENT && 
-		node->opr[0]->type == TYPE_FLOAT)&& 
-		(node->opr[1]->nature == NODE_FLOATVAL))
+		node->opr[0]->type == TYPE_FLOAT) && 
+		node->opr[1]->nature == NODE_FLOATVAL)
 	{
 		// pointer = address 
 		load_pointer(D0, node->opr[0]->address);
@@ -158,7 +158,6 @@ void create_lt_instr(node_t node)
 			case NODE_BOR :
 			case NODE_BXOR :
 			case NODE_SRL :
-			case NODE_SRA :
 			case NODE_SLL :
 			default : 
 			break;
@@ -194,6 +193,9 @@ void create_lt_instr(node_t node)
 // NODE_NE
 // NODE_GE
 // NODE_LE
+// NODE_AND
+// NODE_OR
+// NODE_NOT
 
 
 // create an addition
@@ -227,17 +229,21 @@ void create_plus_instr(node_t node)
 				create_mul_instr(node->opr[0]);
 			break;
 			case NODE_DIV :
-				create_div_instr(node->opr[1]);
+				create_div_instr(node->opr[0]);
 			break;
 			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
 			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
 			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
 			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
 			case NODE_BNOT :
-			case NODE_AND :
-			case NODE_OR :
-			case NODE_NOT :
-			case NODE_SRA :
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -273,14 +279,18 @@ void create_plus_instr(node_t node)
 				create_div_instr(node->opr[1]);
 			break;
 			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
 			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
 			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
 			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
 			case NODE_BNOT :
-			case NODE_AND :
-			case NODE_OR :
-			case NODE_NOT :
-			case NODE_SRA :
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -319,17 +329,21 @@ void create_minus_instr(node_t node)
 				create_mul_instr(node->opr[0]);
 			break;
 			case NODE_DIV :
-				create_div_instr(node->opr[1]);
+				create_div_instr(node->opr[0]);
 			break;
 			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
 			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
 			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
 			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
 			case NODE_BNOT :
-			case NODE_AND :
-			case NODE_OR :
-			case NODE_NOT :
-			case NODE_SRA :
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -365,14 +379,18 @@ void create_minus_instr(node_t node)
 				create_div_instr(node->opr[1]);
 			break;
 			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
 			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
 			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
 			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
 			case NODE_BNOT :
-			case NODE_AND :
-			case NODE_OR :
-			case NODE_NOT :
-			case NODE_SRA :
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -410,17 +428,21 @@ void create_mul_instr(node_t node)
 				create_mul_instr(node->opr[0]);
 			break;
 			case NODE_DIV :
-				create_div_instr(node->opr[1]);
+				create_div_instr(node->opr[0]);
 			break;
 			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
 			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
 			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
 			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
 			case NODE_BNOT :
-			case NODE_AND :
-			case NODE_OR :
-			case NODE_NOT :
-			case NODE_SRA :
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -458,14 +480,18 @@ void create_mul_instr(node_t node)
 				create_div_instr(node->opr[1]);
 			break;
 			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
 			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
 			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
 			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
 			case NODE_BNOT :
-			case NODE_AND :
-			case NODE_OR :
-			case NODE_NOT :
-			case NODE_SRA :
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -473,7 +499,7 @@ void create_mul_instr(node_t node)
 	}
 }
 
-// create an multiplication
+// create an division
 void create_div_instr(node_t node)
 {
 	if(node->opr[0]->nature == NODE_IDENT)
@@ -503,17 +529,21 @@ void create_div_instr(node_t node)
 				create_mul_instr(node->opr[0]);
 			break;
 			case NODE_DIV :
-				create_div_instr(node->opr[1]);
+				create_div_instr(node->opr[0]);
 			break;
 			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
 			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
 			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
 			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
 			case NODE_BNOT :
-			case NODE_AND :
-			case NODE_OR :
-			case NODE_NOT :
-			case NODE_SRA :
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -551,14 +581,524 @@ void create_div_instr(node_t node)
 				create_div_instr(node->opr[1]);
 			break;
 			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
 			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
 			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
 			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
 			case NODE_BNOT :
-			case NODE_AND :
-			case NODE_OR :
-			case NODE_NOT :
-			case NODE_SRA :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+}
+
+// create an modulo
+void create_mod_instr(node_t node)
+{
+	if(node->opr[0]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
+	}
+	else if (node->opr[0]->nature == NODE_INTVAL 	|| 
+			 node->opr[0]->nature == NODE_FLOATVAL	||
+			 node->opr[0]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[0]->value, 0);
+	}
+	else
+	{
+		switch(node->opr[0]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[0]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[0]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[0]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[0]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+	if(node->opr[1]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[1]->address);
+		// exchnage A and DAT
+		reading_memory(D0, C, W_FIELD);
+		mod_register(A, C, W_FIELD);
+	}
+	else if (node->opr[1]->nature == NODE_INTVAL 	|| 
+			 node->opr[1]->nature == NODE_FLOATVAL	||
+			 node->opr[1]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[1]->value, 1);
+		mod_register(A, C, W_FIELD);
+	}
+	else
+	{
+		switch(node->opr[1]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[1]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[1]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[1]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+}
+
+// create an bitwise and
+void create_band_instr(node_t node)
+{
+	if(node->opr[0]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
+	}
+	else if (node->opr[0]->nature == NODE_INTVAL 	|| 
+			 node->opr[0]->nature == NODE_FLOATVAL	||
+			 node->opr[0]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[0]->value, 0);
+	}
+	else
+	{
+		switch(node->opr[0]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[0]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[0]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[0]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[0]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+	if(node->opr[1]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[1]->address);
+		// exchnage A and DAT
+		reading_memory(D0, C, W_FIELD);
+		logical_AND(A, C, W_FIELD);
+	}
+	else if (node->opr[1]->nature == NODE_INTVAL 	|| 
+			 node->opr[1]->nature == NODE_FLOATVAL	||
+			 node->opr[1]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[1]->value, 1);
+		logical_AND(A, C, W_FIELD);
+	}
+	else
+	{
+		switch(node->opr[1]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[1]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[1]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[1]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+}
+
+// create an bitwise or
+void create_bor_instr(node_t node)
+{
+	if(node->opr[0]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
+	}
+	else if (node->opr[0]->nature == NODE_INTVAL 	|| 
+			 node->opr[0]->nature == NODE_FLOATVAL	||
+			 node->opr[0]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[0]->value, 0);
+	}
+	else
+	{
+		switch(node->opr[0]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[0]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[0]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[0]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[0]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+	if(node->opr[1]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[1]->address);
+		// exchnage A and DAT
+		reading_memory(D0, C, W_FIELD);
+		logical_OR(A, C, W_FIELD);
+	}
+	else if (node->opr[1]->nature == NODE_INTVAL 	|| 
+			 node->opr[1]->nature == NODE_FLOATVAL	||
+			 node->opr[1]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[1]->value, 1);
+		logical_OR(A, C, W_FIELD);
+	}
+	else
+	{
+		switch(node->opr[1]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[1]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[1]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[1]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+
+	}
+}
+
+// create an bitwise xor
+void create_bxor_instr(node_t node)
+{
+	if(node->opr[0]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
+	}
+	else if (node->opr[0]->nature == NODE_INTVAL 	|| 
+			 node->opr[0]->nature == NODE_FLOATVAL	||
+			 node->opr[0]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[0]->value, 0);
+	}
+	else
+	{
+		switch(node->opr[0]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[0]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[0]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[0]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[0]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+	if(node->opr[1]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[1]->address);
+		// exchnage A and DAT
+		reading_memory(D0, C, W_FIELD);
+		logical_XOR(A, C, W_FIELD);
+	}
+	else if (node->opr[1]->nature == NODE_INTVAL 	|| 
+			 node->opr[1]->nature == NODE_FLOATVAL	||
+			 node->opr[1]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[1]->value, 1);
+		logical_XOR(A, C, W_FIELD);
+	}
+	else
+	{
+		switch(node->opr[1]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[1]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[1]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[1]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+}
+
+// create an bitwise not
+void create_bnot_instr(node_t node)
+{
+	if(node->opr[0]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
+	}
+	else if (node->opr[0]->nature == NODE_INTVAL 	|| 
+			 node->opr[0]->nature == NODE_FLOATVAL	||
+			 node->opr[0]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[0]->value, 0);
+	}
+	else
+	{
+		switch(node->opr[0]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[0]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[0]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[0]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[0]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
+			case NODE_BNOT :
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+	if(node->opr[1]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[1]->address);
+		// exchnage A and DAT
+		reading_memory(D0, C, W_FIELD);
+		logical_XOR(A, C, W_FIELD);
+	}
+	else if (node->opr[1]->nature == NODE_INTVAL 	|| 
+			 node->opr[1]->nature == NODE_FLOATVAL	||
+			 node->opr[1]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[1]->value, 1);
+		logical_XOR(A, C, W_FIELD);
+	}
+	else
+	{
+		switch(node->opr[1]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[1]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[1]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[1]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[1]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[1]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[1]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[1]);
+			break;
+			case NODE_BNOT :
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -566,21 +1106,18 @@ void create_div_instr(node_t node)
 	}
 }
 // dupe above for every operation possible
-// NODE_PLUS OK
-// NODE_MINUS OK
-// NODE_MUL OK
-// NODE_DIV OK
-// NODE_MOD
-// NODE_BAND
-// NODE_BOR
-// NODE_BXOR
+// NODE_PLUS 	OK
+// NODE_MINUS 	OK
+// NODE_MUL 	OK
+// NODE_DIV 	OK
+// NODE_MOD 	OK
+// NODE_BAND	OK
+// NODE_BOR 	OK
+// NODE_BXOR	OK
 // NODE_BNOT
-// NODE_AND
-// NODE_OR
-// NODE_NOT
-// NODE_SRA
 // NODE_SLL
 // NODE_SRL
+
 
 
 /* --------------- Main functions --------------- */
@@ -642,59 +1179,38 @@ void gen_code_passe_2(node_t root)
 						blockParsed = 1;
 					}
 
-					// instruction creation
-					if (root->opr[i]->opr[1]->nature == NODE_PLUS)
+					switch(root->opr[i]->opr[1]->nature)
 					{
-						create_plus_instr(root->opr[i]->opr[1]);
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_MINUS)
-					{
-						create_minus_instr(root->opr[i]->opr[1]);
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_MUL)
-					{
-						create_mul_instr(root->opr[i]->opr[1]);
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_DIV)
-					{
-						create_div_instr(root->opr[i]->opr[1]);
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_MOD)
-					{
-						// create_mod_instr(root->opr[i]->opr[1]);
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_BAND)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_BOR)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_BXOR)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_BNOT)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_AND)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_OR)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_NOT)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_SRA)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_SLL)
-					{
-					}
-					if (root->opr[i]->opr[1]->nature == NODE_SRL)
-					{
-					}
-					else
-					{
+						case NODE_PLUS :
+							create_plus_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_MINUS :
+							create_minus_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_MUL :
+							create_mul_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_DIV :
+							create_div_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_MOD :
+							create_mod_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_BAND :
+							create_band_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_BOR :
+							create_bor_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_BXOR :
+							create_bxor_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_BNOT :
+						case NODE_SLL :
+						case NODE_SRL :
+						break;
+						default:
+						break;
 					}
 					load_pointer(D0, root->opr[i]->opr[0]->address);
 					writing_memory(D0, A, W_FIELD);

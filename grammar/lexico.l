@@ -94,8 +94,7 @@ SEPARATOR           [ \t\n]+
 ")"             RETURN(TOK_RPAR);
 "{"             RETURN(TOK_LACC);
 "}"             RETURN(TOK_RACC);
-">>"            RETURN(TOK_SRA);
-">>>"           RETURN(TOK_SRL);
+">>"            RETURN(TOK_SRL);
 "<<"            RETURN(TOK_SLL);
 ">="            RETURN(TOK_GE);
 "<="            RETURN(TOK_LE);

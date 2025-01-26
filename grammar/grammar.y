@@ -80,7 +80,7 @@ node_t make_node_main(node_t node_next);
 %left TOK_BAND
 %left TOK_EQ TOK_NE
 %nonassoc TOK_GT TOK_LT TOK_GE TOK_LE
-%nonassoc TOK_SRL TOK_SRA TOK_SLL
+%nonassoc TOK_SRL TOK_SLL
 /* a / b / c = (a / b) / c AND a - b - c = (a - b) - c */
 %left TOK_PLUS TOK_MINUS
 %left TOK_MUL TOK_DIV TOK_MOD
@@ -347,10 +347,6 @@ expr                    : expr TOK_MUL expr
                         | expr TOK_SRL expr
                         {
                             $$ = make_node(NODE_SRL, 2, $1, $3);
-                        }
-                        | expr TOK_SRA expr
-                        {
-                            $$ = make_node(NODE_SRA, 2, $1, $3);
                         }
                         | expr TOK_SLL expr
                         {

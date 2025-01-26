@@ -1060,8 +1060,6 @@ void save_IN_A(void)
 {
 	// === BUG USING 'A=IN' ===
 	// === USE A SUBROUTINE ===
-	// char retStr[6];
-	// sprintf(retStr, "A=IN");
 	char retStr[13];
 	if (target == 48)
 	{
@@ -1079,8 +1077,6 @@ void save_IN_C(void)
 {
 	// === BUG USING 'C=IN' ===
 	// === USE A SUBROUTINE ===
-	// char retStr[6];
-	// sprintf(retStr, "C=IN");
 	char retStr[13];
 	if (target == 48)
 	{

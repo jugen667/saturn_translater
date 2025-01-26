@@ -21,17 +21,15 @@ void create_gt_instr(node_t node);
 void create_ge_instr(node_t node);
 void create_plus_instr(node_t node);
 void create_minus_instr(node_t node);
-void create_uminus_instr(node_t node);
 void create_mul_instr(node_t node);
 void create_div_instr(node_t node);
-void create_and_instr(node_t node);
 void create_mod_instr(node_t node);
-void create_or_instr(node_t node);
+void create_band_instr(node_t node);
+void create_bor_instr(node_t node);
 void create_bnot_instr(node_t node);
-void create_not_instr(node_t node);
-void create_sra_instr(node_t node);
+void create_bxor_instr(node_t node);
 void create_sll_instr(node_t node);
 void create_srl_instr(node_t node);
-void create_bxor_instr(node_t node);
+void create_not_instr(node_t node);
 
 #endif

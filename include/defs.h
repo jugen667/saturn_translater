@@ -154,7 +154,6 @@ typedef enum node_nature_s {
     NODE_NOT,
     NODE_BNOT,
     NODE_SLL,
-    NODE_SRA,
     NODE_SRL,
     NODE_UMINUS,
     NODE_AFFECT,

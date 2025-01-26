@@ -327,7 +327,6 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
         case NODE_BAND:
         case NODE_BOR:
         case NODE_BXOR:
-        case NODE_SRA:
         case NODE_SRL:
         case NODE_SLL:
         case NODE_NOT:
@@ -381,7 +380,6 @@ void dump_tree(node_t prog_root, const char * dotname)
 {
 
     FILE * f;
-
     f = fopen(dotname, "w");
     fprintf(f, "digraph global_vars {\n");
     dump_tree2dot(f, prog_root);
@@ -485,8 +483,6 @@ const char * node_nature2string(node_nature t)
             return "BXOR";
         case NODE_SLL:
             return "SLL";
-        case NODE_SRA:
-            return "SRA";
         case NODE_SRL:
             return "SRL";
         case NODE_NOT:
@@ -546,10 +542,8 @@ const char * node_nature2symb(node_nature t)
             return "|";
         case NODE_BXOR:
             return "^";
-        case NODE_SRA:
-            return ">>";
         case NODE_SRL:
-            return ">>>";
+            return ">>";
         case NODE_SLL:
             return "<<";
         case NODE_NOT:
