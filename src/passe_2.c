@@ -149,7 +149,6 @@ void create_lt_instr(node_t node)
 		switch(node->opr[1]->nature){
 			case NODE_PLUS :
 			case NODE_MINUS :
-			case NODE_UMINUS :
 			case NODE_DIV :
 			case NODE_MUL :
 			case NODE_MOD :
@@ -244,6 +243,8 @@ void create_plus_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -291,6 +292,8 @@ void create_plus_instr(node_t node)
 				create_bxor_instr(node->opr[1]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[1]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -344,6 +347,8 @@ void create_minus_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -391,6 +396,8 @@ void create_minus_instr(node_t node)
 				create_bxor_instr(node->opr[1]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[1]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -443,6 +450,8 @@ void create_mul_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -492,6 +501,8 @@ void create_mul_instr(node_t node)
 				create_bxor_instr(node->opr[1]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[1]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -544,6 +555,8 @@ void create_div_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -593,6 +606,8 @@ void create_div_instr(node_t node)
 				create_bxor_instr(node->opr[1]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[1]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -645,6 +660,8 @@ void create_mod_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -694,6 +711,8 @@ void create_mod_instr(node_t node)
 				create_bxor_instr(node->opr[1]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[1]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -746,6 +765,8 @@ void create_band_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -795,6 +816,8 @@ void create_band_instr(node_t node)
 				create_bxor_instr(node->opr[1]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[1]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -847,6 +870,8 @@ void create_bor_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -896,6 +921,8 @@ void create_bor_instr(node_t node)
 				create_bxor_instr(node->opr[1]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[1]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -949,6 +976,8 @@ void create_bxor_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -998,6 +1027,8 @@ void create_bxor_instr(node_t node)
 				create_bxor_instr(node->opr[1]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[1]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
@@ -1050,62 +1081,25 @@ void create_bnot_instr(node_t node)
 				create_bxor_instr(node->opr[0]);
 			break;
 			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
+			break;	
 			case NODE_SLL :
 			case NODE_SRL :
 			break;
 		}
 	}
-	if(node->opr[1]->nature == NODE_IDENT)
-	{
-		// pointer = address 
-		load_pointer(D0, node->opr[1]->address);
-		// exchnage A and DAT
-		reading_memory(D0, C, W_FIELD);
-		logical_XOR(A, C, W_FIELD);
-	}
-	else if (node->opr[1]->nature == NODE_INTVAL 	|| 
-			 node->opr[1]->nature == NODE_FLOATVAL	||
-			 node->opr[1]->nature == NODE_BOOLVAL)
-	{
-		load_register(node->opr[1]->value, 1);
-		logical_XOR(A, C, W_FIELD);
-	}
-	else
-	{
-		switch(node->opr[1]->nature)
-		{
-			case NODE_PLUS :
-				create_plus_instr(node->opr[1]);
-			break;
-			case NODE_MINUS :
-				create_minus_instr(node->opr[1]);
-			break;
-			case NODE_MUL :
-				create_mul_instr(node->opr[1]);
-			break;
-			case NODE_DIV :
-				create_div_instr(node->opr[1]);
-			break;
-			case NODE_MOD :
-				create_mod_instr(node->opr[1]);
-			break;
-			case NODE_BAND :
-				create_band_instr(node->opr[1]);
-			break;
-			case NODE_BOR :
-				create_bor_instr(node->opr[1]);
-			break;
-			case NODE_BXOR :
-				create_bxor_instr(node->opr[1]);
-			break;
-			case NODE_BNOT :
-			case NODE_SLL :
-			case NODE_SRL :
-			break;
-		}
-	}
+	one_complement(A, W_FIELD);
 }
-// dupe above for every operation possible
+
+// create a shift to the left
+void create_sll_instr(node_t node)
+{
+}
+// create a shift to the right
+void create_srl_instr(node_t node)
+{
+}
+// every integrer/float operation possible
 // NODE_PLUS 	OK
 // NODE_MINUS 	OK
 // NODE_MUL 	OK
@@ -1114,9 +1108,9 @@ void create_bnot_instr(node_t node)
 // NODE_BAND	OK
 // NODE_BOR 	OK
 // NODE_BXOR	OK
-// NODE_BNOT
-// NODE_SLL
-// NODE_SRL
+// NODE_SLL		TO DO BUT ANNOYING
+// NODE_SRL		TO DO BUT ANNOYING
+// NODE_BNOT	OK
 
 
 
@@ -1206,6 +1200,8 @@ void gen_code_passe_2(node_t root)
 							create_bxor_instr(root->opr[i]->opr[1]);
 						break;
 						case NODE_BNOT :
+							create_bnot_instr(root->opr[i]->opr[1]);
+						break;	
 						case NODE_SLL :
 						case NODE_SRL :
 						break;

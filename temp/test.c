@@ -3,7 +3,7 @@
 int start = 0;
 int end = 5;
 void main(){
-	start = (3 ^ 3) ^ 3;
+	start = (1>>3);
 	// int i;
 	// start = 4 % (3 ^ 3);
 	// int sum = 0;
