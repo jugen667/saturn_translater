@@ -63,3 +63,17 @@ Fast test file with tree as png and svg :
 int start = 0;
 /* int end = 5; */   <-- Will consider this comment terminator as the terminator of the first comment
 ```
+
+- Priority parenthesis not on point
+```C
+int i;
+start = 1 * (2 + 2); <-- Wont take into account parenthesis
+int sum = 0;
+```
+
+- Substraction to improve
+```C
+int i;
+start = 1-2; 		<-- Compiler will consider -2 as a integer and result in syntax error
+int sum = 0;
+```
