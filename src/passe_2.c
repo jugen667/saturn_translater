@@ -211,8 +211,7 @@ void create_plus_instr(node_t node)
 			 node->opr[0]->nature == NODE_FLOATVAL	||
 			 node->opr[0]->nature == NODE_BOOLVAL)
 	{
-		register_zero(A, W_FIELD);
-		add_const_register(A, W_FIELD, node->opr[0]->value);
+		load_register(node->opr[0]->value, 0);	
 	}
 	else
 	{
@@ -256,12 +255,14 @@ void create_plus_instr(node_t node)
 		load_pointer(D0, node->opr[1]->address);
 		// exchnage A and DAT
 		reading_memory(D0, A, W_FIELD);
+		add_register(A, C, W_FIELD);
 	}
 	else if (node->opr[1]->nature == NODE_INTVAL 	|| 
 			 node->opr[1]->nature == NODE_FLOATVAL	||
 			 node->opr[1]->nature == NODE_BOOLVAL)
 	{
-		add_const_register(A, W_FIELD, node->opr[1]->value);
+		load_register(node->opr[1]->value, 1);
+		add_register(A, C, W_FIELD);
 	}
 	else
 	{
@@ -315,8 +316,7 @@ void create_minus_instr(node_t node)
 			 node->opr[0]->nature == NODE_FLOATVAL	||
 			 node->opr[0]->nature == NODE_BOOLVAL)
 	{
-		register_zero(A, W_FIELD);
-		sub_const_register(A, W_FIELD, node->opr[0]->value);
+		load_register(node->opr[0]->value, 0);
 	}
 	else
 	{
@@ -359,13 +359,15 @@ void create_minus_instr(node_t node)
 		// pointer = address 
 		load_pointer(D0, node->opr[1]->address);
 		// exchnage A and DAT
-		reading_memory(D0, A, W_FIELD);
+		reading_memory(D0, C, W_FIELD);
+		sub_register(A, C, W_FIELD);
 	}
 	else if (node->opr[1]->nature == NODE_INTVAL 	|| 
 			 node->opr[1]->nature == NODE_FLOATVAL	||
 			 node->opr[1]->nature == NODE_BOOLVAL)
 	{
-		sub_const_register(A, W_FIELD, node->opr[1]->value);
+		load_register(node->opr[1]->value, 1);
+		sub_register(A, C, W_FIELD);
 	}
 	else
 	{
