@@ -70,10 +70,3 @@ int i;
 start = 1 * (2 + 2); <-- Wont take into account parenthesis
 int sum = 0;
 ```
-
-- Substraction to improve
-```C
-int i;
-start = 1-2; 		<-- Compiler will consider -2 as a integer and result in syntax error
-int sum = 0;
-```
