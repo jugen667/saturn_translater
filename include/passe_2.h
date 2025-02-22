@@ -21,6 +21,7 @@ void create_gt_instr(node_t node);
 void create_ge_instr(node_t node);
 void create_plus_instr(node_t node);
 void create_minus_instr(node_t node);
+void create_uminus_instr(node_t node);
 void create_mul_instr(node_t node);
 void create_div_instr(node_t node);
 void create_mod_instr(node_t node);

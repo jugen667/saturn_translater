@@ -223,6 +223,9 @@ void create_plus_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -273,6 +276,9 @@ void create_plus_instr(node_t node)
 			break;
 			case NODE_MINUS :
 				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[1]);
 			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[1]);
@@ -328,6 +334,9 @@ void create_minus_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -379,6 +388,9 @@ void create_minus_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[1]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[1]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[1]);
 			break;
@@ -399,6 +411,64 @@ void create_minus_instr(node_t node)
 			break;
 			case NODE_BNOT :
 				create_bnot_instr(node->opr[1]);
+			break;	
+			case NODE_SLL :
+			case NODE_SRL :
+			break;
+		}
+	}
+}
+
+// create a opposite
+void create_uminus_instr(node_t node)
+{
+	if(node->opr[0]->nature == NODE_IDENT)
+	{
+		// pointer = address 
+		load_pointer(D0, node->opr[0]->address);
+		// exchnage A and DAT
+		reading_memory(D0, A, W_FIELD);
+	}
+	else if (node->opr[0]->nature == NODE_INTVAL 	|| 
+			 node->opr[0]->nature == NODE_FLOATVAL	||
+			 node->opr[0]->nature == NODE_BOOLVAL)
+	{
+		load_register(node->opr[0]->value, 0);
+		two_complement(A, W_FIELD);
+	}
+	else
+	{
+		switch(node->opr[0]->nature)
+		{
+			case NODE_PLUS :
+				create_plus_instr(node->opr[0]);
+			break;
+			case NODE_MINUS :
+				create_minus_instr(node->opr[0]);
+			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
+			case NODE_MUL :
+				create_mul_instr(node->opr[0]);
+			break;
+			case NODE_DIV :
+				create_div_instr(node->opr[0]);
+			break;
+			case NODE_MOD :
+				create_mod_instr(node->opr[0]);
+			break;
+			case NODE_BAND :
+				create_band_instr(node->opr[0]);
+			break;
+			case NODE_BOR :
+				create_bor_instr(node->opr[0]);
+			break;
+			case NODE_BXOR :
+				create_bxor_instr(node->opr[0]);
+			break;
+			case NODE_BNOT :
+				create_bnot_instr(node->opr[0]);
 			break;	
 			case NODE_SLL :
 			case NODE_SRL :
@@ -433,6 +503,9 @@ void create_mul_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -483,6 +556,9 @@ void create_mul_instr(node_t node)
 			break;
 			case NODE_MINUS :
 				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[1]);
 			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[1]);
@@ -538,6 +614,9 @@ void create_div_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -588,6 +667,9 @@ void create_div_instr(node_t node)
 			break;
 			case NODE_MINUS :
 				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[1]);
 			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[1]);
@@ -643,6 +725,9 @@ void create_mod_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -693,6 +778,9 @@ void create_mod_instr(node_t node)
 			break;
 			case NODE_MINUS :
 				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[1]);
 			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[1]);
@@ -748,6 +836,9 @@ void create_band_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -798,6 +889,9 @@ void create_band_instr(node_t node)
 			break;
 			case NODE_MINUS :
 				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[1]);
 			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[1]);
@@ -853,6 +947,9 @@ void create_bor_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -903,6 +1000,9 @@ void create_bor_instr(node_t node)
 			break;
 			case NODE_MINUS :
 				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[1]);
 			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[1]);
@@ -959,6 +1059,9 @@ void create_bxor_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -1009,6 +1112,9 @@ void create_bxor_instr(node_t node)
 			break;
 			case NODE_MINUS :
 				create_minus_instr(node->opr[1]);
+			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[1]);
 			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[1]);
@@ -1064,6 +1170,9 @@ void create_bnot_instr(node_t node)
 			case NODE_MINUS :
 				create_minus_instr(node->opr[0]);
 			break;
+			case NODE_UMINUS :
+				create_uminus_instr(node->opr[0]);
+			break;
 			case NODE_MUL :
 				create_mul_instr(node->opr[0]);
 			break;
@@ -1104,6 +1213,7 @@ void create_srl_instr(node_t node)
 // every integrer/float operation possible
 // NODE_PLUS 	OK
 // NODE_MINUS 	OK
+// NODE_UMINUS 	
 // NODE_MUL 	OK
 // NODE_DIV 	OK
 // NODE_MOD 	OK
@@ -1182,6 +1292,9 @@ void gen_code_passe_2(node_t root)
 						break;
 						case NODE_MINUS :
 							create_minus_instr(root->opr[i]->opr[1]);
+						break;
+						case NODE_UMINUS :
+							create_uminus_instr(root->opr[i]->opr[1]);
 						break;
 						case NODE_MUL :
 							create_mul_instr(root->opr[i]->opr[1]);

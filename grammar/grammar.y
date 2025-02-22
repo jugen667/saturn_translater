@@ -28,7 +28,7 @@ extern bool stop_after_syntax;
 extern bool stop_after_verif;
 extern bool verboseDebug;
 extern char * outfile;
-
+static bool isPrio = false;
 
 /* prototypes */
 int yylex(void);
@@ -138,7 +138,6 @@ vardecl                 : type listtypedecl TOK_SEMICOL
                             $$ = make_node(NODE_DECLS, 2, $1, $2);
                         }
                         ;
-
 
 type                    : TOK_INT
                         {
@@ -282,19 +281,33 @@ block                   :  TOK_LACC list TOK_RACC
 
 expr                    : expr TOK_MUL expr
                         {
+                            printf("MUL : isPrio = %d\r\n", isPrio);
+                            isPrio = false;
                             $$ = make_node(NODE_MUL, 2, $1, $3);
                         }
                         | expr TOK_DIV expr
                         {
+                            printf("DIV : isPrio = %d\r\n", isPrio);
+                            isPrio = false;
                             $$ = make_node(NODE_DIV, 2, $1, $3);
                         }
                         | expr TOK_PLUS expr
                         {
+                            printf("PLUS : isPrio = %d\r\n", isPrio);
+                            isPrio = false;
                             $$ = make_node(NODE_PLUS, 2, $1, $3);
                         }
                         | expr TOK_MINUS expr
                         {
+                            printf("MINUS : isPrio = %d\r\n", isPrio);
+                            isPrio = false;
                             $$ = make_node(NODE_MINUS, 2, $1, $3);
+                        }
+                        | TOK_MINUS expr %prec TOK_UMINUS
+                        {
+                            printf("UMINUS : isPrio = %d\r\n", isPrio);
+                            isPrio = false;
+                            $$ = make_node(NODE_UMINUS, 1, $2);
                         }
                         | expr TOK_MOD expr
                         {
@@ -362,7 +375,11 @@ expr                    : expr TOK_MUL expr
                         }
                         | TOK_LPAR expr TOK_RPAR
                         {
+                            // priority
+                            printf("Priority\r\n");
+                            isPrio = true;
                             $$ = $2;
+
                         }
                         | ident TOK_AFFECT expr
                         {
@@ -433,7 +450,7 @@ node_t make_node(node_nature nature, int nops, ...) {
     node->lineno = yylineno;
     node->nature = nature;
     node->type = TYPE_NONE;
-    node->value = 0; 
+    node->value = 0;
     va_start(ap, nops);
 
     node->opr = (node_t *) calloc(nops, sizeof(node_s)); // ensure every sub nodes are initialized
