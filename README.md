@@ -56,14 +56,6 @@ Fast test file with tree as png and svg :
 
 # KNOWN BUGS 
 
-- Having more than one multi-line comment will consider the code in between the 2 comment block as a whole comment block
-```C
-/* Test file */    
-// Test Comment
-int start = 0;
-/* int end = 5; */   <-- Will consider this comment terminator as the terminator of the first comment
-```
-
 - Priority parenthesis not on point
 ```C
 int i;
