@@ -56,7 +56,7 @@ These loops and branches have the same syntax as C
 - **Direct Assignement** (=)
 - **Comma** as a separator for definition and assignement 
 > Ex : int a = 1 **,** int b = 2;
-- **Comment** (// and /\*\*/)
+- **Comment** (// and /\*\*/) : not supporting nested comments 
 
 ### Not Supported 
 - **Incremental operators** (++, --)
