@@ -35,11 +35,24 @@ extern int yydebug;
 #else
 #define RETURN(token) ({ return token; })
 #endif
-
+/* == Multiline comment check */
+static int input ( void );
+static void yyunput ( int c, char *buf_ptr  );
+void comment()
+{
+    char c1, c2;
+loop:
+    while ((c1 = input()) != '*' && c1 != 0);
+    if ((c2 = input()) != '/' && c1 != 0) {
+        unput(c2);
+        goto loop;
+    }
+}
 
 %}
 
 %option yylineno
+
 
 
 LETTER              [a-zA-Z]
@@ -55,7 +68,6 @@ SPECCHAR            [\x09-\x0E]
 STRING_CHAR         [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E] 
 STRING              \"({STRING_CHAR}|\\\"|\\n)*\"
 COMMENT             \/\/({STRING_CHAR}|{STRING}|\t)*(\\n)*
-COMMENTMUL          \/\*({STRING_CHAR}|{STRING}|{SPECCHAR})*\*\/
 SEPARATOR           [ \t\n]+
 /* ==== TO DO POINTERS MAYBE ? ==== */
 
@@ -102,7 +114,7 @@ SEPARATOR           [ \t\n]+
 "!="            RETURN(TOK_NE);
 "&&"            RETURN(TOK_AND);
 "||"            RETURN(TOK_OR);
-
+"\/\*"          {comment();}
 
 
 
@@ -144,8 +156,7 @@ SEPARATOR           [ \t\n]+
 {COMMENT} {
 }
 
-{COMMENTMUL} {
-}
+
 
 
 [ \t\n]+
