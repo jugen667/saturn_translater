@@ -152,7 +152,7 @@ void parse_args(int argc, char ** argv)
                     case 'a':
                         disable_tree_dump = 0;
                         printf(BOLD "Compilation tree will be dumped\n" NC);
-                        printf(BOLD ".dot files will be created\n" NC);
+                        printf(BOLD ".dot files will be created" NC "\n");
                     break;
 					case 't':
 						test_int_value(48,49,atoi(argv[i+1]), argv[i]);

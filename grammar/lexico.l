@@ -16,15 +16,17 @@
 #include "../include/common.h"
 
 #include "../include/y.tab.h"
-
 int yyparse(node_t * program_root);
 void analyse_tree(node_t root);
+static int input ( void );
+static void yyunput ( int c, char *buf_ptr  );
 
 
 char * infile = NULL;
 char * outfile = DEFAULT_OUTFILE;
 bool stop_after_syntax = false;
 bool stop_after_verif = false;
+bool isPrio = false;
 
 #if YYDEBUG
 extern int yydebug;
@@ -35,9 +37,8 @@ extern int yydebug;
 #else
 #define RETURN(token) ({ return token; })
 #endif
+
 /* == Multiline comment check */
-static int input ( void );
-static void yyunput ( int c, char *buf_ptr  );
 void comment()
 {
     char c1, c2;

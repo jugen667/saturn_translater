@@ -668,7 +668,7 @@ void ex_reg_work_save(short reg_1, short reg_2, short field)
 // load a pointer (adress or nibble is size 2, 4 or 5 only)
 void load_pointer(short reg_1, int adress) 
 {
-	char retStr[9];
+	char retStr[10];
 	sprintf(retStr, "%s= %.05x",pointer_register_str[reg_1],adress);
 	dump_instruction(retStr, outfileDescriptor);
 }

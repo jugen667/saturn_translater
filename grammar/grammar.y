@@ -16,10 +16,10 @@
 
 #include "../include/defs.h"
 #include "../include/common.h"
-#include "../include/objects.h"
 #include "../include/passe_1.h"
 #include "../include/passe_2.h"
-#include "../include/instruction_set.h"
+// #include "../include/objects.h"
+// #include "../include/instruction_set.h"
 
 
 
@@ -28,7 +28,7 @@ extern bool stop_after_syntax;
 extern bool stop_after_verif;
 extern bool verboseDebug;
 extern char * outfile;
-static bool isPrio = false;
+extern bool isPrio;
 
 /* prototypes */
 int yylex(void);
@@ -279,34 +279,36 @@ block                   :  TOK_LACC list TOK_RACC
                         ;
 
 
-expr                    : expr TOK_MUL expr
+expr                    : TOK_LPAR expr TOK_RPAR
+                        {
+                            // priority
+                            printf("Priority\r\n");
+                            $$ = $2;
+
+                        }   
+                        | expr TOK_MUL expr
                         {
                             printf("MUL : isPrio = %d\r\n", isPrio);
-                            isPrio = false;
                             $$ = make_node(NODE_MUL, 2, $1, $3);
                         }
                         | expr TOK_DIV expr
                         {
                             printf("DIV : isPrio = %d\r\n", isPrio);
-                            isPrio = false;
                             $$ = make_node(NODE_DIV, 2, $1, $3);
                         }
                         | expr TOK_PLUS expr
                         {
                             printf("PLUS : isPrio = %d\r\n", isPrio);
-                            isPrio = false;
                             $$ = make_node(NODE_PLUS, 2, $1, $3);
                         }
                         | expr TOK_MINUS expr
                         {
                             printf("MINUS : isPrio = %d\r\n", isPrio);
-                            isPrio = false;
                             $$ = make_node(NODE_MINUS, 2, $1, $3);
                         }
                         | TOK_MINUS expr %prec TOK_UMINUS
                         {
                             printf("UMINUS : isPrio = %d\r\n", isPrio);
-                            isPrio = false;
                             $$ = make_node(NODE_UMINUS, 1, $2);
                         }
                         | expr TOK_MOD expr
@@ -372,14 +374,6 @@ expr                    : expr TOK_MUL expr
                         | TOK_BNOT expr
                         {
                             $$ = make_node(NODE_BNOT, 1, $2);
-                        }
-                        | TOK_LPAR expr TOK_RPAR
-                        {
-                            // priority
-                            printf("Priority\r\n");
-                            isPrio = true;
-                            $$ = $2;
-
                         }
                         | ident TOK_AFFECT expr
                         {
