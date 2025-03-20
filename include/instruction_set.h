@@ -13,16 +13,12 @@
 // ================================================================================================= //
 // =========================================== PROTOTYPES ========================================== //
 // ================================================================================================= //
-short work_reg_available(void);
-short save_reg_available(void);
-short point_reg_available(void);
-void add_node_register(short reg_type, node_t node_val, node_t node_ident, short index);
-node_t get_node_val(short reg_type, short index);
-short get_node_ident(short reg_type, char * ident);
-
-// ==== Useless - to delete but idc atm ==== 
-node_t get_current_node(void);
-void set_current_node(node_t node);
+short work_reg_available(node_t node, int save);
+void flush_work_reg(void);
+short save_reg_available(node_t node, int save);
+void flush_save_reg(void);
+short point_reg_available(node_t node, int save);
+void flush_point_reg(void);
 // =========================================  
 
 void increment_P(void);
@@ -39,7 +35,7 @@ void check_P_diff_value(short n);
 void save_pointers(void);
 void restore_pointers(void);
 void set_hexmode(void);
-void set_hexmode(void);
+void set_decmode(void);
 void filler(short nibble_amount); 	// not recognised by MASD and HP ASM
 void filler_3n(void);				// using raw opcode
 void filler_4n(void);				// using raw opcode

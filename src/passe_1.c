@@ -192,16 +192,16 @@ void check_bool_op(node_t node)
 		{
 			if (node->opr[0]->type != node->opr[1]->type)
 			{	
-				printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
+				printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only for " PURPLE "bool" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 				exit(EXIT_FAILURE);
 			}
 		}
 	}
 	else
 	{
-		if (node->opr[0]->type != TYPE_BOOL)
+		if (node->opr[0]->type != TYPE_BOOL && node->opr[0]->nature != NODE_PRIO)
 		{	
-			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
+			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only for " PURPLE "bool" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -227,8 +227,9 @@ void check_int_op(node_t node)
 	}
 	else
 	{
-		if (node->opr[0]->type != TYPE_INT) 
+		if (node->opr[0]->type != TYPE_INT && node->opr[0]->nature != NODE_PRIO) 
 		{	
+			printf("here");
 			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
 		}
@@ -392,6 +393,15 @@ void analyse_passe_1(node_t root)
 				case NODE_INTVAL :
 					root->opr[i]->type = TYPE_INT;
 				break;
+
+				case NODE_PRIO :
+					root->opr[i]->isPrio = true;
+					if(root->opr[i]->opr[0] != NULL)
+					{
+						root->opr[i]->opr[0]->isPrio = true;
+					}
+				break;
+
 				case NODE_FLOATVAL :
 					root->opr[i]->type = TYPE_FLOAT;
 				break;
@@ -449,12 +459,13 @@ void analyse_passe_1(node_t root)
 				break;
 					
 				// Operators that returns int expressions (do with float too)
-				case NODE_PLUS :
-				case NODE_MINUS :
-				case NODE_UMINUS :
 				case NODE_DIV :
 				case NODE_MUL :
 				case NODE_MOD :
+					root->opr[i]->isPrio = true;
+				case NODE_PLUS :
+				case NODE_MINUS :
+				case NODE_UMINUS :
 				case NODE_BNOT :
 				case NODE_BAND :
 				case NODE_BOR :

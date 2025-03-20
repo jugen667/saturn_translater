@@ -13,6 +13,13 @@
 // for pre-C99 standard
 typedef enum { false = 0, true = !false } bool;
 
+// handful enum
+enum
+{
+    NO,
+    YES,
+};
+
 // ===== register description =====
 // ======================= REGISTER STRUCTURES IN HP48 ======================== //
 //                                                                              //
@@ -84,10 +91,10 @@ enum REGISTER_FIELDS
     MAX_FIELD,
 };
 
-enum DIRECTION          // for bit/nibble shift
+enum DIRECTION          // for bit/nibble shift AND priority management
 {
-    RIGHT,
     LEFT,
+    RIGHT,
     MAX_DIRECTION,
 };
 
@@ -159,6 +166,7 @@ typedef enum node_nature_s {
     NODE_AFFECT,
     NODE_PRINT,
     NODE_ELSE,
+    NODE_PRIO,
 } node_nature;
 
 
@@ -182,10 +190,11 @@ typedef struct _node_s {
     // node values
     uint64_t value;
     uint32_t address;            // adress on 5 nibbles (20 bits)
-    bool global_decl;
     int32_t lineno;
+    bool global_decl;
     char * ident;
     char * str;
+    bool isPrio;                // for info on tree 
 
     // for tree dump
     int32_t node_num;

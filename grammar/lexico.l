@@ -120,38 +120,38 @@ SEPARATOR           [ \t\n]+
 
 
 {IDF} {
-                #if !LEX_DEBUG
-                yylval.strval = strdupl(yytext);
-                #endif
-                RETURN(TOK_IDENT);
+    #if !LEX_DEBUG
+    yylval.strval = strdupl(yytext);
+    #endif
+    RETURN(TOK_IDENT);
 }
 
 {INTEGER} {
-                #if !LEX_DEBUG
-                yylval.intval = atoi(yytext);
-                #endif
-                RETURN(TOK_INTVAL);
+    #if !LEX_DEBUG
+    yylval.intval = atoi(yytext);
+    #endif
+    RETURN(TOK_INTVAL);
 }
 
 {INTEGER_HEXA} {
-                #if !LEX_DEBUG
-                yylval.intval = strtol(yytext, NULL, 16);
-                #endif
-                RETURN(TOK_INTVAL);
+    #if !LEX_DEBUG
+    yylval.intval = strtol(yytext, NULL, 16);
+    #endif
+    RETURN(TOK_INTVAL);
 }
 
 {FLOAT} {
-                #if !LEX_DEBUG
-                yylval.floatval = atof(yytext);
-                #endif
-                RETURN(TOK_FLOATVAL);
+    #if !LEX_DEBUG
+    yylval.floatval = atof(yytext);
+    #endif
+    RETURN(TOK_FLOATVAL);
 }
 
 {STRING} {
-                #if !LEX_DEBUG
-                yylval.strval = strdupl(yytext);
-                #endif
-                RETURN(TOK_STRING);
+    #if !LEX_DEBUG
+    yylval.strval = strdupl(yytext);
+    #endif
+    RETURN(TOK_STRING);
 }
 
 {COMMENT} {

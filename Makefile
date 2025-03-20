@@ -5,15 +5,15 @@ INC_DIR:=include
 GRA_DIR:=grammar
 
 DEBUG_LEX=0
-DEBUG_YACC=1
+DEBUG_YACC=0
 
 YACC_FLAGS=
 LEX_FLAGS=
 
 ifeq ($(DEBUG_LEX),1)
-	LEX_FLAGS=-DLEX_DEBUG=1
+	LEX_FLAGS=-DLEX_DEBUG=1 
 else ifeq ($(DEBUG_YACC),1)
-	YACC_FLAGS=-t
+	YACC_FLAGS=-t 
 endif
 
 
@@ -32,13 +32,13 @@ $(EXE) :  y.tab.o lex.yy.o common.o passe_1.o instruction_set.o objects.o passe_
 
 
 y.tab.c: $(GRA_DIR)/grammar.y Makefile
-	@echo "| yacc -d -t grammar.y"
-	@yacc -d -t $(GRA_DIR)/grammar.y
+	@echo "| yacc $(YACC_FLAGS)-d grammar.y"
+	@yacc $(YACC_FLAGS)-d $(GRA_DIR)/grammar.y
 	@mv y.tab.c $(SRC_DIR)
 	@mv y.tab.h $(INC_DIR)
 
 lex.yy.c: $(GRA_DIR)/lexico.l Makefile
-	@echo "| lex $(LEX_FLAGS) -d lexico.l"
+	@echo "| lex $(LEX_FLAGS)-d lexico.l"
 	@lex -o $(SRC_DIR)/lex.yy.c $(LEX_FLAGS) $(GRA_DIR)/lexico.l
 
 lex.yy.o: lex.yy.c

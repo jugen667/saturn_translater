@@ -306,6 +306,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
         case NODE_FOR:
         case NODE_DOWHILE:
         case NODE_PRINT:
+        case NODE_PRIO:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Nb. ops: %d}}\"];\n", node_num, node_nature2string(n->nature), n->nops);
             break;
         case NODE_FUNC:
@@ -334,7 +335,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
         case NODE_UMINUS:
     	case NODE_ELSE:
     	case NODE_AFFECT:
-            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s|Nb. ops: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->nops);
+            fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s|Nb. ops: %d}|{Prio: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->nops, n->isPrio);
             break;
 	    default:
             printf("*** Error in %s: unknown nature : %s\n", __func__, node_nature2string(n->nature));
@@ -497,6 +498,8 @@ const char * node_nature2string(node_nature t)
             return "PRINT";
     	case NODE_ELSE:
     	    return "ELSE";
+        case NODE_PRIO:
+            return "PRIO";
     	default:
             fprintf(stderr, "*** Error in %s: Unknown node nature: %d\n", __func__, t);
             exit(EXIT_FAILURE);

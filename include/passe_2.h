@@ -13,6 +13,10 @@ void gen_code_passe_2(node_t root);
 
 void decl_inblock(node_t node);
 void affect_variable(node_t node);
+
+void create_operation(node_t node, int node_nature);
+void manage_priority(node_t node, int node_nature, int position);
+
 void create_lt_instr(node_t node);
 void create_le_instr(node_t node);
 void create_eq_instr(node_t node);

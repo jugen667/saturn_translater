@@ -182,7 +182,7 @@ decl                    :   ident
                         ;
 
 
-maindecl                : TOK_VOID TOK_MAIN TOK_LPAR TOK_RPAR block // only valid main 
+maindecl                : TOK_VOID TOK_MAIN TOK_LPAR TOK_RPAR block // only valid main (modify to support functions)
                         {
                             $$ = make_node_main($5);
                         }
@@ -268,7 +268,7 @@ list                    :   listdecl
                         {
             
                             $$ = NULL;
-                        }
+                        } 
                         ;
 
 
@@ -282,33 +282,26 @@ block                   :  TOK_LACC list TOK_RACC
 expr                    : TOK_LPAR expr TOK_RPAR
                         {
                             // priority
-                            printf("Priority\r\n");
-                            $$ = $2;
-
+                            $$ = make_node(NODE_PRIO, 1, $2);
                         }   
                         | expr TOK_MUL expr
                         {
-                            printf("MUL : isPrio = %d\r\n", isPrio);
                             $$ = make_node(NODE_MUL, 2, $1, $3);
                         }
                         | expr TOK_DIV expr
                         {
-                            printf("DIV : isPrio = %d\r\n", isPrio);
                             $$ = make_node(NODE_DIV, 2, $1, $3);
                         }
                         | expr TOK_PLUS expr
                         {
-                            printf("PLUS : isPrio = %d\r\n", isPrio);
                             $$ = make_node(NODE_PLUS, 2, $1, $3);
                         }
                         | expr TOK_MINUS expr
                         {
-                            printf("MINUS : isPrio = %d\r\n", isPrio);
                             $$ = make_node(NODE_MINUS, 2, $1, $3);
                         }
                         | TOK_MINUS expr %prec TOK_UMINUS
                         {
-                            printf("UMINUS : isPrio = %d\r\n", isPrio);
                             $$ = make_node(NODE_UMINUS, 1, $2);
                         }
                         | expr TOK_MOD expr
@@ -445,6 +438,7 @@ node_t make_node(node_nature nature, int nops, ...) {
     node->nature = nature;
     node->type = TYPE_NONE;
     node->value = 0;
+    node->isPrio = 0;           // update passe 1
     va_start(ap, nops);
 
     node->opr = (node_t *) calloc(nops, sizeof(node_s)); // ensure every sub nodes are initialized
@@ -470,6 +464,7 @@ node_t make_node_ident(char* identifier){
     node->global_decl = false;           // init but update in passe 1
     node->opr = NULL;
     node->value = 0;
+    node->isPrio = 0;                   // update passe 1
     return node;
 }
 
@@ -485,6 +480,7 @@ node_t make_node_type(node_type type){
     node->global_decl = false;          // init but update in passe 1
     node->opr = NULL;
     node->value = 0;
+    node->isPrio = 0;                   // update passe 1
     return node;
 }
 
@@ -500,6 +496,7 @@ node_t make_node_intval(int32_t value){
     node->global_decl = false;          // init but update in passe 1
     node->value = value;                // to update in passe1
     node->opr = NULL;
+    node->isPrio = 0;                   // update passe 1
     return node;
 }
 
@@ -515,6 +512,7 @@ node_t make_node_floatval(double value){
     node->global_decl = false;          // init but update in passe 1
     node->value = value;                // to update in passe 1
     node->opr = NULL;
+    node->isPrio = 0;                   // update passe 1
     return node;
 }
 
@@ -530,6 +528,7 @@ node_t make_node_boolval(bool value){
     node->global_decl = false;          // init but update in passe 1
     node->value = (uint64_t) value;
     node->opr = NULL;
+    node->isPrio = 0;                   // update passe 1
     return node;
 }
 
@@ -545,6 +544,7 @@ node_t make_node_strval(char* string){
     node->global_decl = false;          // maj dans passe 1
     node->str = string;
     node->opr = NULL;
+    node->isPrio = 0;                   // update passe 1
     return node;
 }
 
@@ -560,6 +560,7 @@ node_t make_node_main(node_t node_next){
     node->global_decl = true;      
     node->opr = (node_t *) malloc(sizeof(node_s)); // child block
     node->opr[0] = node_next;
+    node->isPrio = 0;                   // update passe 1
     return node;
 }
 
