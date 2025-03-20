@@ -40,25 +40,21 @@ Fast test file with tree as png and svg :
 
 - ~~registers setups~~
 - ~~instuctions list~~
-- add ARM instruction set compatibility and compilation option 
-
 
 ## 2nd parsing : translate nodes to instructions with the instructions set
+- ~~int operations~~
+- bool operation
 
 
 ## TO DO IN THE FUTURE ##
 
+- Add support for more C function (incremental operator ?)
 - Pointers maybe ?
 - ~~Address management (func loop etc)~~
 - String support
-- Add support for more C function (incremental operator ?)
+- add ARM instruction set compatibility and compilation option (not sure)
 
 
 # KNOWN BUGS 
 
-- Priority parenthesis not on point
-```C
-int i;
-start = 1 * (2 + 2); <-- Wont take into account parenthesis
-int sum = 0;
-```
+- Priority to test but fixed
