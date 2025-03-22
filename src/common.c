@@ -151,8 +151,7 @@ void parse_args(int argc, char ** argv)
 					break;
                     case 'a':
                         disable_tree_dump = 0;
-                        printf(BOLD "Compilation tree will be dumped\n" NC);
-                        printf(BOLD ".dot files will be created" NC "\n");
+                        printf(BOLD "Compilation tree will be dumped in .dot files\n" NC);
                     break;
 					case 't':
 						test_int_value(48,49,atoi(argv[i+1]), argv[i]);
@@ -613,12 +612,13 @@ int decimal2BCD(int value)
     return result;
 }
 
-// assign an address to a node (maybe the most useful func here)
+// assign an address to a node (maybe the most useful func here but to check if ok with hardware)
 uint32_t assign_address(void)
 {
-    current_address+=0x20;
+    current_address+=0x20; // + 4 BYTES
     if(current_address >= MAX_PRACTICAL_ADDRESS)
     {
+        printf(BOLD RED "TRAP ADDRESS ERROR : address 0x%05x is unreachable\n" NC, current_address);
         exit(EXIT_FAILURE);
     }
     else
@@ -633,7 +633,7 @@ uint32_t assign_address(void)
 // open file
 FILE * outfile_open(char * outfileName)
 {
-    FILE * f;
+    FILE * f = NULL;
     if(verboseDebug){
         printf(BOLD "> Creating and opening file : %s\n" NC, outfile);
     }
@@ -650,7 +650,7 @@ FILE * outfile_open(char * outfileName)
         }
     }
     else{
-        printf(RED "Fatal error : " NC "could not open/create file %s\n", outfile);
+        printf(RED "Error : " NC "could not open/create file %s\n", outfile);
         printf(BOLD GREEN "Printing program in stdout\n" NC);
     }
     return f;

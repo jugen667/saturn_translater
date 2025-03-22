@@ -3,11 +3,18 @@
  * line !
  */ 
 int start = 0;
-int x = 0;
+int x = 1;
 // int end = 5;
 // Starting main
 void main(){
-	start = ~(x*(4-3))+2;
+	// if(start < 0 && x != 0)
+	// if(true)
+	if(start < 0)
+	{
+		x = x + 1;
+		x = 2*(1+2);
+	}
+	// start = ~(x*(4-3))+2;
 /*  int i;
 	int sum = 0;
 	for (i = start; i < end; i = i + 1) {

@@ -45,22 +45,27 @@ char * label_formatting(void)
 	return labelStr;
 }
 
+char * get_label(void)
+{
+	return labelStr;
+}
+
 
 // priority management
-void manage_priority(node_t node, int node_nature, int position) // position left or right 
+void manage_priority(node_t node, int position) // position left or right 
 {
-	switch(node_nature)
+	switch(node->nature)
 	{
 		case NODE_DIV :
 		case NODE_MUL :
 		case NODE_MOD :
-			create_operation(node, node->nature);
+			create_operation(node);
 			// load the result in save reg
 			ex_reg_work_save(A, position, W_FIELD);
 			save_reg_available(node, YES);
 		break;
 		case NODE_PRIO:
-			create_operation(node->opr[0], node->opr[0]->nature);
+			create_operation(node->opr[0]);
 			// load the result in a save reg 
 			ex_reg_work_save(A, position, W_FIELD); 
 			save_reg_available(node->opr[0], YES);
@@ -167,60 +172,27 @@ void affect_variable(node_t node)
 // --------------------------------------------- //
 
 // ------------ OPERATIONS ON BOOL ------------ //
-// create an lt condition
-void create_lt_instr(node_t node)
-{
-	// check register available
-	// handling experssion such as addition or substraction
-	if (node->opr[1]->nature == NODE_INTVAL || 
-		node->opr[1]->nature == NODE_FLOATVAL)
-	{
-		switch(node->opr[1]->nature){
-			case NODE_PLUS :
-			case NODE_MINUS :
-			case NODE_DIV :
-			case NODE_MUL :
-			case NODE_MOD :
-			case NODE_BNOT :
-			case NODE_BAND :
-			case NODE_BOR :
-			case NODE_BXOR :
-			case NODE_SRL :
-			case NODE_SLL :
-			default : 
-			break;
-		}
-	}
-	// if we are in a loop 
-	else if (inLoopFor || inLoopWhile) 
-	{
-		if(node->opr[1]->global_decl)
-		{
-		}
-		else
-		{
-		}
-	}
 
-	//creation of branchement
-	if(inLoopFor || inLoopWhile)
+void create_if_instruction(node_t node)
+{
+	switch(node->opr[0]->nature) // treatement of condition
 	{
+		case NODE_AND:
+		case NODE_OR:
+		case NODE_NOT:
+		break;
+		case NODE_BOOLVAL:
+		break;
+		default :
+			create_operation(node->opr[0]);
+		break;
 	}
-	else if(inLoopDo)
-	{
-	}
-	else if(inIf)
-	{
-	}
+	GOYES(get_label());
+	gen_code_passe_2(node->opr[1]);
+	blockParsed = 1; // force block parsing
 }
 
 // dupe above for every condition possible
-// NODE_LT
-// NODE_GT
-// NODE_EQ
-// NODE_NE
-// NODE_GE
-// NODE_LE
 // NODE_AND
 // NODE_OR
 // NODE_NOT
@@ -228,14 +200,14 @@ void create_lt_instr(node_t node)
 // -------------------------------------------- //
 
 
-// ------------ OPERATIONS ON INT/FLOAT ------------ //
+// ------------ OPERATIONS CREATIONS ------------ //
 // create an opposite 
 void create_uminus_instr(node_t node)
 {
 	// prio management
 	if(node->opr[0]->isPrio)
 	{
-		manage_priority(node->opr[0], node->opr[0]->nature, LEFT);
+		manage_priority(node->opr[0], LEFT);
 	}
 
 	if(node->opr[0]->nature == NODE_IDENT)
@@ -258,7 +230,7 @@ void create_uminus_instr(node_t node)
 	{
 		if(!node->opr[0]->isPrio)
 		{
-			create_operation(node->opr[0], node->opr[0]->nature);
+			create_operation(node->opr[0]);
 		}
 		else
 		{
@@ -274,7 +246,7 @@ void create_bnot_instr(node_t node)
 	// prio management
 	if(node->opr[0]->isPrio)
 	{
-		manage_priority(node->opr[0], node->opr[0]->nature, LEFT);
+		manage_priority(node->opr[0], LEFT);
 	}
 
 	if(node->opr[0]->nature == NODE_IDENT)
@@ -297,7 +269,7 @@ void create_bnot_instr(node_t node)
 	{
 		if(!node->opr[0]->isPrio)
 		{
-			create_operation(node->opr[0], node->opr[0]->nature);
+			create_operation(node->opr[0]);
 		}
 		else
 		{
@@ -308,9 +280,9 @@ void create_bnot_instr(node_t node)
 }
 
 // create operation on int/float
-void create_operation(node_t node, int node_nature)
+void create_operation(node_t node)
 {
-	switch(node_nature)
+	switch(node->nature)
 	{
 		// special cases 1 operand
 		case NODE_UMINUS :
@@ -324,11 +296,11 @@ void create_operation(node_t node, int node_nature)
 		 	// prio management
 			if(node->opr[0]->isPrio)
 			{
-				manage_priority(node->opr[0], node->opr[0]->nature, LEFT);
+				manage_priority(node->opr[0], LEFT);
 			}
 			if(node->opr[1]->isPrio)
 			{
-				manage_priority(node->opr[1], node->opr[1]->nature, RIGHT);
+				manage_priority(node->opr[1], RIGHT);
 			}
 
 			// left operand
@@ -343,7 +315,7 @@ void create_operation(node_t node, int node_nature)
 					copy_reg_save_work(R1, C, W_FIELD);	
 					if(save_reg_available(NULL, NO)) // to ensure that the prio has been treated
 					{
-						switch(node_nature)
+						switch(node->nature)
 						{
 							case NODE_PLUS :
 								add_register(A, C, W_FIELD);
@@ -368,6 +340,24 @@ void create_operation(node_t node, int node_nature)
 							break;
 							case NODE_BXOR :
 								logical_AND(A, C, W_FIELD);
+							break;
+							case NODE_LT :
+								register_LT(A, C, W_FIELD);
+							break;
+							case NODE_GT :
+								register_GT(A, C, W_FIELD);
+							break;
+							case NODE_EQ :
+								register_equal(A, C, W_FIELD);
+							break;
+							case NODE_NE :
+								register_not_equal(A, C, W_FIELD);
+							break;
+							case NODE_GE :
+								register_GTE(A, C, W_FIELD);
+							break;
+							case NODE_LE :
+								register_LTE(A, C, W_FIELD);
 							break;
 							case NODE_SLL :
 							case NODE_SRL :
@@ -387,7 +377,7 @@ void create_operation(node_t node, int node_nature)
 					copy_reg_save_work(R1, C, W_FIELD);	
 					if(save_reg_available(NULL, NO)) // to ensure that the prio has been treated
 					{
-						switch(node_nature)
+						switch(node->nature)
 						{
 							case NODE_PLUS :
 								add_register(A, C, W_FIELD);
@@ -413,6 +403,24 @@ void create_operation(node_t node, int node_nature)
 							case NODE_BXOR :
 								logical_AND(A, C, W_FIELD);
 							break;
+							case NODE_LT :
+								register_LT(A, C, W_FIELD);
+							break;
+							case NODE_GT :
+								register_GT(A, C, W_FIELD);
+							break;
+							case NODE_EQ :
+								register_equal(A, C, W_FIELD);
+							break;
+							case NODE_NE :
+								register_not_equal(A, C, W_FIELD);
+							break;
+							case NODE_GE :
+								register_GTE(A, C, W_FIELD);
+							break;
+							case NODE_LE :
+								register_LTE(A, C, W_FIELD);
+							break;
 							case NODE_SLL :
 							case NODE_SRL :
 							default:
@@ -426,7 +434,7 @@ void create_operation(node_t node, int node_nature)
 			{
 				if(!node->opr[0]->isPrio)
 				{
-					create_operation(node->opr[0], node->opr[0]->nature);
+					create_operation(node->opr[0]);
 				}
 			}
 
@@ -441,7 +449,7 @@ void create_operation(node_t node, int node_nature)
 				{
 					copy_reg_save_work(R0, A, W_FIELD);
 				}
-				switch(node_nature)
+				switch(node->nature)
 				{
 					case NODE_PLUS :
 						add_register(A, C, W_FIELD);
@@ -466,6 +474,24 @@ void create_operation(node_t node, int node_nature)
 					break;
 					case NODE_BXOR :
 						logical_AND(A, C, W_FIELD);
+					break;
+					case NODE_LT :
+						register_LT(A, C, W_FIELD);
+					break;
+					case NODE_GT :
+						register_GT(A, C, W_FIELD);
+					break;
+					case NODE_EQ :
+						register_equal(A, C, W_FIELD);
+					break;
+					case NODE_NE :
+						register_not_equal(A, C, W_FIELD);
+					break;
+					case NODE_GE :
+						register_GTE(A, C, W_FIELD);
+					break;
+					case NODE_LE :
+						register_LTE(A, C, W_FIELD);
 					break;
 					case NODE_SLL :
 					case NODE_SRL :
@@ -482,7 +508,7 @@ void create_operation(node_t node, int node_nature)
 				{
 					copy_reg_save_work(R0, A, W_FIELD);
 				}
-				switch(node_nature)
+				switch(node->nature)
 				{
 					case NODE_PLUS :
 						add_register(A, C, W_FIELD);
@@ -508,6 +534,24 @@ void create_operation(node_t node, int node_nature)
 					case NODE_BXOR :
 						logical_AND(A, C, W_FIELD);
 					break;
+					case NODE_LT :
+						register_LT(A, C, W_FIELD);
+					break;
+					case NODE_GT :
+						register_GT(A, C, W_FIELD);
+					break;
+					case NODE_EQ :
+						register_equal(A, C, W_FIELD);
+					break;
+					case NODE_NE :
+						register_not_equal(A, C, W_FIELD);
+					break;
+					case NODE_GE :
+						register_GTE(A, C, W_FIELD);
+					break;
+					case NODE_LE :
+						register_LTE(A, C, W_FIELD);
+					break;
 					case NODE_SLL :
 					case NODE_SRL :
 					default:
@@ -518,7 +562,7 @@ void create_operation(node_t node, int node_nature)
 			{
 				if(!node->opr[1]->isPrio)
 				{
-					create_operation(node->opr[1], node->opr[1]->nature);
+					create_operation(node->opr[1]);
 				}
 			}
 		break;
@@ -527,16 +571,6 @@ void create_operation(node_t node, int node_nature)
 
 
 // every integrer/float operation possible
-// NODE_PLUS 	OK
-// NODE_MINUS 	OK
-// NODE_UMINUS 	OK
-// NODE_MUL 	OK
-// NODE_DIV 	OK
-// NODE_MOD 	OK
-// NODE_BAND	OK
-// NODE_BOR 	OK
-// NODE_BXOR	OK
-// NODE_BNOT	OK
 // NODE_SLL		TO DO BUT ANNOYING
 // NODE_SRL		TO DO BUT ANNOYING
 
@@ -602,15 +636,13 @@ void gen_code_passe_2(node_t root)
 						gen_code_passe_2(root->opr[i+1]);
 						blockParsed = 1;
 					}
-
 					switch(root->opr[i]->opr[1]->nature)
 					{
-						
 						case NODE_PRIO:
-							create_operation(root->opr[i]->opr[1]->opr[0], root->opr[i]->opr[1]->opr[0]->nature);
+							create_operation(root->opr[i]->opr[1]->opr[0]);
 						break;
 						default:
-							create_operation(root->opr[i]->opr[1], root->opr[i]->opr[1]->nature);
+							create_operation(root->opr[i]->opr[1]);
 						break;
 					}
 					load_pointer(D0, root->opr[i]->opr[0]->address);
@@ -618,14 +650,15 @@ void gen_code_passe_2(node_t root)
 					flush_save_reg(); // reset save_reg pointers from our side : to test if useful
 				break;
 				
-				//loop instruction determination
-				case NODE_LT :
-				case NODE_GT :
-				case NODE_EQ :
-				case NODE_NE :
-				case NODE_GE :
-				case NODE_LE :
-				break;
+				// //loop instruction determination
+				// case NODE_LT :
+				// case NODE_GT :
+				// case NODE_EQ :
+				// case NODE_NE :
+				// case NODE_GE :
+				// case NODE_LE :
+				// 	printf("bool condition\n");
+				// break;
 
 				// case if the FOR index initialisation is a ident not an affectation
 				case NODE_FOR :
@@ -639,20 +672,23 @@ void gen_code_passe_2(node_t root)
 					inLoopWhile = 1;
 					create_comment("STARTING WHILE LOOP :");
 					create_label(label_formatting());
-					break;
+				break;
 
 				// creation of the Do While loop
 				case NODE_DOWHILE :
 					create_comment("STARTING DO_WHILE LOOP :");
 					create_label(label_formatting());
-					break;
+				break;
 
 				// creation of the If Statement
 				case NODE_IF :
+					create_comment("--- IF ---");
 					inIf = 1;
-					create_comment("IF :");
-					create_label(label_formatting());
-					break;	
+					label_formatting();
+					create_if_instruction(root->opr[i]);
+					create_label(get_label());
+					create_comment("-- ENDIF --");
+				break;	
 			}		
 		}
 
@@ -662,6 +698,10 @@ void gen_code_passe_2(node_t root)
 			if (!(root->opr[i]->nature == NODE_BLOCK && blockParsed))
 			{
 				gen_code_passe_2(root->opr[i]);
+			}
+			else
+			{
+				blockParsed = 0;
 			}
 		}
 
