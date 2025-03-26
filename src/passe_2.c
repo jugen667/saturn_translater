@@ -186,16 +186,27 @@ void create_if_instruction(node_t node, char * loc_label)
 		case NODE_AND:
 		case NODE_OR:
 		case NODE_NOT:
+			// do the test and store the bool result in a reg (S_FIELD)
 		break;
 		case NODE_BOOLVAL:
+			switch(node->opr[0]->value)
+			{
+				// if true do the if
+				case true :
+					gen_code_passe_2(node->opr[1]);	
+				break;
+				// if false dont do it
+				case false :
+				break;
+			}
 		break;
 		default :
 			create_operation(node->opr[0]);
+			GOYES(label_in_use);	
+			gen_code_passe_2(node->opr[1]);
+			create_label(label_in_use);
 		break;
 	}
-	GOYES(label_in_use);	
-	gen_code_passe_2(node->opr[1]);
-	create_label(label_in_use);
 	blockParsed = 1; // force block parsing
 }
 
