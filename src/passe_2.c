@@ -16,22 +16,25 @@
 
 
 // global utility variables
-int launch = 1;
-int label = 0;
-char labelStr[16];
-int inFunc_Decl = 0;
-int inBlockFunc = 0;
-int parsingLoopFor = 0;
-int parsingLoopWhile = 0;
-int parsingLoopIf = 0;
-int parsingLoopDo = 0;
-int inLoopFor = 0;
-int inLoopWhile = 0;
-int current_reg;
-int jmpLabelDecl = 0;
-int blockParsed = 0;
-int inLoopDo = 0;
-int inIf = 0;
+static int launch = 1;
+static int label = 0;
+static char labelStr[16];
+static int inIf = 0;
+static int blockParsed = 0;
+static int current_reg;
+
+/*
+static int inBlockFunc = 0;
+static int parsingLoopFor = 0;
+static int parsingLoopWhile = 0;
+static int parsingLoopIf = 0;
+static int parsingLoopDo = 0;
+static int inLoopFor = 0;
+static int inLoopWhile = 0;
+static int jmpLabelDecl = 0;
+static int inLoopDo = 0;
+static int inFunc_Decl = 0;
+*/
 
 
 /* --------------- Instruction creation functions --------------- */
@@ -114,7 +117,7 @@ void decl_inblock(node_t node)
 	}
 }
 
-// affectation of a variable
+// affectation of a variable (unused)
 void affect_variable(node_t node)
 {
 	// affect an ident with an ident
@@ -171,10 +174,13 @@ void affect_variable(node_t node)
 }
 // --------------------------------------------- //
 
-// ------------ OPERATIONS ON BOOL ------------ //
+// ------------ OPERATIONS FOR TESTS ----------- //
 
-void create_if_instruction(node_t node)
+void create_if_instruction(node_t node, char * loc_label)
 {
+	char label_in_use[16]; // creating a temporary label for recursion
+	memcpy(label_in_use,loc_label,16);
+
 	switch(node->opr[0]->nature) // treatement of condition
 	{
 		case NODE_AND:
@@ -187,8 +193,9 @@ void create_if_instruction(node_t node)
 			create_operation(node->opr[0]);
 		break;
 	}
-	GOYES(get_label());
+	GOYES(label_in_use);	
 	gen_code_passe_2(node->opr[1]);
+	create_label(label_in_use);
 	blockParsed = 1; // force block parsing
 }
 
@@ -280,6 +287,15 @@ void create_bnot_instr(node_t node)
 }
 
 // create operation on int/float
+/* PRECISION FOR CONDITIONNAL OPERATIONS
+--
+--	case of parsing a condition
+-- 	-> manage condition bool operation
+-- 	-> parse block 
+-- 	-> if condition respected (opposite of what expected) jump to else
+--	-> example : if(x<0) = if(x>=0) jump to end of block
+--
+*/
 void create_operation(node_t node)
 {
 	switch(node->nature)
@@ -341,23 +357,23 @@ void create_operation(node_t node)
 							case NODE_BXOR :
 								logical_AND(A, C, W_FIELD);
 							break;
-							case NODE_LT :
-								register_LT(A, C, W_FIELD);
-							break;
-							case NODE_GT :
-								register_GT(A, C, W_FIELD);
-							break;
-							case NODE_EQ :
-								register_equal(A, C, W_FIELD);
-							break;
-							case NODE_NE :
-								register_not_equal(A, C, W_FIELD);
-							break;
-							case NODE_GE :
+							case NODE_LT : // opposite op : GTE
 								register_GTE(A, C, W_FIELD);
 							break;
-							case NODE_LE :
+							case NODE_GT : // opposite op : LTE
 								register_LTE(A, C, W_FIELD);
+							break;
+							case NODE_EQ : // opposite op : NE
+								register_not_equal(A, C, W_FIELD);
+							break;
+							case NODE_NE : // opposite op : EQ
+								register_equal(A, C, W_FIELD);
+							break;
+							case NODE_GE : // opposite op : LT
+								register_LT(A, C, W_FIELD);
+							break;
+							case NODE_LE : // opposite op : GT
+								register_GT(A, C, W_FIELD);
 							break;
 							case NODE_SLL :
 							case NODE_SRL :
@@ -403,23 +419,23 @@ void create_operation(node_t node)
 							case NODE_BXOR :
 								logical_AND(A, C, W_FIELD);
 							break;
-							case NODE_LT :
-								register_LT(A, C, W_FIELD);
-							break;
-							case NODE_GT :
-								register_GT(A, C, W_FIELD);
-							break;
-							case NODE_EQ :
-								register_equal(A, C, W_FIELD);
-							break;
-							case NODE_NE :
-								register_not_equal(A, C, W_FIELD);
-							break;
-							case NODE_GE :
+							case NODE_LT : // opposite op : GTE
 								register_GTE(A, C, W_FIELD);
 							break;
-							case NODE_LE :
+							case NODE_GT : // opposite op : LTE
 								register_LTE(A, C, W_FIELD);
+							break;
+							case NODE_EQ : // opposite op : NE
+								register_not_equal(A, C, W_FIELD);
+							break;
+							case NODE_NE : // opposite op : EQ
+								register_equal(A, C, W_FIELD);
+							break;
+							case NODE_GE : // opposite op : LT
+								register_LT(A, C, W_FIELD);
+							break;
+							case NODE_LE : // opposite op : GT
+								register_GT(A, C, W_FIELD);
 							break;
 							case NODE_SLL :
 							case NODE_SRL :
@@ -475,23 +491,23 @@ void create_operation(node_t node)
 					case NODE_BXOR :
 						logical_AND(A, C, W_FIELD);
 					break;
-					case NODE_LT :
-						register_LT(A, C, W_FIELD);
-					break;
-					case NODE_GT :
-						register_GT(A, C, W_FIELD);
-					break;
-					case NODE_EQ :
-						register_equal(A, C, W_FIELD);
-					break;
-					case NODE_NE :
-						register_not_equal(A, C, W_FIELD);
-					break;
-					case NODE_GE :
+					case NODE_LT : // opposite op : GTE
 						register_GTE(A, C, W_FIELD);
 					break;
-					case NODE_LE :
+					case NODE_GT : // opposite op : LTE
 						register_LTE(A, C, W_FIELD);
+					break;
+					case NODE_EQ : // opposite op : NE
+						register_not_equal(A, C, W_FIELD);
+					break;
+					case NODE_NE : // opposite op : EQ
+						register_equal(A, C, W_FIELD);
+					break;
+					case NODE_GE : // opposite op : LT
+						register_LT(A, C, W_FIELD);
+					break;
+					case NODE_LE : // opposite op : GT
+						register_GT(A, C, W_FIELD);
 					break;
 					case NODE_SLL :
 					case NODE_SRL :
@@ -534,23 +550,23 @@ void create_operation(node_t node)
 					case NODE_BXOR :
 						logical_AND(A, C, W_FIELD);
 					break;
-					case NODE_LT :
-						register_LT(A, C, W_FIELD);
-					break;
-					case NODE_GT :
-						register_GT(A, C, W_FIELD);
-					break;
-					case NODE_EQ :
-						register_equal(A, C, W_FIELD);
-					break;
-					case NODE_NE :
-						register_not_equal(A, C, W_FIELD);
-					break;
-					case NODE_GE :
+					case NODE_LT : // opposite op : GTE
 						register_GTE(A, C, W_FIELD);
 					break;
-					case NODE_LE :
+					case NODE_GT : // opposite op : LTE
 						register_LTE(A, C, W_FIELD);
+					break;
+					case NODE_EQ : // opposite op : NE
+						register_not_equal(A, C, W_FIELD);
+					break;
+					case NODE_NE : // opposite op : EQ
+						register_equal(A, C, W_FIELD);
+					break;
+					case NODE_GE : // opposite op : LT
+						register_LT(A, C, W_FIELD);
+					break;
+					case NODE_LE : // opposite op : GT
+						register_GT(A, C, W_FIELD);
 					break;
 					case NODE_SLL :
 					case NODE_SRL :
@@ -641,6 +657,11 @@ void gen_code_passe_2(node_t root)
 						case NODE_PRIO:
 							create_operation(root->opr[i]->opr[1]->opr[0]);
 						break;
+						case NODE_INTVAL:
+						case NODE_BOOLVAL:
+						case NODE_FLOATVAL:
+							affect_variable(root->opr[i]);
+						break;
 						default:
 							create_operation(root->opr[i]->opr[1]);
 						break;
@@ -650,27 +671,17 @@ void gen_code_passe_2(node_t root)
 					flush_save_reg(); // reset save_reg pointers from our side : to test if useful
 				break;
 				
-				// //loop instruction determination
-				// case NODE_LT :
-				// case NODE_GT :
-				// case NODE_EQ :
-				// case NODE_NE :
-				// case NODE_GE :
-				// case NODE_LE :
-				// 	printf("bool condition\n");
-				// break;
-
 				// case if the FOR index initialisation is a ident not an affectation
 				case NODE_FOR :
 					create_comment("STARTING FOR LOOP :");
+					// inLoopFor = 1;
 					create_label(label_formatting());
-					inLoopFor = 1;
 				break;
 
 				// creation of the While loop
 				case NODE_WHILE :
-					inLoopWhile = 1;
 					create_comment("STARTING WHILE LOOP :");
+					// inLoopWhile = 1;
 					create_label(label_formatting());
 				break;
 
@@ -685,10 +696,20 @@ void gen_code_passe_2(node_t root)
 					create_comment("--- IF ---");
 					inIf = 1;
 					label_formatting();
-					create_if_instruction(root->opr[i]);
-					create_label(get_label());
+					create_if_instruction(root->opr[i], get_label());
 					create_comment("-- ENDIF --");
+				break;
+
+				case NODE_ELSE :
+					create_comment("--- ELSE ---");
+					inIf = 1;
+					// create_if_instruction(root->opr[i]);
+					// create_label(label_formatting());
+					create_comment("-- ENDELSE --");
 				break;	
+
+				case NODE_LIST :
+				break;
 			}		
 		}
 
@@ -702,101 +723,6 @@ void gen_code_passe_2(node_t root)
 			else
 			{
 				blockParsed = 0;
-			}
-		}
-
-		// End the program
-		if(root->nature == NODE_PROGRAM)
-		{
-			if (inFunc_Decl)
-			{
-				// declare in main
-				if(root->opr[1] != NULL)
-				{
-				}
-			}
-			else
-			{
-				// declare global 
-				// declare the string in global
-				for (int i = 0; i < 10; i++)
-				{
-				}
-				inFunc_Decl = 1;
-			}
-		}
-
-		// create a syscall for a print ?
-		if(root->nature == NODE_PRINT)
-		{
-		}
-
-		// creation of label for 'for' loop
-		if(root->nature == NODE_FOR){
-			if( parsingLoopFor == 0){
-				label++;
-				// create label
-				parsingLoopFor++;
-				inLoopFor = 1;
-			}
-			else if (parsingLoopFor == root->nops - 1)
-			{
-				// jump creation
-				label++;
-				// create label
-				parsingLoopFor = 0;
-				inLoopFor = 0;
-				blockParsed = 0;
-			}
-			else
-			{
-				parsingLoopFor++;
-			}
-		}
-		// creation of label for 'while' loop
-		if (root->nature == NODE_WHILE)
-		{
-			if(parsingLoopWhile == root->nops - 1)
-			{
-				// create jump 
-				label++;
-				// create label
-				parsingLoopWhile = 0;
-				inLoopWhile = 0;
-				blockParsed = 0;
-			}
-			else
-			{
-				parsingLoopWhile++;
-			}
-		}
-		// creation of label for 'dowhile' loop
-		if(root->nature == NODE_DOWHILE)
-		{
-			inLoopDo = 1;
-			if(parsingLoopDo == root->nops - 1)
-			{
-				parsingLoopDo = 0;
-				inLoopDo = 0;
-			}
-			else
-			{
-				parsingLoopDo++;
-			}			
-		}
-		// creation of label for 'if' statement
-		if(root->nature == NODE_IF)
-		{
-			if (parsingLoopIf == root->nops-1)
-			{
-				label++;
-				// create label	
-				parsingLoopIf = 0;
-				inIf = 0;
-			}
-			else
-			{
-				parsingLoopIf++;
 			}
 		}
 	}
