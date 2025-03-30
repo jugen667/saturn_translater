@@ -28,7 +28,7 @@ Fast test file with tree as png and svg :
 
 # KNOWN BUGS 
 
-- Multiple OR and AND in If not sure if ok -> to test
+- Mixing 'OR' and 'AND' in conditionnal makes the instruction creation messy : to fix ?
 
 ---------------
 
