@@ -16,6 +16,7 @@ void decl_inblock(node_t node);
 void create_uminus_instr(node_t node);
 
 void create_operation(node_t node);
+void create_NOT_operation(node_t node);
 void create_bnot_instr(node_t node);
 void create_sll_instr(node_t node);
 void create_srl_instr(node_t node);

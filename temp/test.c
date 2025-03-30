@@ -3,16 +3,17 @@
  * line !
  */ 
 int start = 0;
-int x = 1;
+float x = 1;
+bool e = true;
 // int end = 5;
 // Starting main
 void main(){
 	// if(start < 0 && x != 0)
 	// if(true)
 		start = 32;
-	if(true)
+	if(start > 3 || x > 1 || start == x) 
 	{
-		x = x + 1;
+		x = x & start;
 		x = 2*(1+2);
 	}
 	else

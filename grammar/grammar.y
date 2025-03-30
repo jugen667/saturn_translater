@@ -491,7 +491,7 @@ node_t make_node_intval(int32_t value){
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = NULL;
-    node->type = TYPE_INT;              // init but update in passe 1
+    node->type = TYPE_NONE;              // init but update in passe 1
     node->address = 0;                  // init but update in passe 1
     node->global_decl = false;          // init but update in passe 1
     node->value = value;                // to update in passe1
@@ -507,7 +507,7 @@ node_t make_node_floatval(double value){
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = NULL;
-    node->type = TYPE_FLOAT;            // init but update in passe 1
+    node->type = TYPE_NONE;            // init but update in passe 1
     node->address = 0;                  // init but update in passe 1
     node->global_decl = false;          // init but update in passe 1
     node->value = value;                // to update in passe 1
@@ -523,7 +523,7 @@ node_t make_node_boolval(bool value){
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = NULL;
-    node->type = TYPE_BOOL;             // init but update in passe 1
+    node->type = TYPE_NONE;             // init but update in passe 1
     node->address = 0;                  // init but update in passe 1
     node->global_decl = false;          // init but update in passe 1
     node->value = (uint64_t) value;

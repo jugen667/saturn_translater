@@ -192,7 +192,7 @@ void check_bool_op(node_t node)
 		{
 			if (node->opr[0]->type != node->opr[1]->type)
 			{	
-				printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only for " PURPLE "bool" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
+				printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only between " PURPLE "bool" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -201,7 +201,7 @@ void check_bool_op(node_t node)
 	{
 		if (node->opr[0]->type != TYPE_BOOL && node->opr[0]->nature != NODE_PRIO)
 		{	
-			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only for " PURPLE "bool" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
+			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "%s" NC " only between " PURPLE "bool" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -220,7 +220,7 @@ void check_int_op(node_t node)
 				((node->opr[0]->type != TYPE_INT) ||
 				 (node->opr[1]->type != TYPE_INT)))
 			{	
-				printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
+				printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " only between " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 				exit(EXIT_FAILURE);
 			}
 		}
@@ -229,9 +229,32 @@ void check_int_op(node_t node)
 	{
 		if (node->opr[0]->type != TYPE_INT && node->opr[0]->nature != NODE_PRIO) 
 		{	
-			printf("here");
-			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " only for " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
+			printf(RED "Error line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " only between " PURPLE "int" NC " variables\n", node->opr[0]->lineno, node_nature2symb(node->nature));
 			exit(EXIT_FAILURE);
+		}
+	}
+}
+
+// ------------------------------------------------------------------------------------------------- //
+
+void check_same_type(node_t node) // return a warning but will compile
+{
+	if (node->opr[1] != NULL)
+	{
+		if (node->opr[0]->type && node->opr[1]->type)
+		{
+			if ((node->opr[0]->type != node->opr[1]->type))
+			{	
+				printf(PURPLE "Warning line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " between %s and %s\n", node->opr[0]->lineno, node_nature2symb(node->nature), node_type2string(node->opr[0]->type), node_type2string(node->opr[1]->type));
+			}
+		}
+	}
+	else
+	{
+		// not possible but ...
+		if (node->opr[0]->type != TYPE_INT && node->opr[0]->nature != NODE_PRIO) 
+		{	
+			printf(PURPLE "Warning line" BOLD " %d " NC ": operation " BOLD "'%s'" NC " between %s and %s\n", node->opr[0]->lineno, node_nature2symb(node->nature), node_type2string(node->opr[0]->type), node_type2string(node->opr[1]->type));
 		}
 	}
 }
@@ -265,6 +288,11 @@ void check_affect_type(node_t node)
 	    		printf(RED "Error line" BOLD " %d " NC ": " PURPLE "float" NC " value on " PURPLE "int" NC " variable\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 	    	}
+	    	else if((node->opr[0]->type == TYPE_FLOAT && node->opr[1]->type == TYPE_INT)) // not a problem but warning
+	    	{
+	    		printf(PURPLE "Error line" BOLD " %d " NC ": integer value assigned to a float variable '%s'\n", node->opr[0]->lineno, node->opr[0]->ident);
+	    	}
+
 	    }
 	}
 }
@@ -394,6 +422,14 @@ void analyse_passe_1(node_t root)
 					root->opr[i]->type = TYPE_INT;
 				break;
 
+				case NODE_BOOLVAL :
+					root->opr[i]->type = TYPE_BOOL;
+				break;
+
+				case NODE_FLOATVAL :
+					root->opr[i]->type = TYPE_FLOAT;
+				break;
+
 				case NODE_PRIO :
 					root->opr[i]->isPrio = true;
 					if(root->opr[i]->opr[0] != NULL)
@@ -402,9 +438,6 @@ void analyse_passe_1(node_t root)
 					}
 				break;
 
-				case NODE_FLOATVAL :
-					root->opr[i]->type = TYPE_FLOAT;
-				break;
 
 				case NODE_IDENT :
 					// Check if variable has been declared already
@@ -594,20 +627,14 @@ void analyse_passe_1(node_t root)
 			root->nature == NODE_GT ||
 			root->nature == NODE_LE ||
 			root->nature == NODE_GE ||
-			root->nature == NODE_AND ||
-			root->nature == NODE_OR )
-		{
-			check_bool_op(root);
-		}
-		// integrer r operand
-		if(	root->nature == NODE_BNOT ||
+			root->nature == NODE_BNOT ||
 			root->nature == NODE_BAND ||
 			root->nature == NODE_BOR ||
 			root->nature == NODE_BXOR ||
 			root->nature == NODE_SRL ||
 			root->nature == NODE_SLL )
 		{
-			check_int_op(root);
+			check_same_type(root);
 		}
 
 	}

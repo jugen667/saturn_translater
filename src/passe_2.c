@@ -16,14 +16,15 @@
 
 
 // global utility variables
-static int launch = 1;
-static int label = 0;
+static bool launch = false;
+static unsigned int label = 0;
 static char labelStr[16];
-static int inIf = 0;
-static int blockParsed = 0;
-static int current_reg;
+static bool inIf = false;
+static bool blockParsed = false;
+static unsigned int countInIf = 0; // less 2^31-1 '&&' or '||' in if condition or maybe you're trying something crazy
 
 /*
+static int current_reg;
 static int inBlockFunc = 0;
 static int parsingLoopFor = 0;
 static int parsingLoopWhile = 0;
@@ -53,6 +54,10 @@ char * get_label(void)
 	return labelStr;
 }
 
+void update_label_string(char* dest)
+{
+	memcpy(dest,label_formatting(),16);
+}
 
 // priority management
 void manage_priority(node_t node, int position) // position left or right 
@@ -174,49 +179,6 @@ void affect_variable(node_t node)
 }
 // --------------------------------------------- //
 
-// ------------ OPERATIONS FOR TESTS ----------- //
-
-void create_if_instruction(node_t node, char * loc_label)
-{
-	char label_in_use[16]; // creating a temporary label for recursion
-	memcpy(label_in_use,loc_label,16);
-
-	switch(node->opr[0]->nature) // treatement of condition
-	{
-		case NODE_AND:
-		case NODE_OR:
-		case NODE_NOT:
-			// do the test and store the bool result in a reg (S_FIELD)
-		break;
-		case NODE_BOOLVAL:
-			switch(node->opr[0]->value)
-			{
-				// if true do the if
-				case true :
-					gen_code_passe_2(node->opr[1]);	
-				break;
-				// if false dont do it
-				case false :
-				break;
-			}
-		break;
-		default :
-			create_operation(node->opr[0]);
-			GOYES(label_in_use);	
-			gen_code_passe_2(node->opr[1]);
-			create_label(label_in_use);
-		break;
-	}
-	blockParsed = 1; // force block parsing
-}
-
-// dupe above for every condition possible
-// NODE_AND
-// NODE_OR
-// NODE_NOT
-
-// -------------------------------------------- //
-
 
 // ------------ OPERATIONS CREATIONS ------------ //
 // create an opposite 
@@ -304,7 +266,7 @@ void create_bnot_instr(node_t node)
 -- 	-> manage condition bool operation
 -- 	-> parse block 
 -- 	-> if condition respected (opposite of what expected) jump to else
---	-> example : if(x<0) = if(x>=0) jump to end of block
+--	-> example : wrinting [if(x<0)] translate to [if(x>=0) then jump to end of block]
 --
 */
 void create_operation(node_t node)
@@ -317,6 +279,17 @@ void create_operation(node_t node)
 		break;
 		case NODE_BNOT :
 			create_bnot_instr(node);
+		break;
+		// case ident is used as a condition in a if
+		case NODE_IDENT :
+			if(inIf == true) // security
+			{
+				load_pointer(D0, node->address);
+				// exchnage A and DAT
+				reading_memory(D0, A, W_FIELD);
+				//if value = 0 skip the if
+				different_from_zero(A, W_FIELD);
+			}
 		break;
 		// else 2 operand
 		default:
@@ -363,10 +336,10 @@ void create_operation(node_t node)
 								logical_AND(A, C, W_FIELD);
 							break;
 							case NODE_BOR :
-								logical_AND(A, C, W_FIELD);
+								logical_OR(A, C, W_FIELD);
 							break;
 							case NODE_BXOR :
-								logical_AND(A, C, W_FIELD);
+								logical_XOR(A, C, W_FIELD);
 							break;
 							case NODE_LT : // opposite op : GTE
 								register_GTE(A, C, W_FIELD);
@@ -425,10 +398,10 @@ void create_operation(node_t node)
 								logical_AND(A, C, W_FIELD);
 							break;
 							case NODE_BOR :
-								logical_AND(A, C, W_FIELD);
+								logical_OR(A, C, W_FIELD);
 							break;
 							case NODE_BXOR :
-								logical_AND(A, C, W_FIELD);
+								logical_XOR(A, C, W_FIELD);
 							break;
 							case NODE_LT : // opposite op : GTE
 								register_GTE(A, C, W_FIELD);
@@ -469,9 +442,9 @@ void create_operation(node_t node)
 			if(node->opr[1]->nature == NODE_IDENT)
 			{
 				// pointer = address 
-				load_pointer(D0, node->opr[1]->address);
+				load_pointer(D1, node->opr[1]->address);
 				// exchnage A and DAT
-				reading_memory(D0, A, W_FIELD);
+				reading_memory(D1, C, W_FIELD);
 				if(node->opr[0]->isPrio)
 				{
 					copy_reg_save_work(R0, A, W_FIELD);
@@ -497,10 +470,10 @@ void create_operation(node_t node)
 						logical_AND(A, C, W_FIELD);
 					break;
 					case NODE_BOR :
-						logical_AND(A, C, W_FIELD);
+						logical_OR(A, C, W_FIELD);
 					break;
 					case NODE_BXOR :
-						logical_AND(A, C, W_FIELD);
+						logical_XOR(A, C, W_FIELD);
 					break;
 					case NODE_LT : // opposite op : GTE
 						register_GTE(A, C, W_FIELD);
@@ -556,10 +529,10 @@ void create_operation(node_t node)
 						logical_AND(A, C, W_FIELD);
 					break;
 					case NODE_BOR :
-						logical_AND(A, C, W_FIELD);
+						logical_OR(A, C, W_FIELD);
 					break;
 					case NODE_BXOR :
-						logical_AND(A, C, W_FIELD);
+						logical_XOR(A, C, W_FIELD);
 					break;
 					case NODE_LT : // opposite op : GTE
 						register_GTE(A, C, W_FIELD);
@@ -597,11 +570,488 @@ void create_operation(node_t node)
 }
 
 
+// for managing conditionnal operation with NOT
+void create_NOT_operation(node_t node)
+{
+	switch(node->nature)
+	{
+		// else 2 operand
+		default:
+		 	// prio management
+			if(node->opr[0]->isPrio)
+			{
+				manage_priority(node->opr[0], LEFT);
+			}
+			if(node->opr[1]->isPrio)
+			{
+				manage_priority(node->opr[1], RIGHT);
+			}
+
+			// left operand
+			if(node->opr[0]->nature == NODE_IDENT)
+			{
+				// pointer = address 
+				load_pointer(D0, node->opr[0]->address);
+				// exchnage A and DAT
+				reading_memory(D0, A, W_FIELD);
+				if(node->opr[1]->isPrio)
+				{
+					copy_reg_save_work(R1, C, W_FIELD);	
+					if(save_reg_available(NULL, NO)) // to ensure that the prio has been treated
+					{
+						switch(node->nature)
+						{
+							case NODE_LT : // opposite op of GTE 
+								register_LT(A, C, W_FIELD);
+							break;
+							case NODE_GT : // opposite op of GT
+								register_GT(A, C, W_FIELD);
+							break;
+							case NODE_EQ : // opposite op of NE
+								register_equal(A, C, W_FIELD);
+							break;
+							case NODE_NE : // opposite op of EQ
+								register_not_equal(A, C, W_FIELD);
+							break;
+							case NODE_GE : // opposite op of LT
+								register_GTE(A, C, W_FIELD);
+							break;
+							case NODE_LE : // opposite op of GT
+								register_LTE(A, C, W_FIELD);
+							break;
+							case NODE_SLL :
+							case NODE_SRL :
+							default:
+							break;
+						}
+					}	
+				}
+			}
+			else if (node->opr[0]->nature == NODE_INTVAL 	|| 
+					 node->opr[0]->nature == NODE_FLOATVAL	||
+					 node->opr[0]->nature == NODE_BOOLVAL)
+			{
+				load_register(node->opr[0]->value, 0);
+				if(node->opr[1]->isPrio)
+				{
+					copy_reg_save_work(R1, C, W_FIELD);	
+					if(save_reg_available(NULL, NO)) // to ensure that the prio has been treated
+					{
+						switch(node->nature)
+						{
+							case NODE_LT : // opposite op of GTE 
+								register_LT(A, C, W_FIELD);
+							break;
+							case NODE_GT : // opposite op of GT
+								register_GT(A, C, W_FIELD);
+							break;
+							case NODE_EQ : // opposite op of NE
+								register_equal(A, C, W_FIELD);
+							break;
+							case NODE_NE : // opposite op of EQ
+								register_not_equal(A, C, W_FIELD);
+							break;
+							case NODE_GE : // opposite op of LT
+								register_GTE(A, C, W_FIELD);
+							break;
+							case NODE_LE : // opposite op of GT
+								register_LTE(A, C, W_FIELD);
+							break;
+							case NODE_SLL :
+							case NODE_SRL :
+							default:
+							break;
+						}
+					}				
+				}
+
+			}
+			else
+			{
+				if(!node->opr[0]->isPrio)
+				{
+					create_operation(node->opr[0]);
+				}
+			}
+
+			//right operand
+			if(node->opr[1]->nature == NODE_IDENT)
+			{
+				// pointer = address 
+				load_pointer(D0, node->opr[1]->address);
+				// exchnage A and DAT
+				reading_memory(D0, A, W_FIELD);
+				if(node->opr[0]->isPrio)
+				{
+					copy_reg_save_work(R0, A, W_FIELD);
+				}
+				switch(node->nature)
+				{
+					case NODE_LT : // opposite op of GTE 
+						register_LT(A, C, W_FIELD);
+					break;
+					case NODE_GT : // opposite op of GT
+						register_GT(A, C, W_FIELD);
+					break;
+					case NODE_EQ : // opposite op of NE
+						register_equal(A, C, W_FIELD);
+					break;
+					case NODE_NE : // opposite op of EQ
+						register_not_equal(A, C, W_FIELD);
+					break;
+					case NODE_GE : // opposite op of LT
+						register_GTE(A, C, W_FIELD);
+					break;
+					case NODE_LE : // opposite op of GT
+						register_LTE(A, C, W_FIELD);
+					break;
+					case NODE_SLL :
+					case NODE_SRL :
+					default:
+					break;
+				}
+			}
+			else if (node->opr[1]->nature == NODE_INTVAL 	|| 
+					 node->opr[1]->nature == NODE_FLOATVAL	||
+					 node->opr[1]->nature == NODE_BOOLVAL) 
+			{
+				load_register(node->opr[1]->value, 1);
+				if(	node->opr[0]->isPrio)
+				{
+					copy_reg_save_work(R0, A, W_FIELD);
+				}
+				switch(node->nature)
+				{
+					case NODE_LT : // opposite op of GTE 
+						register_LT(A, C, W_FIELD);
+					break;
+					case NODE_GT : // opposite op of GT
+						register_GT(A, C, W_FIELD);
+					break;
+					case NODE_EQ : // opposite op of NE
+						register_equal(A, C, W_FIELD);
+					break;
+					case NODE_NE : // opposite op of EQ
+						register_not_equal(A, C, W_FIELD);
+					break;
+					case NODE_GE : // opposite op of LT
+						register_GTE(A, C, W_FIELD);
+					break;
+					case NODE_LE : // opposite op of GT
+						register_LTE(A, C, W_FIELD);
+					break;
+					case NODE_SLL :
+					case NODE_SRL :
+					default:
+					break;
+				}
+			}
+			else
+			{
+				if(!node->opr[1]->isPrio)
+				{
+					create_operation(node->opr[1]);
+				}
+			}
+		break;
+	}
+}
+
 // every integrer/float operation possible
 // NODE_SLL		TO DO BUT ANNOYING
 // NODE_SRL		TO DO BUT ANNOYING
 
 // ------------------------------------------------- //
+
+
+// ------------ OPERATIONS FOR TESTS ----------- //
+
+void create_if_instruction(node_t node, char * loc_label)
+{
+	char label_in_use[16]; // creating a temporary label for recursion
+	memcpy(label_in_use,loc_label,16);
+	switch(node->opr[0]->nature) // treatement of condition
+	{
+		case NODE_AND:
+			switch(node->opr[0]->opr[0]->nature)
+			{
+				case NODE_OR : 
+					countInIf++; // for recursion entry point 
+					create_if_instruction(node->opr[0], label_formatting());
+					countInIf--; // for recursion exit point
+				break;
+				case NODE_AND :
+					countInIf++; // for recursion entry point 
+					create_if_instruction(node->opr[0], label_in_use);
+					countInIf--; // for recursion exit point
+				break;
+				case NODE_PRIO:
+					create_operation(node->opr[0]->opr[0]->opr[0]);
+					GOYES(label_in_use);
+				break;
+
+				case NODE_BOOLVAL:
+					switch(node->opr[0]->opr[0]->value)
+					{
+						case true :
+						break;
+						case false : // in a AND make the value always false
+							// jump automatically to label (can be optimized and skip the entire if)
+							go_very_long(label_in_use);
+						break;
+					}
+				break;
+
+				case NODE_INTVAL:
+				case NODE_FLOATVAL:
+					switch(node->opr[0]->opr[0]->value)
+					{
+						case 0 : // in a AND make the value always false
+							// jump automatically to label (can be optimized and skip the entire if)
+							go_very_long(label_in_use);
+						break;
+						default :
+						break;
+					}
+				break;
+
+				default:
+					create_operation(node->opr[0]->opr[0]);	
+					GOYES(label_in_use);	
+				break;
+			}
+			
+			switch(node->opr[0]->opr[1]->nature)
+			{
+				case NODE_PRIO:
+					create_operation(node->opr[0]->opr[1]->opr[0]);
+					GOYES(label_in_use);
+					gen_code_passe_2(node->opr[1]);
+					create_label(label_in_use);
+				break;
+
+				case NODE_BOOLVAL:
+					switch(node->opr[0]->opr[1]->value)
+					{
+						case true :
+						break;
+						case false : // in a AND make the value always false
+							// jump automatically to label (can be optimized and skip the entire if)
+							go_very_long(label_in_use);
+							create_label(label_in_use);
+						break;
+					}
+				break;
+
+				case NODE_INTVAL:
+				case NODE_FLOATVAL:
+					switch(node->opr[0]->opr[1]->value)
+					{
+						case 0 : // in a AND make the value always false
+							// jump automatically to label (can be optimized and skip the entire if)
+							go_very_long(label_in_use);
+							create_label(label_in_use);
+						break;
+						default :
+						break;
+					}
+				break;
+
+				default:
+					create_operation(node->opr[0]->opr[1]);	
+					GOYES(label_in_use);	
+					gen_code_passe_2(node->opr[1]);
+					if(countInIf < 2) // for recursion
+					{
+						create_label(label_in_use);
+					}
+					break;
+			}
+		break;
+
+		case NODE_OR:
+			switch(node->opr[0]->opr[0]->nature)
+			{
+				case NODE_AND :
+					countInIf++; // for recursion entry point 
+					create_if_instruction(node->opr[0], label_in_use);
+					countInIf--; // for recursion exit point
+				break;
+				case NODE_OR : 
+					countInIf++; // for recursion entry point 
+					create_if_instruction(node->opr[0], label_formatting());
+					countInIf--; // for recursion exit point
+				break;
+				case NODE_PRIO:
+					create_operation(node->opr[0]->opr[0]->opr[0]);
+					GOYES(label_in_use);
+					create_label(label_in_use);
+					update_label_string(label_in_use);
+				break;
+
+				case NODE_BOOLVAL:
+					switch(node->opr[0]->opr[0]->value)
+					{
+						case true :
+						break;
+						case false : 
+						break;
+					}
+				break;
+
+				case NODE_INTVAL:
+				case NODE_FLOATVAL:
+					switch(node->opr[0]->opr[0]->value)
+					{
+						case 0 :
+						break;
+						default :
+						break;
+					}
+				break;
+
+				default:
+					create_operation(node->opr[0]->opr[0]);	
+					GOYES(label_in_use);	
+					create_label(label_in_use);
+					update_label_string(label_in_use);
+				break;
+			}
+			
+			switch(node->opr[0]->opr[1]->nature)
+			{
+				case NODE_PRIO:
+					create_operation(node->opr[0]->opr[1]->opr[0]);
+					GOYES(label_in_use);
+					gen_code_passe_2(node->opr[1]);
+					create_label(label_in_use);
+				break;
+
+				case NODE_BOOLVAL:
+					switch(node->opr[0]->opr[1]->value)
+					{
+						case true :
+						break;
+						case false :
+						break;
+					}
+				break;
+
+				case NODE_INTVAL:
+				case NODE_FLOATVAL:
+					switch(node->opr[0]->opr[1]->value)
+					{
+						case 0 :
+						break;
+						default :
+						break;
+					}
+				break;
+
+				default:
+					create_operation(node->opr[0]->opr[1]);	
+					GOYES(label_in_use);	
+					gen_code_passe_2(node->opr[1]);
+					create_label(label_in_use);
+					break;
+			}
+
+
+
+
+			// create_operation(node->opr[0]->opr[0]);
+			// GOYES(label_in_use);	
+			// create_label(label_in_use);
+			// update_label_string(label_in_use);
+			// create_operation(node->opr[0]->opr[1]);
+			// GOYES(label_in_use);	
+			// gen_code_passe_2(node->opr[1]);
+			// create_label(label_in_use);
+		break;
+
+		case NODE_NOT:
+			if(node->opr[0]->opr[0]->nature == NODE_PRIO)
+			{
+				switch(node->opr[0]->opr[0]->opr[0]->type)
+				{
+					case TYPE_BOOL :
+						create_NOT_operation(node->opr[0]->opr[0]->opr[0]);
+					break;
+					case TYPE_INT:
+					case TYPE_FLOAT:
+						create_operation(node->opr[0]->opr[0]->opr[0]);
+						equal_to_zero(A, W_FIELD);
+					break;
+
+				}
+			}
+			else if(node->opr[0]->opr[0]->nature == NODE_IDENT)
+			{
+				load_pointer(D0, node->opr[0]->address);
+				// exchnage A and DAT
+				reading_memory(D0, A, W_FIELD);
+				//if value != 0 skip the if
+				equal_to_zero(A, W_FIELD);
+			}
+			else
+			{
+				create_NOT_operation(node->opr[0]->opr[0]);
+			}
+			GOYES(label_in_use);	
+			gen_code_passe_2(node->opr[1]);
+			create_label(label_in_use);
+		break;
+
+		case NODE_BOOLVAL:
+			switch(node->opr[0]->value)
+			{
+				// if true do the if
+				case true :
+					gen_code_passe_2(node->opr[1]);	
+				break;
+				// if false dont do it
+				case false :
+				break;
+			}
+		break;
+
+		case NODE_INTVAL:
+		case NODE_FLOATVAL:
+			switch(node->opr[0]->value)
+			{
+				// if 0 dont do it
+				case 0 :
+				break;
+				// else do it
+				default :
+					gen_code_passe_2(node->opr[1]);	
+				break;
+			}
+		break;
+
+		default :
+			if(node->opr[0]->nature == NODE_PRIO)
+			{
+				create_operation(node->opr[0]->opr[0]);
+			}
+			else
+			{
+				create_operation(node->opr[0]);
+			}
+			GOYES(label_in_use);	
+			gen_code_passe_2(node->opr[1]);
+			create_label(label_in_use);
+		break;
+	}
+	blockParsed = true; // force block parsing
+}
+
+// dupe above for every condition possible
+// NODE_AND
+// NODE_OR
+// NODE_NOT 	DONE 
+
+// -------------------------------------------- //
 
 /* -------------------------------------------------------------- */
 
@@ -609,10 +1059,10 @@ void create_operation(node_t node)
 
 void gen_code_passe_2(node_t root) 
 {
-	if (launch)
+	if (!launch)
 	{
 		// launching the program
-		launch = 0;
+		launch = true;
 	}
 	for(int i = 0; i < root->nops; i++)
 	{
@@ -661,7 +1111,7 @@ void gen_code_passe_2(node_t root)
 					if (root->opr[i+1] != NULL && root->opr[i+1]->nature == NODE_BLOCK)
 					{
 						gen_code_passe_2(root->opr[i+1]);
-						blockParsed = 1;
+						blockParsed = true;
 					}
 					switch(root->opr[i]->opr[1]->nature)
 					{
@@ -705,15 +1155,17 @@ void gen_code_passe_2(node_t root)
 				// creation of the If Statement
 				case NODE_IF :
 					create_comment("--- IF ---");
-					inIf = 1;
+					inIf = true;
 					label_formatting();
+					countInIf++; // = 1 for recursion, first entry point
 					create_if_instruction(root->opr[i], get_label());
+					countInIf--; // = 0 for recursion, last exit point
 					create_comment("-- ENDIF --");
 				break;
 
 				case NODE_ELSE :
 					create_comment("--- ELSE ---");
-					inIf = 1;
+					inIf = true;
 					// create_if_instruction(root->opr[i]);
 					// create_label(label_formatting());
 					create_comment("-- ENDELSE --");
@@ -733,7 +1185,7 @@ void gen_code_passe_2(node_t root)
 			}
 			else
 			{
-				blockParsed = 0;
+				blockParsed = false;
 			}
 		}
 	}
