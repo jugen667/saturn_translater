@@ -272,7 +272,7 @@ void check_affect_type(node_t node)
 				((node->opr[0]->type != TYPE_INT && node->opr[0]->type != TYPE_FLOAT) ||
 				 (node->opr[1]->type != TYPE_INT && node->opr[1]->type != TYPE_FLOAT))) 
 			{	
-				printf(RED "Error line" BOLD " %d " NC ": uncompatible affectation\n", node->opr[0]->lineno);
+				printf(RED "Error line" BOLD " %d " NC ": incompatible affectation\n", node->opr[0]->lineno);
 				exit(EXIT_FAILURE);
 			}
 			else
@@ -471,7 +471,7 @@ void analyse_passe_1(node_t root)
 								break;  
 							}
 						}
-						// if trying to redeclare	
+						// if trying to re declare	
 						else if(variableDecl != NULL && declaration == 1)
 						{
 							printf(RED "Error line" BOLD " %d " NC ": variable " BOLD "'%s'" NC " already declared : previous declaration line %d\n", root->opr[i]->lineno, root->opr[i]->ident, variableDecl->lineno);
@@ -508,7 +508,7 @@ void analyse_passe_1(node_t root)
 					root->opr[i]->type = TYPE_INT;
 				break;
 
-				// Opreators that returns boolean expressions
+				// Operators that returns boolean expressions
 				case NODE_EQ :
 				case NODE_NE :
 				case NODE_LT :
@@ -616,7 +616,7 @@ void analyse_passe_1(node_t root)
 		// case if(...) else ...
 		if(root->nature == NODE_IF && root->nops == 3)
 		{
-			// if 3 node then 3rd is else stamenet (to check) (statement, block, else)
+			// if 3 node then 3rd is else statement (to check) (statement, block, else)
 			root->opr[2]->nature = NODE_ELSE;
 		}
 

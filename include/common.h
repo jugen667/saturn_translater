@@ -20,7 +20,14 @@
 // > v0.1 : first iteration = start		 	\\	
 // > v0.2 : final dev architecture 		 	\\
 // > v0.3 : basic operations support		\\
-// > v0.4 : if integration finished			\\
+// > v0.4 : if else integration finished	\\
+// > v0.5 : while integration finished		\\
+// > v0.6 : for integration finished		\\
+// > v0.7 : binary changes (flags etc)		\\
+// > v0.8 : changes and fixes				\\
+// > v0.9 : testing phase					\\
+// > v1.0 : first release					\\
+// > v1.x : 								\\
 // ========================================	\\
 
 #define     NC              "\e[0m"

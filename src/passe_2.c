@@ -21,7 +21,7 @@ static unsigned int label = 0;
 static char labelStr[16];
 static bool inIf = false;
 static bool blockParsed = false;
-static unsigned int countInIf = 0; // less 2^31-1 '&&' or '||' in if condition or maybe you're trying something crazy
+static unsigned int countInIf = 0; // less then  2^31-1 '&&' or '||' in if condition or maybe you're trying something crazy
 
 /*
 static int current_reg;
@@ -98,7 +98,7 @@ void decl_inblock(node_t node)
 			load_pointer(D1, node->opr[1]->address);
 			// read memory into A
 			reading_memory(D1, A, W_FIELD);
-			// exchnage A and DAT
+			// exchange A and DAT
 			writing_memory(D0, A, W_FIELD);
 		}
 		else // IT IS A IMMEDIATE 
@@ -107,7 +107,7 @@ void decl_inblock(node_t node)
 			load_pointer(D0, node->opr[0]->address);
 			// A = value
 			load_register(node->opr[1]->value, 0);
-			// exchnage A and DAT
+			// exchange A and DAT
 			writing_memory(D0, A, W_FIELD);
 		}
 	}
@@ -117,7 +117,7 @@ void decl_inblock(node_t node)
 		load_pointer(D0, node->opr[0]->address);
 		// A = value
 		load_register(0, 0);
-		// exchnage A and DAT
+		// exchange A and DAT
 		writing_memory(D0, A, W_FIELD);
 	}
 }
@@ -134,7 +134,7 @@ void affect_variable(node_t node)
 		load_pointer(D1, node->opr[1]->address);
 		// read memory into A
 		reading_memory(D1, A, W_FIELD);
-		// exchnage A and DAT
+		// exchange A and DAT
 		writing_memory(D0, A, W_FIELD);
 	}
 
@@ -160,7 +160,7 @@ void affect_variable(node_t node)
 		load_pointer(D0, node->opr[0]->address);
 		// A = value
 		load_register(node->opr[1]->value, 0);
-		// exchnage A and DAT
+		// exchange A and DAT
 		writing_memory(D0, A, W_FIELD);
 	}
 
@@ -173,7 +173,7 @@ void affect_variable(node_t node)
 		load_pointer(D0, node->opr[0]->address);
 		// A = value
 		load_register(node->opr[1]->value, 0);
-		// exchnage A and DAT
+		// exchange A and DAT
 		writing_memory(D0, A, S_FIELD);	// value of bool on a S field only
 	}
 }
@@ -194,7 +194,7 @@ void create_uminus_instr(node_t node)
 	{
 		// pointer = address 
 		load_pointer(D0, node->opr[0]->address);
-		// exchnage A and DAT
+		// exchange A and DAT
 		reading_memory(D0, A, W_FIELD);
 		two_complement(A, W_FIELD);
 
@@ -233,7 +233,7 @@ void create_bnot_instr(node_t node)
 	{
 		// pointer = address 
 		load_pointer(D0, node->opr[0]->address);
-		// exchnage A and DAT
+		// exchange A and DAT
 		reading_memory(D0, A, W_FIELD);
 		one_complement(A, W_FIELD);
 
@@ -285,7 +285,7 @@ void create_operation(node_t node)
 			if(inIf == true) // security
 			{
 				load_pointer(D0, node->address);
-				// exchnage A and DAT
+				// exchange A and DAT
 				reading_memory(D0, A, W_FIELD);
 				//if value = 0 skip the if
 				different_from_zero(A, W_FIELD);
@@ -308,7 +308,7 @@ void create_operation(node_t node)
 			{
 				// pointer = address 
 				load_pointer(D0, node->opr[0]->address);
-				// exchnage A and DAT
+				// exchange A and DAT
 				reading_memory(D0, A, W_FIELD);
 				if(node->opr[1]->isPrio)
 				{
@@ -443,7 +443,7 @@ void create_operation(node_t node)
 			{
 				// pointer = address 
 				load_pointer(D1, node->opr[1]->address);
-				// exchnage A and DAT
+				// exchange A and DAT
 				reading_memory(D1, C, W_FIELD);
 				if(node->opr[0]->isPrio)
 				{
@@ -570,7 +570,7 @@ void create_operation(node_t node)
 }
 
 
-// for managing conditionnal operation with NOT
+// for managing conditional operation with NOT
 void create_NOT_operation(node_t node)
 {
 	switch(node->nature)
@@ -592,7 +592,7 @@ void create_NOT_operation(node_t node)
 			{
 				// pointer = address 
 				load_pointer(D0, node->opr[0]->address);
-				// exchnage A and DAT
+				// exchange A and DAT
 				reading_memory(D0, A, W_FIELD);
 				if(node->opr[1]->isPrio)
 				{
@@ -679,7 +679,7 @@ void create_NOT_operation(node_t node)
 			{
 				// pointer = address 
 				load_pointer(D0, node->opr[1]->address);
-				// exchnage A and DAT
+				// exchange A and DAT
 				reading_memory(D0, A, W_FIELD);
 				if(node->opr[0]->isPrio)
 				{
@@ -757,7 +757,7 @@ void create_NOT_operation(node_t node)
 	}
 }
 
-// every integrer/float operation possible
+// every integer/float operation possible
 // NODE_SLL		TO DO BUT ANNOYING
 // NODE_SRL		TO DO BUT ANNOYING
 
@@ -770,21 +770,23 @@ void create_if_instruction(node_t node, char * loc_label)
 {
 	char label_in_use[16]; // creating a temporary label for recursion
 	memcpy(label_in_use,loc_label,16);
-	switch(node->opr[0]->nature) // treatement of condition
+	switch(node->opr[0]->nature) // treatment of condition
 	{
 		case NODE_AND:
 			switch(node->opr[0]->opr[0]->nature)
 			{
-				case NODE_OR : 
-					countInIf++; // for recursion entry point 
-					create_if_instruction(node->opr[0], label_formatting());
-					countInIf--; // for recursion exit point
-				break;
 				case NODE_AND :
 					countInIf++; // for recursion entry point 
 					create_if_instruction(node->opr[0], label_in_use);
 					countInIf--; // for recursion exit point
 				break;
+				// --- CURRENTLY BUGGY : TO IMPROVE ---
+				// case NODE_OR : 
+				// 	countInIf++; // for recursion entry point 
+				// 	create_if_instruction(node->opr[0], label_formatting());
+				// 	countInIf--; // for recursion exit point
+				// break;
+				// ------------------------------------
 				case NODE_PRIO:
 					create_operation(node->opr[0]->opr[0]->opr[0]);
 					GOYES(label_in_use);
@@ -823,6 +825,18 @@ void create_if_instruction(node_t node, char * loc_label)
 			
 			switch(node->opr[0]->opr[1]->nature)
 			{
+				// --- CURRENTLY BUGGY : TO IMPROVE ---
+				// case NODE_OR : 
+				// 	countInIf++; // for recursion entry point 
+				// 	create_if_instruction(node->opr[0], label_formatting());
+				// 	countInIf--; // for recursion exit point
+				// break;
+				// case NODE_AND :
+				// 	countInIf++; // for recursion entry point 
+				// 	create_if_instruction(node->opr[0], label_in_use);
+				// 	countInIf--; // for recursion exit point
+				// break;
+				// ------------------------------------
 				case NODE_PRIO:
 					create_operation(node->opr[0]->opr[1]->opr[0]);
 					GOYES(label_in_use);
@@ -863,6 +877,7 @@ void create_if_instruction(node_t node, char * loc_label)
 					gen_code_passe_2(node->opr[1]);
 					if(countInIf < 2) // for recursion
 					{
+						go_very_long(label_formatting());
 						create_label(label_in_use);
 					}
 					break;
@@ -870,23 +885,34 @@ void create_if_instruction(node_t node, char * loc_label)
 		break;
 
 		case NODE_OR:
+			// create a register use B
+			if(countInIf < 2)
+			{
+				register_zero(B, W_FIELD);
+			}
 			switch(node->opr[0]->opr[0]->nature)
 			{
-				case NODE_AND :
-					countInIf++; // for recursion entry point 
-					create_if_instruction(node->opr[0], label_in_use);
-					countInIf--; // for recursion exit point
-				break;
 				case NODE_OR : 
 					countInIf++; // for recursion entry point 
 					create_if_instruction(node->opr[0], label_formatting());
 					countInIf--; // for recursion exit point
 				break;
+				// --- CURRENTLY BUGGY : TO IMPROVE ---
+				// case NODE_OR : 
+				// 	countInIf++; // for recursion entry point 
+				// 	create_if_instruction(node->opr[0], label_formatting());
+				// 	countInIf--; // for recursion exit point
+				// break;
+				// ------------------------------------
 				case NODE_PRIO:
+					// do operation
 					create_operation(node->opr[0]->opr[0]->opr[0]);
 					GOYES(label_in_use);
+					// increment register if true
+					inc_register(B, W_FIELD);
 					create_label(label_in_use);
 					update_label_string(label_in_use);
+
 				break;
 
 				case NODE_BOOLVAL:
@@ -911,8 +937,11 @@ void create_if_instruction(node_t node, char * loc_label)
 				break;
 
 				default:
-					create_operation(node->opr[0]->opr[0]);	
-					GOYES(label_in_use);	
+					// do operation
+					create_operation(node->opr[0]->opr[0]);
+					GOYES(label_in_use);
+					// increment register if true
+					inc_register(B, W_FIELD);
 					create_label(label_in_use);
 					update_label_string(label_in_use);
 				break;
@@ -920,9 +949,30 @@ void create_if_instruction(node_t node, char * loc_label)
 			
 			switch(node->opr[0]->opr[1]->nature)
 			{
+
+				// --- CURRENTLY BUGGY : TO IMPROVE ---
+				// case NODE_OR : 
+				// 	countInIf++; // for recursion entry point 
+				// 	create_if_instruction(node->opr[0], label_formatting());
+				// 	countInIf--; // for recursion exit point
+				// break;
+				// case NODE_AND :
+				// 	countInIf++; // for recursion entry point 
+				// 	create_if_instruction(node->opr[0], label_in_use);
+				// 	countInIf--; // for recursion exit point
+				// break;
+				// ------------------------------------
 				case NODE_PRIO:
+					// do operation 
 					create_operation(node->opr[0]->opr[1]->opr[0]);
 					GOYES(label_in_use);
+					// increment register if true
+					inc_register(B, W_FIELD);
+					create_label(label_in_use);
+					update_label_string(label_in_use);
+					// evaluate the register if is null, skip if
+					equal_to_zero(B, W_FIELD);
+		 			GOYES(label_in_use);
 					gen_code_passe_2(node->opr[1]);
 					create_label(label_in_use);
 				break;
@@ -949,24 +999,24 @@ void create_if_instruction(node_t node, char * loc_label)
 				break;
 
 				default:
+					// do operation 
 					create_operation(node->opr[0]->opr[1]);	
 					GOYES(label_in_use);	
-					gen_code_passe_2(node->opr[1]);
+					// increment register if true
+					inc_register(B, W_FIELD);
 					create_label(label_in_use);
-					break;
+					update_label_string(label_in_use);
+					// evaluate the register if is null, skip if
+					equal_to_zero(B, W_FIELD);
+		 			GOYES(label_in_use);
+					gen_code_passe_2(node->opr[1]);
+					if(countInIf < 2) // for recursion
+					{
+						go_very_long(label_formatting());
+						create_label(label_in_use);
+					}
+				break;
 			}
-
-
-
-
-			// create_operation(node->opr[0]->opr[0]);
-			// GOYES(label_in_use);	
-			// create_label(label_in_use);
-			// update_label_string(label_in_use);
-			// create_operation(node->opr[0]->opr[1]);
-			// GOYES(label_in_use);	
-			// gen_code_passe_2(node->opr[1]);
-			// create_label(label_in_use);
 		break;
 
 		case NODE_NOT:
@@ -988,7 +1038,7 @@ void create_if_instruction(node_t node, char * loc_label)
 			else if(node->opr[0]->opr[0]->nature == NODE_IDENT)
 			{
 				load_pointer(D0, node->opr[0]->address);
-				// exchnage A and DAT
+				// exchange A and DAT
 				reading_memory(D0, A, W_FIELD);
 				//if value != 0 skip the if
 				equal_to_zero(A, W_FIELD);
@@ -999,6 +1049,7 @@ void create_if_instruction(node_t node, char * loc_label)
 			}
 			GOYES(label_in_use);	
 			gen_code_passe_2(node->opr[1]);
+			go_very_long(label_formatting());
 			create_label(label_in_use);
 		break;
 
@@ -1040,16 +1091,12 @@ void create_if_instruction(node_t node, char * loc_label)
 			}
 			GOYES(label_in_use);	
 			gen_code_passe_2(node->opr[1]);
+			go_very_long(label_formatting());
 			create_label(label_in_use);
 		break;
 	}
 	blockParsed = true; // force block parsing
 }
-
-// dupe above for every condition possible
-// NODE_AND
-// NODE_OR
-// NODE_NOT 	DONE 
 
 // -------------------------------------------- //
 
@@ -1090,7 +1137,7 @@ void gen_code_passe_2(node_t root)
 							load_pointer(D0, root->opr[i]->opr[0]->address);
 							// A = value
 							load_register(0, 0);
-							// exchnage A and DAT
+							// exchange A and DAT
 							writing_memory(D0, A, W_FIELD);
 						}
 					}
@@ -1100,7 +1147,7 @@ void gen_code_passe_2(node_t root)
 					}
 				break;
 
-				// FUNC initilization 
+				// FUNC initialization 
 				case NODE_FUNC :
 					// create label
 					create_label("MAIN_FUNC");
@@ -1132,7 +1179,7 @@ void gen_code_passe_2(node_t root)
 					flush_save_reg(); // reset save_reg pointers from our side : to test if useful
 				break;
 				
-				// case if the FOR index initialisation is a ident not an affectation
+				// case if the FOR index initialization is a ident not an affectation
 				case NODE_FOR :
 					create_comment("STARTING FOR LOOP :");
 					// inLoopFor = 1;
@@ -1141,9 +1188,10 @@ void gen_code_passe_2(node_t root)
 
 				// creation of the While loop
 				case NODE_WHILE :
-					create_comment("STARTING WHILE LOOP :");
-					// inLoopWhile = 1;
+					create_comment("--- WHILE ---");
+					// create_while_instruction(root->opr[i]);
 					create_label(label_formatting());
+					create_comment("--- ENDWHILE ---");
 				break;
 
 				// creation of the Do While loop
@@ -1154,23 +1202,24 @@ void gen_code_passe_2(node_t root)
 
 				// creation of the If Statement
 				case NODE_IF :
-					create_comment("--- IF ---");
+					create_comment("--- IF ---"); // to delete for debug in dump file
 					inIf = true;
 					label_formatting();
 					countInIf++; // = 1 for recursion, first entry point
 					create_if_instruction(root->opr[i], get_label());
 					countInIf--; // = 0 for recursion, last exit point
-					create_comment("-- ENDIF --");
+					if(root->opr[i]->opr[2] != NULL) // else
+					{
+						create_comment("--- ELSE ---"); // to delete for debug in dump file
+						gen_code_passe_2(root->opr[i]->opr[2]);
+						create_comment("-- ENDELSE --"); // to delete for debug in dump file
+					}
+					create_label(get_label()); // to skip the else if the if is valid
+					inIf = false;
+					create_comment("-- ENDIF --"); // to delete for debug in dump file
 				break;
 
-				case NODE_ELSE :
-					create_comment("--- ELSE ---");
-					inIf = true;
-					// create_if_instruction(root->opr[i]);
-					// create_label(label_formatting());
-					create_comment("-- ENDELSE --");
-				break;	
-
+				default:
 				case NODE_LIST :
 				break;
 			}		
@@ -1179,7 +1228,8 @@ void gen_code_passe_2(node_t root)
 		// RECURSION
 		if(root->opr[i] != NULL)
 		{
-			if (!(root->opr[i]->nature == NODE_BLOCK && blockParsed))
+			if (!(root->opr[i]->nature == NODE_BLOCK && blockParsed) && // block managed in the  
+				(root->opr[i]->nature != NODE_ELSE)) // else managed in if 
 			{
 				gen_code_passe_2(root->opr[i]);
 			}

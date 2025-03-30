@@ -58,7 +58,7 @@ void affiche_help()
 {
     printf("\n");
 	printf(BOLD "Help page Saturncc \n\n" NC);
-	printf(BOLD "Translater for simplified C to Saturn HP assembly\n" NC);
+	printf(BOLD "Translator for simplified C to Saturn HP assembly\n" NC);
     printf("Usage : ./saturncc <options> <infile>\n\n");
 	printf("  -o <filename> : Custom output filename\n\t(default : out.s)\n");
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
@@ -93,7 +93,7 @@ void testValideInFile(char * test)
     i = strlen(test);
     if (strstr(&test[i-2],".c") == NULL )
     {
-        fprintf(stderr,RED BOLD "unvalid file name : %s\n" NC,test);
+        fprintf(stderr,RED BOLD "invalid file name : %s\n" NC,test);
         exit(EXIT_FAILURE);    
     }
 }
@@ -106,7 +106,7 @@ void testValideOutFile(char * test)
     i = strlen(test);
     if (strstr(&test[i-2],".s") == NULL )
     {
-        fprintf(stderr,RED BOLD"unvalid file name : %s\n" NC,test);
+        fprintf(stderr,RED BOLD"invalid file name : %s\n" NC,test);
         exit(EXIT_FAILURE);    
     }
 }
@@ -121,7 +121,7 @@ void test_arg_compatibility(char *arg_1, char *arg_2, char *test)
 	}
 	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == 1)
     {
-		fprintf(stderr,BOLD "uncompatible options  : %s and %s \n" NC, arg_1, arg_2);
+		fprintf(stderr,BOLD "incompatible options  : %s and %s \n" NC, arg_1, arg_2);
 		exit(EXIT_FAILURE);
 	}
 }

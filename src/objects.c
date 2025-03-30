@@ -37,7 +37,7 @@ typedef union
 uint64_t create_real_number(int32_t value)
 {
     int32_t tempValue = value;
-    printf("entrey value  : %d\n", value);
+    printf("entry value  : %d\n", value);
     unsigned short exponent;
     realNumber returnValue;
     returnValue.fullNumber = 0;
