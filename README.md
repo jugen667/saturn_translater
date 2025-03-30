@@ -8,7 +8,7 @@ This also can produce a tree of the program.
 
 ## About C
 We are using a sub-set of C. 
-This subset is limited by the instruction set of the Saturn CPU.
+This subset is mainly limited by the instruction set of the Saturn CPU.
 
 More about the subset under [grammar/rules.md](https://github.com/jugen667/saturn_translater/blob/master/grammar/rules.md)
 
@@ -25,6 +25,14 @@ Fast test file with tree as png and svg :
 
 ```make clean && make all && bin/saturncc -a temp/test.c && tools/graph-create.sh```
 
+
+# KNOWN BUGS 
+
+- Multiple OR and AND in If not sure if ok -> to test
+
+---------------
+
+
 # Road Map
 
 ## ~~Add float support~~
@@ -32,7 +40,6 @@ Fast test file with tree as png and svg :
 ## ~~Ensure tree is correct~~
 
 ## ~~1st parsing : ensure we are doing operations correctly (type checks etc)~~
-
 
 ## ~~Instruction Set implementation~~ 
 
@@ -43,7 +50,11 @@ Fast test file with tree as png and svg :
 
 ## 2nd parsing : translate nodes to instructions with the instructions set
 - ~~int operations~~
-- bool operation
+- ~~bool operation~~ 
+- if
+- for
+- while / do...while
+
 
 
 ## TO DO IN THE FUTURE ##
@@ -55,6 +66,4 @@ Fast test file with tree as png and svg :
 - add ARM instruction set compatibility and compilation option (not sure)
 
 
-# KNOWN BUGS 
 
-- Priority to test but fixed
