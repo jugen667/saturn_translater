@@ -58,19 +58,22 @@ node_t make_node_main(node_t node_next);
     node_t ptr;
 };
 
-%type <intval> TOK_INTVAL;
-%type <floatval> TOK_FLOATVAL;
-%type <strval> TOK_IDENT TOK_STRING;
-
-%token TOK_VOID TOK_INT TOK_INTVAL TOK_FLOAT TOK_FLOATVAL TOK_BOOL TOK_TRUE TOK_FALSE 
-%token TOK_MAIN TOK_IDENT TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_PRINT 
-%token TOK_SEMICOL TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
-%token TOK_STRING TOK_DO
-
-
+// data with variables values
+%token <intval> TOK_INTVAL;
+%token <floatval> TOK_FLOATVAL;
+%token <strval> TOK_IDENT TOK_STRING;
+// data types
+%token TOK_VOID TOK_INT TOK_FLOAT TOK_BOOL
+// data static values
+%token TOK_TRUE TOK_FALSE 
+// statements 
+%token  TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_DO
+// special tokens
+%token TOK_MAIN TOK_PRINT TOK_SEMICOL TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
 %nonassoc TOK_THEN
 %nonassoc TOK_ELSE 
 
+// operators
 %right TOK_AFFECT
 
 %left TOK_OR
@@ -87,7 +90,7 @@ node_t make_node_main(node_t node_next);
 %nonassoc TOK_UMINUS TOK_NOT TOK_BNOT
 
 
-%type <ptr> program listdecl listdeclnonnull vardecl ident type listtypedecl decl maindecl listinst listinstnonnull inst block expr listparamprint paramprint list 
+%type <ptr> program listdecl vardecl ident type listtypedecl decl maindecl listinst inst block expr listparamprint paramprint list 
 
 %%
 
@@ -115,20 +118,9 @@ program:                list maindecl // case of inst
                         ;
 
 
-listdecl:               listdeclnonnull
+listdecl:               vardecl
                         {
                             $$ = $1;
-                        }
-                        ;
-
-
-listdeclnonnull:        vardecl
-                        {
-                            $$ = $1; 
-                        }
-                        | listdeclnonnull vardecl
-                        {
-                            $$ = make_node(NODE_LIST, 2, $1, $2);
                         }
                         ;
 
@@ -189,26 +181,14 @@ maindecl                : TOK_VOID TOK_MAIN TOK_LPAR TOK_RPAR block // only vali
                         | TOK_VOID ident TOK_LPAR TOK_RPAR block
                         {
                             printf(RED "Syntax error" NC " : function name must be " BOLD CYAN "main()" NC " of type " BOLD PURPLE "void" NC " \n");
-                            // free
                             exit(EXIT_FAILURE);
                         }
                         ;
 
 
-listinst                : listinstnonnull
+listinst                : inst
                         {
                             $$ =$1;
-                        }
-                        ;
-
-
-listinstnonnull         : inst
-                        {
-                            $$ = $1;
-                        }
-                        | listinstnonnull inst
-                        {
-                            $$ = make_node(NODE_LIST, 2, $1, $2);
                         }
                         ;
 
@@ -264,11 +244,6 @@ list                    :   listdecl
                         {
                             $$ = make_node(NODE_LIST, 2, $1, $2);
                         }
-                        |
-                        {
-            
-                            $$ = NULL;
-                        } 
                         ;
 
 
@@ -389,15 +364,10 @@ expr                    : TOK_LPAR expr TOK_RPAR
                             $$ = make_node_boolval(false);
                         }
                         | ident
-                        {
+                        {                
                             $$ = $1;
                         }
-                        |
-                        {
-                            $$ = NULL;
-                        }
                         ;
-
 
 listparamprint          : listparamprint TOK_COMMA paramprint
                         {
@@ -604,7 +574,8 @@ void analyse_tree(node_t root) {
  * DON'T CALL IT : value given by yylineno won't be correct after syntaxe analysis
  */
 void yyerror(node_t * program_root, char * s) {
-    fprintf(stderr, "Error line %d: %s\n", yylineno, s);
+
+    fprintf(stderr, NC BOLD RED "Error line %d : " NC RED "%s\n" NC, yylineno, s);
     exit(1);
 }
 

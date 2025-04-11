@@ -17,7 +17,7 @@ else ifeq ($(DEBUG_YACC),1)
 endif
 
 
-CFLAGS=-O0 -g -std=c99 -DYY_NO_LEAKS -Wimplicit-function-declaration
+CFLAGS=-O0 -g -std=c99 -DYY_NO_LEAKS
 INCLUDE=-I$(INC_DIR) 
 
 all: $(EXE)
@@ -28,17 +28,17 @@ $(EXE) :  y.tab.o lex.yy.o common.o passe_1.o instruction_set.o objects.o passe_
 	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o passe_1.o instruction_set.o objects.o passe_2.o -o $@
 	@echo "| Cleaning .o files"
 	@rm -f *.o
-	@echo "| Finished building $(EXE)"
+	@echo "| \033[1mFinished building $(EXE)\033[0m"
 
 
 y.tab.c: $(GRA_DIR)/grammar.y Makefile
-	@echo "| yacc $(YACC_FLAGS)-d grammar.y"
+	@echo "| Creating parser $@"
 	@yacc $(YACC_FLAGS)-d $(GRA_DIR)/grammar.y
 	@mv y.tab.c $(SRC_DIR)
 	@mv y.tab.h $(INC_DIR)
 
 lex.yy.c: $(GRA_DIR)/lexico.l Makefile
-	@echo "| lex $(LEX_FLAGS)-d lexico.l"
+	@echo "| Creating lexical analyser $@"
 	@lex -o $(SRC_DIR)/lex.yy.c $(LEX_FLAGS) $(GRA_DIR)/lexico.l
 
 lex.yy.o: lex.yy.c
@@ -96,4 +96,5 @@ clean:
 	@rm -rf tools/graph-last-program
 	@echo "| Cleaning test files"
 	@rm -f  tests/log.txt tests/buffer.txt tests/*.s tests/*.dot *.txt
+	@echo "| \033[1mCleaned all files\033[0m"
 

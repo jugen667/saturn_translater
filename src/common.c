@@ -42,13 +42,13 @@ bool uncompatible=0;
 void print_version()
 {
     printf("\n");
-    printf(BOLD "-------------------- SaturnCC --------------------\n" NC);
+    printf(BOLD "---------------------------- SaturnCC ----------------------------\n" NC);
     printf("\n");
-    printf(BOLD "Translater for simplified C to Saturn HP assembly\n" NC);
-    printf(BOLD "Build Version :" NC "v%s.%s\r\n", MAIN_VERSION, SUB_VERSION);
+    printf(BOLD "Translator from implified C to Saturn HP assembly\n" NC);
+    printf(BOLD "Build Version : " NC "v%s.%s\r\n", MAIN_VERSION, SUB_VERSION);
     printf(BOLD "Github link : " NC "https://github.com/jugen667/saturn_translater\n");
     printf("\n");
-    printf(BOLD "--------------------------------------------------\n" NC);
+    printf(BOLD "------------------------------------------------------------------\n" NC);
     printf("\n");
 }
 
@@ -58,7 +58,7 @@ void affiche_help()
 {
     printf("\n");
 	printf(BOLD "Help page Saturncc \n\n" NC);
-	printf(BOLD "Translator for simplified C to Saturn HP assembly\n" NC);
+	printf(BOLD "Translator from Simplified C to Saturn HP assembly\n" NC);
     printf("Usage : ./saturncc <options> <infile>\n\n");
 	printf("  -o <filename> : Custom output filename\n\t(default : out.s)\n");
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
