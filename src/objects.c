@@ -21,10 +21,7 @@
 //===============
 typedef union
 {
-    struct 
-    {
-        uint64_t fullNumber;
-    };
+    uint64_t fullNumber;
     struct 
     {
         uint64_t sign:4;        // 1 nibbles = 4 bits

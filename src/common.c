@@ -26,9 +26,11 @@
 // ================================================================================================= //
 static uint32_t current_address = MIN_ADDRESS; // init at base address
 extern char * infile;
-extern char * outfile;
-extern bool stop_after_syntax;
-extern bool stop_after_verif;
+
+char * outfile = DEFAULT_OUTFILE;
+bool stop_after_syntax = false;
+bool stop_after_verif = false;
+
 FILE * outfileDescriptor = NULL;
 bool verboseDebug = 0;
 short target = 48;
@@ -615,7 +617,7 @@ int decimal2BCD(int value)
 // assign an address to a node (maybe the most useful func here but to check if ok with hardware)
 uint32_t assign_address(void)
 {
-    current_address+=0x20; // + 4 BYTES
+    current_address+=NEXT_ADDRESS; // + 8 BYTES 
     if(current_address >= MAX_PRACTICAL_ADDRESS)
     {
         printf(BOLD RED "TRAP ADDRESS ERROR : address 0x%05x is unreachable\n" NC, current_address);
@@ -640,8 +642,8 @@ FILE * outfile_open(char * outfileName)
     f = fopen(outfileName, "w");
     if(f != NULL){
         fprintf(f, "%% Source file name : %s\n", infile);
-        fprintf(f, "%% Compiled with saturn_translater\n");
         fprintf(f, "%% Target of this program : HP-%d series\n", target);
+        fprintf(f, "%% Compiled with saturn_translater\n");
         fprintf(f, "%% https://github.com/jugen667/saturn_translater\n");
         fprintf(f, "\n\n");
         if(verboseDebug)

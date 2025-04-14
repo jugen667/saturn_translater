@@ -23,9 +23,6 @@ static void yyunput ( int c, char *buf_ptr  );
 
 
 char * infile = NULL;
-char * outfile = DEFAULT_OUTFILE;
-bool stop_after_syntax = false;
-bool stop_after_verif = false;
 bool isPrio = false;
 
 #if YYDEBUG

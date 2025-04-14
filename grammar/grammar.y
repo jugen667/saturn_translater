@@ -19,7 +19,6 @@
 #include "../include/passe_1.h"
 #include "../include/passe_2.h"
 // #include "../include/objects.h"
-// #include "../include/instruction_set.h"
 
 
 
@@ -215,7 +214,7 @@ inst                    : expr TOK_SEMICOL
                         }
                         | TOK_DO inst TOK_WHILE TOK_LPAR expr TOK_RPAR TOK_SEMICOL
                         {
-                            $$ = make_node(NODE_DOWHILE, 2, $2, $5);
+                            $$ = make_node(NODE_DOWHILE, 2, $5, $2);
                         }
                         | block
                         {

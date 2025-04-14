@@ -11,10 +11,9 @@
 // =========================================== DEFINES ============================================= //
 // ================================================================================================= //
 #define DEFAULT_OUTFILE "out.s"
-#define DEFAULT_TRACE_LEVEL 0
 
 #define     MAIN_VERSION    "0"                 /*dev phase*/
-#define     SUB_VERSION     "4"                 /*iteration*/
+#define     SUB_VERSION     "5"                 /*iteration*/
 
 // ============== LOGGING =================	\\
 // > v0.1 : first iteration = start		 	\\	
@@ -23,11 +22,13 @@
 // > v0.4 : if else integration finished	\\
 // > v0.5 : while integration finished		\\
 // > v0.6 : for integration finished		\\
-// > v0.7 : binary changes (flags etc)		\\
-// > v0.8 : changes and fixes				\\
-// > v0.9 : testing phase					\\
+// > v0.7 : objects creation 				\\
+// > v0.8 : parser enhancements				\\
+// > v0.9 : compiler adjustements 			\\
+// > v0.10 : changes and fixes				\\
+// > v0.11 : testing phase					\\
 // > v1.0 : first release					\\
-// > v1.x : 								\\
+// > v1.x : test on machine + corrections	\\
 // ========================================	\\
 
 #define     NC              "\e[0m"
@@ -40,7 +41,6 @@
 #define     CYAN          	"\033[36m"          /* Cyan */
 #define     WHITE           "\033[37m"          /* White */
 #define     BOLD            "\033[1m"           /* Bold */
-#define     BOLDWHITE       "\033[1m\033[37m"   /* Bold White */
 
 extern bool verboseDebug;
 extern short target;

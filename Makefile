@@ -69,8 +69,8 @@ passe_2.o: $(SRC_DIR)/passe_2.c $(INC_DIR)/passe_2.h $(INC_DIR)/defs.h $(INC_DIR
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
-# keeping the binary
-clean-soft:  
+# keeping the binary for delivery
+clean-delivery:  
 	@echo "| Cleaning all files except binary"
 	@echo "| Cleaning .o files"
 	@rm -f *.o
