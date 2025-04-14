@@ -20,6 +20,15 @@ enum
     YES,
 };
 
+enum
+{
+    IF_STATEMENT,
+    WHILE_STATEMENT,
+    DOWHILE_STATEMENT,
+    FOR_STATEMENT,
+    MAX_STATEMENT
+};
+
 // ===== register description =====
 // ======================= REGISTER STRUCTURES IN HP48 ======================== //
 //                                                                              //
@@ -27,9 +36,9 @@ enum
 //      |                                                               |       //
 //       <------------------------------W------------------------------>        //
 //                                               <----------A---------->        //
-//                                                           <----X---->        //
-//                                                           <XS>               //
 //                                                               <--B-->        //
+//                                                           <XS>               //
+//                                                           <----X---->        //
 //           <-----------------------M--------------------->                    //
 //       <S>                                                                    //
 //                                                                              //
@@ -104,6 +113,7 @@ enum DIRECTION          // for bit/nibble shift AND priority management
 #define MAX_ADDRESS_512KB       0xFFFFF         // 5 nibbles for address 
 #define MAX_PRACTICAL_ADDRESS   0x7DFFF         // for test case of GX
 #define MIN_ADDRESS             0x00140         // first address allowed 
+#define NEXT_ADDRESS            0x00040         // increment of the address (64 bits)
 
 // add forbidden subroutine ??
 

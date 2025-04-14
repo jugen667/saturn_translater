@@ -21,4 +21,6 @@ void create_bnot_instr(node_t node);
 void create_sll_instr(node_t node);
 void create_srl_instr(node_t node);
 
+void create_cond_instruction(node_t node, char * loc_label, int statement);
+
 #endif

@@ -6,12 +6,20 @@ int start;
 int x;
 // Starting main
 void main(){
-
-	while(x > 1)
+	do 
 	{
-		x = x + 1;
+		// if (start == 1)
+		// {
+		// 	x = x + 1;
+		// }
+		// else 
+		// {
+		// 	x = x - 2;
+		// }
+		start = 3;
 	}
-	// if(start > 3) 
+	while(x*2 || x+2);
+	// if(false) 
 	// {
 	// 	x = x & start;
 	// }
@@ -19,10 +27,12 @@ void main(){
 	// {
 	// 	x = 0;
 	// }
-/*  int i;
+/*  
+	int i;
 	int sum = 0;
 	for (i = start; i < end; i = i + 1) {
  		sum = sum + 10;	
  	}
- 	printf("sum :", sum , "\n"); */
+ 	printf("sum :", start , "\n"); 
+*/
 }
