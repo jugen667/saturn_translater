@@ -51,9 +51,9 @@ Fast test file with tree as png and svg :
 ## 2nd parsing : translate nodes to instructions with the instructions set
 - ~~int operations~~
 - ~~bool operation~~ 
-- if
-- for
+- ~~if~~
 - while / do...while
+- for
 
 
 
