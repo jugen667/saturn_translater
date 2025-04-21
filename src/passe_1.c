@@ -329,80 +329,15 @@ void analyse_passe_1(node_t root)
 	
 	// printf("declaration flag : %d\n", declaration);
 	if (root->nature == NODE_PROGRAM)
-	{ 
-		if(verboseDebug)
-		{	
-			for(char i = 0; i<36; i++)
-			{
-				printf("=");
-			}
-			printf(" Starting Program ");
-			for(char i = 0; i<35; i++)
-			{
-				printf("=");
-			}
-			printf("\n");
-
-		}
+	{
 		//flag to update the global_decl attribute
 		isGlobal=1; 
-		if(verboseDebug)
-		{	
-			for(char i = 0; i<33; i++)
-			{
-				printf("-");
-			}
-			printf(" Entering Global Scope ");
-			for(char i = 0; i<33; i++)
-			{
-				printf("-");
-			}
-			printf("\n");
-		}
 	}
 	if (root->nature == NODE_FUNC)
 	{ 
-		if(verboseDebug)
-		{	
-			for(char i = 0; i<33; i++)
-			{
-				printf("-");
-			}
-			printf(" Exiting  global scope ");
-			for(char i = 0; i<33; i++)
-			{
-				printf("-");
-			}
-			printf("\n");
-			for(char i = 0; i<89; i++)
-			{
-				printf("=");
-			}
-			printf("\n");
-		}
 		//flag to update the global_decl attribute
 		isGlobal=0; 
-		if(verboseDebug)
-		{	
-			for(char i = 0; i<33; i++)
-			{
-				printf("-");
-			}
-			printf(" Entering main() scope ");
-			for(char i = 0; i<33; i++)
-			{
-				printf("-");
-			}
-			printf("\n");
-
-		}
 	}
-	
-	if(verboseDebug)
-	{
-		//print_decl_table();
-		print_node_info(root);
-	}	
 	// parsing the tree
 	for(int i = 0; i < root->nops; i++)
 	{
@@ -581,7 +516,8 @@ void analyse_passe_1(node_t root)
 			root->nature == NODE_FOR)
 		{
 			//the 'do_while' & 'for' bool expression is the second son
-			check_bool_cond(root, 1);
+			if(root->opr[1] != NULL)
+				check_bool_cond(root, 1);
 		}
 		if (root->nature == NODE_WHILE ||
 			root->nature == NODE_IF )

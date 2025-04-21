@@ -205,10 +205,6 @@ void free_nodes(node_t n)
     // Parse until no more node
     // come back and free nodes
     short currnops;
-    if((n->nature == NODE_PROGRAM) && verboseDebug)
-    {
-        printf(BOLD "> Freeing nodes\n" NC);
-    }
     if(n->nops != 0)
     {   
         for(int i = 0; i<n->nops; i++){
@@ -217,19 +213,11 @@ void free_nodes(node_t n)
                 free_nodes(n->opr[i]);
             }
         }
-        if(verboseDebug)
-        {
-            printf("\t > freeing %s\n", node_nature2string(n->nature));
-        }
         free(n->opr); // free the pointer to sub nodes
         free(n);
     }
     else
-    {
-        if(verboseDebug)
-        {
-            printf("\t > freeing %s\n", node_nature2string(n->nature));
-        }     
+    { 
         if(n->nature == NODE_IDENT)
         {
             free(n->ident); // free the pointer identifier string
@@ -246,7 +234,6 @@ void free_nodes(node_t n)
 
 char * strdupl(char * s) 
 {
-    // TO CHANGE (MEMORY LEAK INCOMING) = Limit string size
     char * r = malloc(strlen(s) + 1);
     strcpy(r, s);
     return r;
@@ -636,9 +623,6 @@ uint32_t assign_address(void)
 FILE * outfile_open(char * outfileName)
 {
     FILE * f = NULL;
-    if(verboseDebug){
-        printf(BOLD "> Creating and opening file : %s\n" NC, outfile);
-    }
     f = fopen(outfileName, "w");
     if(f != NULL){
         fprintf(f, "%% Source file name : %s\n", infile);
@@ -646,10 +630,6 @@ FILE * outfile_open(char * outfileName)
         fprintf(f, "%% Compiled with saturn_translater\n");
         fprintf(f, "%% https://github.com/jugen667/saturn_translater\n");
         fprintf(f, "\n\n");
-        if(verboseDebug)
-        {
-            printf(BOLD "\t > %s created and opened\n" NC, outfile);
-        }
     }
     else{
         printf(RED "Error : " NC "could not open/create file %s\n", outfile);
@@ -665,10 +645,6 @@ void outfile_close(FILE * fileDesc)
     {
         fprintf(fileDesc, "\n%% End of File \n\n");
         fclose(fileDesc);
-        if(verboseDebug)
-        {
-            printf(BOLD "\t > %s closed\n" NC, outfile);
-        }
     }
 }
 

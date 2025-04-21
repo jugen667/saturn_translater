@@ -16,7 +16,6 @@
 
 
 // global utility variables
-static bool launch = false;
 static unsigned int label = 0;
 static char labelStr[16];
 static bool inIf = false;
@@ -27,10 +26,6 @@ static bool blockParsed = false;
 static unsigned int countInCond = 0; // less then  2^31-1 '&&' or '||' in if condition or maybe you're trying something crazy
 
 /*
-static int current_reg;
-static int inBlockFunc = 0;
-static int parsingLoopFor = 0;
-static int jmpLabelDecl = 0;
 static int inFunc_Decl = 0;
 */
 
@@ -258,6 +253,7 @@ void create_bnot_instr(node_t node)
 }
 
 // create operation 
+// inNotCond : if parsing a NOT node
 /* PRECISION FOR CONDITIONNAL OPERATIONS
 --
 --	case of parsing a condition
@@ -280,7 +276,7 @@ void create_operation(node_t node)
 		break;
 		// case ident is used as a condition in a if
 		case NODE_IDENT :
-			if(inIf == true) // security
+			if(inIf == true || inDoWhile == true || inWhile == true || inFor == true) // security
 			{
 				load_pointer(D0, node->address);
 				// exchange A and DAT
@@ -679,7 +675,7 @@ void create_NOT_operation(node_t node)
 				// pointer = address 
 				load_pointer(D0, node->opr[1]->address);
 				// exchange A and DAT
-				reading_memory(D0, A, W_FIELD);
+				reading_memory(D0, C, W_FIELD);
 				if(node->opr[0]->isPrio)
 				{
 					copy_reg_save_work(R0, A, W_FIELD);
@@ -766,63 +762,62 @@ void create_NOT_operation(node_t node)
 // -------------- OPERATIONS FOR TESTS ------------- //
 // !!! beware : big function !!! -> modify at your own risk (to optimize imo)
 // functions to parse conditionnal instructions
-// input : 	node -> current node to parse
+// input : 	node -> current node to parse (with the condition)
+// 			root -> current node - 1 to parse for statement 
 //			loc_label-> current label used
 // 			statement -> conditionnal statement currently parsing (while, do_while, if, for)
-void create_cond_instruction(node_t node, char * loc_label, int statement)
+void create_cond_instruction(node_t node, node_t root, char * loc_label, int statement)
 {
 	char label_in_use[16]; // creating a temporary label for recursion
 	char label_in_use_1[16]; 	// creating a temporary label for recursion
 
 	memcpy(label_in_use,loc_label,16);
 
-	if(statement == WHILE_STATEMENT || statement == DOWHILE_STATEMENT)
+	if((statement != IF_STATEMENT) && countInCond < 2) 
 	{
 		update_label_string(loc_label);
 		memcpy(label_in_use_1,loc_label,16);
 		create_label(label_in_use_1);
 	}
-
-	switch(node->opr[0]->nature) // treatment of condition
+	switch(node->nature) // treatment of condition
 	{
 		case NODE_AND:
 			if(countInCond < 2 && statement == DOWHILE_STATEMENT)
 			{
-				gen_code_passe_2(node->opr[1]);
+				gen_code_passe_2(root->opr[1]);
 			}
-			switch(node->opr[0]->opr[0]->nature)
+			switch(node->opr[0]->nature)
 			{
 				case NODE_AND :
+				case NODE_OR :
 					countInCond++; // for recursion entry point 
 					switch(statement)
 					{
 						case IF_STATEMENT :
-							create_cond_instruction(node->opr[0], label_in_use, IF_STATEMENT);
+							create_cond_instruction(node->opr[0], root, label_in_use, IF_STATEMENT);
 						break;
 						
 						case WHILE_STATEMENT :
-							create_cond_instruction(node->opr[0], label_in_use, WHILE_STATEMENT);
+							create_cond_instruction(node->opr[0], root, label_in_use, WHILE_STATEMENT);
 						break;
 						
 						case DOWHILE_STATEMENT :
-							create_cond_instruction(node->opr[0], label_in_use, WHILE_STATEMENT);
+							create_cond_instruction(node->opr[0], root, label_in_use, DOWHILE_STATEMENT);
 						break;
 
 						case FOR_STATEMENT :
+							create_cond_instruction(node->opr[0], root, label_in_use, FOR_STATEMENT);
 						break;
 					}
 					countInCond--; // for recursion exit point
 				break;
-				// --- CURRENTLY BUGGY : TO IMPROVE ---
-				// case NODE_OR : 
-				// 	countInCond++; // for recursion entry point 
-				// 	create_if_instruction(node->opr[0], label_formatting());
-				// 	countInCond--; // for recursion exit point
-				// break;
-				// ------------------------------------
+
+				case NODE_NOT :
+				break;
+
 				case NODE_PRIO:
-					create_operation(node->opr[0]->opr[0]->opr[0]);
-					if(node->opr[0]->opr[0]->opr[0]->type != TYPE_BOOL) // test for int operations
+					create_operation(node->opr[0]->opr[0]);
+					if(node->opr[0]->opr[0]->type != TYPE_BOOL) // test for int operations
 					{
 						equal_to_zero(A, W_FIELD);
 					}
@@ -832,7 +827,7 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 				case NODE_BOOLVAL:
 				case NODE_INTVAL:
 				case NODE_FLOATVAL:
-					switch(node->opr[0]->opr[0]->value)
+					switch(node->opr[0]->value)
 					{
 						case 0 : // in a AND make the value always false
 							// skip the entire cond
@@ -844,8 +839,8 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 				break;
 
 				default:
-					create_operation(node->opr[0]->opr[0]);	
-					if(node->opr[0]->opr[0]->type != TYPE_BOOL) // test for int operations
+					create_operation(node->opr[0]);	
+					if(node->opr[0]->type != TYPE_BOOL) // test for int operations
 					{
 						equal_to_zero(A, W_FIELD);
 					}
@@ -853,56 +848,71 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 				break;
 			}
 			
-			switch(node->opr[0]->opr[1]->nature)
+			switch(node->opr[1]->nature)
 			{
-				// --- CURRENTLY BUGGY : TO IMPROVE ---
-				// case NODE_OR : 
+				case NODE_AND:
+				case NODE_OR:
 				// 	countInCond++; // for recursion entry point 
-				// 	create_if_instruction(node->opr[0], label_formatting());
+				// 	switch(statement)
+				// 	{
+				// 		case IF_STATEMENT :
+				// 			create_cond_instruction(node->opr[1], root, label_in_use, IF_STATEMENT);
+				// 		break;
+						
+				// 		case WHILE_STATEMENT :
+				// 			create_cond_instruction(node->opr[1], root, label_in_use, WHILE_STATEMENT);
+				// 		break;
+						
+				// 		case DOWHILE_STATEMENT :
+				// 			create_cond_instruction(node->opr[1], root, label_in_use, DOWHILE_STATEMENT);
+				// 		break;
+
+				// 		case FOR_STATEMENT :
+				// 			create_cond_instruction(node->opr[1], root, label_in_use, FOR_STATEMENT);
+				// 		break;
+				// 	}
 				// 	countInCond--; // for recursion exit point
-				// break;
-				// case NODE_AND :
-				// 	countInCond++; // for recursion entry point 
-				// 	create_if_instruction(node->opr[0], label_in_use);
-				// 	countInCond--; // for recursion exit point
-				// break;
-				// ------------------------------------
+				break;
+
 				case NODE_PRIO:
 					switch(statement)
 					{
 						case IF_STATEMENT:
-							create_operation(node->opr[0]->opr[1]->opr[0]);
-							if(node->opr[0]->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]->opr[0]);
+							if(node->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
 							GOYES(label_in_use);
-							gen_code_passe_2(node->opr[1]);
 							if(countInCond < 2) // for recursion
 							{
+								gen_code_passe_2(root->opr[1]);
 								go_very_long(label_formatting());
 								create_label(label_in_use);
 							}
 						break;
 
 						case WHILE_STATEMENT:
-							create_operation(node->opr[0]->opr[1]->opr[0]);
-							if(node->opr[0]->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]->opr[0]);
+							if(node->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
 							GOYES(label_in_use);
-							gen_code_passe_2(node->opr[1]);
 							if(countInCond < 2) // for recursion
 							{
+								if(root->opr[1] != NULL)
+								{
+									gen_code_passe_2(root->opr[1]);
+								}
 								go_very_long(label_in_use_1);
 								create_label(label_in_use);
 							}
 						break;
 
 						case DOWHILE_STATEMENT:
-							create_operation(node->opr[0]->opr[1]->opr[0]);
-							if(node->opr[0]->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]->opr[0]);
+							if(node->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
@@ -915,6 +925,45 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 						break;
 
 						case FOR_STATEMENT:
+							create_operation(node->opr[1]->opr[0]);
+							if(node->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
+							{
+								equal_to_zero(A, W_FIELD);
+							}
+							GOYES(label_in_use);
+							if(countInCond < 2) // for recursion
+							{
+								if(root->opr[3] != NULL)
+								{
+									gen_code_passe_2(root->opr[3]);
+								}
+								// -- incrementing the variable
+					 			switch(root->opr[2]->opr[1]->nature)
+								{
+									case NODE_PRIO:
+										create_operation(root->opr[2]->opr[1]->opr[0]);
+										load_pointer(D0, root->opr[2]->opr[0]->address);
+										writing_memory(D0, A, W_FIELD);
+										flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+									break;
+
+									case NODE_INTVAL:
+									case NODE_BOOLVAL:
+									case NODE_FLOATVAL:
+									case NODE_IDENT:
+										affect_variable(root->opr[2]);
+									break;
+
+									default:
+										create_operation(root->opr[2]->opr[1]);
+										load_pointer(D0, root->opr[2]->opr[0]->address);
+										writing_memory(D0, A, W_FIELD);
+										flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+									break;
+								}
+								go_very_long(label_in_use_1);
+								create_label(label_in_use);
+							}
 						break;
 					}
 				break;
@@ -922,7 +971,7 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 				case NODE_BOOLVAL:
 				case NODE_INTVAL:
 				case NODE_FLOATVAL:
-					switch(node->opr[0]->opr[1]->value)
+					switch(node->opr[1]->value)
 					{
 						case 0 : // in a AND make the value always false
 							// jump automatically to label (can be optimized and skip the entire if)
@@ -939,38 +988,41 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 					switch(statement)
 					{
 						case IF_STATEMENT:
-							create_operation(node->opr[0]->opr[1]);	
-							if(node->opr[0]->opr[1]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]);	
+							if(node->opr[1]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
 							GOYES(label_in_use);	
-							gen_code_passe_2(node->opr[1]);
 							if(countInCond < 2) // for recursion
 							{
+								gen_code_passe_2(root->opr[1]);
 								go_very_long(label_formatting());
 								create_label(label_in_use);
 							}
 						break;
 
 						case WHILE_STATEMENT:
-							create_operation(node->opr[0]->opr[1]);	
-							if(node->opr[0]->opr[1]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]);	
+							if(node->opr[1]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
 							GOYES(label_in_use);
-							gen_code_passe_2(node->opr[1]);
 							if(countInCond < 2) // for recursion
 							{
+								if(root->opr[1] != NULL)
+								{
+									gen_code_passe_2(root->opr[1]);
+								}
 								go_very_long(label_in_use_1);
 								create_label(label_in_use);
 							}
 						break;
 
 						case DOWHILE_STATEMENT:
-							create_operation(node->opr[0]->opr[1]);	
-							if(node->opr[0]->opr[1]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]);	
+							if(node->opr[1]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
@@ -983,6 +1035,46 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 						break;
 
 						case FOR_STATEMENT:
+							create_operation(node->opr[1]);	
+							if(node->opr[1]->type != TYPE_BOOL) // test for int operations
+							{
+								equal_to_zero(A, W_FIELD);
+							}
+							GOYES(label_in_use);
+							if(countInCond < 2) // for recursion
+							{
+								if(root->opr[3] != NULL)
+								{
+									gen_code_passe_2(root->opr[3]);
+								}
+								// -- looping varaible
+								switch(root->opr[2]->opr[1]->nature)
+								{
+									case NODE_PRIO:
+										create_operation(root->opr[2]->opr[1]->opr[0]);
+										load_pointer(D0, root->opr[2]->opr[0]->address);
+										writing_memory(D0, A, W_FIELD);
+										flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+									break;
+
+									case NODE_INTVAL:
+									case NODE_BOOLVAL:
+									case NODE_FLOATVAL:
+									case NODE_IDENT:
+										affect_variable(root->opr[2]);
+									break;
+
+									default:
+										create_operation(root->opr[2]->opr[1]);
+										load_pointer(D0, root->opr[2]->opr[0]->address);
+										writing_memory(D0, A, W_FIELD);
+										flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+									break;
+								}
+								// --
+								go_very_long(label_in_use_1);
+								create_label(label_in_use);
+							}
 						break;
 					}
 				break;
@@ -996,63 +1088,38 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 				register_zero(B, W_FIELD);
 				if(statement == DOWHILE_STATEMENT)
 				{
-					gen_code_passe_2(node->opr[1]);
+					gen_code_passe_2(root->opr[1]);
 				}
 			}
-			switch(node->opr[0]->opr[0]->nature)
+			switch(node->opr[0]->nature)
 			{
-				case NODE_OR : 
+				case NODE_AND:
+				case NODE_OR:
 					countInCond++; // for recursion entry point 
 					switch(statement)
 					{
 						case IF_STATEMENT:
-							create_cond_instruction(node->opr[0], label_formatting(), IF_STATEMENT);
+							create_cond_instruction(node->opr[0], root, label_formatting(), IF_STATEMENT);
 						break;
 
 						case WHILE_STATEMENT:
-							create_cond_instruction(node->opr[0], label_formatting(), WHILE_STATEMENT);
+							create_cond_instruction(node->opr[0], root, label_formatting(), WHILE_STATEMENT);
 						break;
 
 						case DOWHILE_STATEMENT:
-							create_cond_instruction(node->opr[0], label_formatting(), DOWHILE_STATEMENT);
+							create_cond_instruction(node->opr[0], root, label_formatting(), DOWHILE_STATEMENT);
 						break;
 
 						case FOR_STATEMENT:
+							create_cond_instruction(node->opr[0], root, label_formatting(), FOR_STATEMENT);
 						break;
 					}
 					countInCond--; // for recursion exit point
 				break;
-				// --- CURRENTLY BUGGY : TO IMPROVE ---
-				// case NODE_AND : 
-				// 	countInCond++; // for recursion entry point 
-				// 	create_if_instruction(node->opr[0], label_formatting());
-				// 	countInCond--; // for recursion exit point
-				// break;
-				// ------------------------------------
+				
 				case NODE_PRIO:
 					// do operation
-					create_operation(node->opr[0]->opr[0]->opr[0]); 
-					if(node->opr[0]->opr[0]->opr[0]->type != TYPE_BOOL) // test for int operations
-					{
-						equal_to_zero(A, W_FIELD);
-					}
-					GOYES(label_in_use);
-					// increment register if true
-					inc_register(B, W_FIELD);
-					create_label(label_in_use);
-					update_label_string(label_in_use);
-
-				break;
-
-				case NODE_BOOLVAL:
-				case NODE_INTVAL:
-				case NODE_FLOATVAL:
-						// no impact in an or
-				break;
-
-				default:
-					// do operation
-					create_operation(node->opr[0]->opr[0]);
+					create_operation(node->opr[0]->opr[0]); 
 					if(node->opr[0]->opr[0]->type != TYPE_BOOL) // test for int operations
 					{
 						equal_to_zero(A, W_FIELD);
@@ -1062,31 +1129,45 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 					inc_register(B, W_FIELD);
 					create_label(label_in_use);
 					update_label_string(label_in_use);
+
+				break;
+
+				case NODE_BOOLVAL:
+				case NODE_INTVAL:
+				case NODE_FLOATVAL:
+						// no impact in an or
+				break;
+
+				default:
+					// do operation
+					create_operation(node->opr[0]);
+					if(node->opr[0]->type != TYPE_BOOL) // test for int operations
+					{
+						equal_to_zero(A, W_FIELD);
+					}
+					GOYES(label_in_use);
+					// increment register if true
+					inc_register(B, W_FIELD);
+					create_label(label_in_use);
+					update_label_string(label_in_use);
 				break;
 			}
-			
-			switch(node->opr[0]->opr[1]->nature)
+			switch(node->opr[1]->nature)
 			{
 
-				// --- CURRENTLY BUGGY : TO IMPROVE ---
-				// case NODE_OR : 
-				// 	countInCond++; // for recursion entry point 
-				// 	create_if_instruction(node->opr[0], label_formatting());
-				// 	countInCond--; // for recursion exit point
-				// break;
-				// case NODE_AND :
-				// 	countInCond++; // for recursion entry point 
-				// 	create_if_instruction(node->opr[0], label_in_use);
-				// 	countInCond--; // for recursion exit point
-				// break;
-				// ------------------------------------
+				
+				case NODE_AND:
+				case NODE_OR:
+					// never in second node ?
+				break;
+
 				case NODE_PRIO:
 					switch(statement)
 					{
 						case IF_STATEMENT:
 							// do operation 
-							create_operation(node->opr[0]->opr[1]->opr[0]);
-							if(node->opr[0]->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]->opr[0]);
+							if(node->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
@@ -1098,9 +1179,9 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 							// evaluate the register if is null, skip if
 							equal_to_zero(B, W_FIELD);
 				 			GOYES(label_in_use);
-							gen_code_passe_2(node->opr[1]);
 							if(countInCond < 2) // for recursion
 							{
+								gen_code_passe_2(root->opr[1]);
 								go_very_long(label_formatting());
 								create_label(label_in_use);
 							}
@@ -1108,8 +1189,8 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 
 						case WHILE_STATEMENT:
 							// do operation 
-							create_operation(node->opr[0]->opr[1]->opr[0]);
-							if(node->opr[0]->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]);
+							if(node->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
@@ -1121,9 +1202,12 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 							// evaluate the register if is null, skip if
 							equal_to_zero(B, W_FIELD);
 				 			GOYES(label_in_use);
-							gen_code_passe_2(node->opr[1]);
 							if(countInCond < 2) // for recursion
 							{
+					 			if(root->opr[1] != NULL)
+					 			{
+									gen_code_passe_2(root->opr[1]);
+					 			}
 								go_very_long(label_in_use_1);
 								create_label(label_in_use);
 							}
@@ -1131,8 +1215,8 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 
 						case DOWHILE_STATEMENT:
 							// do operation 
-							create_operation(node->opr[0]->opr[1]->opr[0]);
-							if(node->opr[0]->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]);
+							if(node->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
@@ -1152,9 +1236,56 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 						break;
 
 						case FOR_STATEMENT:
+							// do operation 
+							create_operation(node->opr[1]);
+							if(node->opr[1]->opr[0]->type != TYPE_BOOL) // test for int operations
+							{
+								equal_to_zero(A, W_FIELD);
+							}
+							GOYES(label_in_use);
+							// increment register if true
+							inc_register(B, W_FIELD);
+							create_label(label_in_use);
+							update_label_string(label_in_use);
+							// evaluate the register if is null, skip if
+							equal_to_zero(B, W_FIELD);
+				 			GOYES(label_in_use);
+							if(countInCond < 2) // for recursion
+							{
+					 			if(root->opr[3] != NULL)
+					 			{
+									gen_code_passe_2(root->opr[3]);
+					 			}
+					 			// -- looping varaible
+								switch(root->opr[2]->opr[1]->nature)
+								{
+									case NODE_PRIO:
+										create_operation(root->opr[2]->opr[1]->opr[0]);
+										load_pointer(D0, root->opr[2]->opr[0]->address);
+										writing_memory(D0, A, W_FIELD);
+										flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+									break;
+
+									case NODE_INTVAL:
+									case NODE_BOOLVAL:
+									case NODE_FLOATVAL:
+									case NODE_IDENT:
+										affect_variable(root->opr[2]);
+									break;
+
+									default:
+										create_operation(root->opr[2]->opr[1]);
+										load_pointer(D0, root->opr[2]->opr[0]->address);
+										writing_memory(D0, A, W_FIELD);
+										flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+									break;
+								}
+								// --
+								go_very_long(label_in_use_1);
+								create_label(label_in_use);
+							}
 						break;
-					}
-					
+					}		
 				break;
 
 				case NODE_BOOLVAL:
@@ -1168,8 +1299,8 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 					{
 						case IF_STATEMENT:
 							// do operation 
-							create_operation(node->opr[0]->opr[1]);	
-							if(node->opr[0]->opr[1]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]);	
+							if(node->opr[1]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
@@ -1181,9 +1312,9 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 							// evaluate the register if is null, skip if
 							equal_to_zero(B, W_FIELD);
 				 			GOYES(label_in_use);
-							gen_code_passe_2(node->opr[1]);
 							if(countInCond < 2) // for recursion
 							{
+								gen_code_passe_2(root->opr[1]);
 								go_very_long(label_formatting());
 								create_label(label_in_use);
 							}
@@ -1191,8 +1322,8 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 
 						case WHILE_STATEMENT:
 							// do operation 
-							create_operation(node->opr[0]->opr[1]);	
-							if(node->opr[0]->opr[1]->type != TYPE_BOOL) // test for int operations
+							create_operation(node->opr[1]);	
+							if(node->opr[1]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
 							}
@@ -1204,9 +1335,12 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 							// evaluate the register if is null, skip if
 							equal_to_zero(B, W_FIELD);
 				 			GOYES(label_in_use);
-							gen_code_passe_2(node->opr[1]);
 							if(countInCond < 2) // for recursion
 							{
+								if(root->opr[1] != NULL)
+					 			{
+									gen_code_passe_2(root->opr[1]);
+					 			}
 								go_very_long(label_in_use_1);
 								create_label(label_in_use);
 							}
@@ -1214,7 +1348,7 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 
 						case DOWHILE_STATEMENT:
 							// do operation 
-							create_operation(node->opr[0]->opr[1]);	
+							create_operation(node->opr[1]);	
 							if(node->opr[0]->opr[1]->type != TYPE_BOOL) // test for int operations
 							{
 								equal_to_zero(A, W_FIELD);
@@ -1235,6 +1369,54 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 						break;
 
 						case FOR_STATEMENT:
+							// do operation 
+							create_operation(node->opr[1]);	
+							if(node->opr[1]->type != TYPE_BOOL) // test for int operations
+							{
+								equal_to_zero(A, W_FIELD);
+							}
+							GOYES(label_in_use);	
+							// increment register if true
+							inc_register(B, W_FIELD);
+							create_label(label_in_use);
+							update_label_string(label_in_use);
+							// evaluate the register if is null, skip if
+							equal_to_zero(B, W_FIELD);
+				 			GOYES(label_in_use);
+							if(countInCond < 2) // for recursion
+							{
+								if(root->opr[1] != NULL)
+					 			{
+									gen_code_passe_2(root->opr[1]);
+					 			}
+					 			// -- looping variable
+								switch(root->opr[2]->opr[1]->nature)
+								{
+									case NODE_PRIO:
+										create_operation(root->opr[2]->opr[1]->opr[0]);
+										load_pointer(D0, root->opr[2]->opr[0]->address);
+										writing_memory(D0, A, W_FIELD);
+										flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+									break;
+
+									case NODE_INTVAL:
+									case NODE_BOOLVAL:
+									case NODE_FLOATVAL:
+									case NODE_IDENT:
+										affect_variable(root->opr[2]);
+									break;
+
+									default:
+										create_operation(root->opr[2]->opr[1]);
+										load_pointer(D0, root->opr[2]->opr[0]->address);
+										writing_memory(D0, A, W_FIELD);
+										flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+									break;
+								}
+								// --
+								go_very_long(label_in_use_1);
+								create_label(label_in_use);
+							}
 						break;
 					}
 				break;
@@ -1245,19 +1427,19 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 			switch(statement)
 			{
 				case IF_STATEMENT:
-					if(node->opr[0]->opr[0]->nature == NODE_PRIO)
+					if(node->opr[0]->nature == NODE_PRIO)
 					{
-						switch(node->opr[0]->opr[0]->opr[0]->type)
+						switch(node->opr[0]->opr[0]->type)
 						{
 							case TYPE_BOOL :
-								create_NOT_operation(node->opr[0]->opr[0]->opr[0]);
+								create_NOT_operation(node->opr[0]->opr[0]);
 							break;
 							case TYPE_INT:
 							case TYPE_FLOAT:
-								create_operation(node->opr[0]->opr[0]->opr[0]);
-								if( node->opr[0]->opr[0]->opr[0]->nature != NODE_INTVAL && 
-									node->opr[0]->opr[0]->opr[0]->nature != NODE_FLOATVAL && 
-									node->opr[0]->opr[0]->opr[0]->nature != NODE_BOOLVAL  ) 
+								create_operation(node->opr[0]->opr[0]);
+								if( node->opr[0]->opr[0]->nature != NODE_INTVAL && 
+									node->opr[0]->opr[0]->nature != NODE_FLOATVAL && 
+									node->opr[0]->opr[0]->nature != NODE_BOOLVAL  ) 
 								{
 									one_complement(A, W_FIELD); // take the one complement of the result of a int operation
 								}
@@ -1266,7 +1448,7 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 
 						}
 					}
-					else if(node->opr[0]->opr[0]->nature == NODE_IDENT)
+					else if(node->opr[0]->nature == NODE_IDENT)
 					{
 						load_pointer(D0, node->opr[0]->address);
 						// exchange A and DAT
@@ -1276,28 +1458,28 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 					}
 					else
 					{
-						create_NOT_operation(node->opr[0]->opr[0]);
+						create_NOT_operation(node->opr[0]);
 					}
 					GOYES(label_in_use);	
-					gen_code_passe_2(node->opr[1]);
+					gen_code_passe_2(root->opr[1]);
 					go_very_long(label_formatting());
 					create_label(label_in_use);
 				break;
 
 				case WHILE_STATEMENT:
-					if(node->opr[0]->opr[0]->nature == NODE_PRIO)
+					if(node->opr[0]->nature == NODE_PRIO)
 					{
-						switch(node->opr[0]->opr[0]->opr[0]->type)
+						switch(node->opr[0]->opr[0]->type)
 						{
 							case TYPE_BOOL :
-								create_NOT_operation(node->opr[0]->opr[0]->opr[0]);
+								create_NOT_operation(node->opr[0]->opr[0]);
 							break;
 							case TYPE_INT:
 							case TYPE_FLOAT:
-								create_operation(node->opr[0]->opr[0]->opr[0]);
-								if( node->opr[0]->opr[0]->opr[0]->nature != NODE_INTVAL && 
-									node->opr[0]->opr[0]->opr[0]->nature != NODE_FLOATVAL && 
-									node->opr[0]->opr[0]->opr[0]->nature != NODE_BOOLVAL  )
+								create_operation(node->opr[0]->opr[0]);
+								if( node->opr[0]->opr[0]->nature != NODE_INTVAL && 
+									node->opr[0]->opr[0]->nature != NODE_FLOATVAL && 
+									node->opr[0]->opr[0]->nature != NODE_BOOLVAL  )
 								{
 									one_complement(A, W_FIELD); // take the one complement of the result of a int operation
 								}
@@ -1306,7 +1488,7 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 
 						}
 					}
-					else if(node->opr[0]->opr[0]->nature == NODE_IDENT)
+					else if(node->opr[0]->nature == NODE_IDENT)
 					{
 						load_pointer(D0, node->opr[0]->address);
 						// exchange A and DAT
@@ -1316,29 +1498,35 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 					}
 					else
 					{
-						create_NOT_operation(node->opr[0]->opr[0]);
+						create_NOT_operation(node->opr[0]);
 					}
-					GOYES(label_in_use);	
-					gen_code_passe_2(node->opr[1]);
-					go_very_long(label_in_use_1);
-					create_label(label_in_use);
+					GOYES(label_in_use);
+					if(countInCond < 2) // for recursion
+					{	
+						if(root->opr[1] != NULL)
+			 			{
+							gen_code_passe_2(root->opr[1]);
+			 			}
+						go_very_long(label_in_use_1);
+						create_label(label_in_use);
+					}
 				break;
 				
 				case DOWHILE_STATEMENT:
-					gen_code_passe_2(node->opr[1]);
-					if(node->opr[0]->opr[0]->nature == NODE_PRIO)
+					gen_code_passe_2(root->opr[1]);
+					if(node->opr[0]->nature == NODE_PRIO)
 					{
-						switch(node->opr[0]->opr[0]->opr[0]->type)
+						switch(node->opr[0]->opr[0]->type)
 						{
 							case TYPE_BOOL :
-								create_NOT_operation(node->opr[0]->opr[0]->opr[0]); 
+								create_NOT_operation(node->opr[0]->opr[0]); 
 							break;
 							case TYPE_INT:
 							case TYPE_FLOAT:
-								create_operation(node->opr[0]->opr[0]->opr[0]);
-								if( node->opr[0]->opr[0]->opr[0]->nature != NODE_INTVAL && 
-									node->opr[0]->opr[0]->opr[0]->nature != NODE_FLOATVAL && 
-									node->opr[0]->opr[0]->opr[0]->nature != NODE_BOOLVAL  )
+								create_operation(node->opr[0]->opr[0]);
+								if( node->opr[0]->opr[0]->nature != NODE_INTVAL && 
+									node->opr[0]->opr[0]->nature != NODE_FLOATVAL && 
+									node->opr[0]->opr[0]->nature != NODE_BOOLVAL  )
 								{
 									one_complement(A, W_FIELD); // take the one complement of the result of a int operation
 								}
@@ -1347,7 +1535,7 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 
 						}
 					}
-					else if(node->opr[0]->opr[0]->nature == NODE_IDENT)
+					else if(node->opr[0]->nature == NODE_IDENT)
 					{
 						load_pointer(D0, node->opr[0]->address);
 						// exchange A and DAT
@@ -1357,14 +1545,86 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 					}
 					else
 					{
-						create_NOT_operation(node->opr[0]->opr[0]);
+						create_NOT_operation(node->opr[0]);
 					}
 					GOYES(label_in_use);	
-					go_very_long(label_in_use_1);
-					create_label(label_in_use);
+					if(countInCond < 2) // for recursion
+					{	
+						go_very_long(label_in_use_1);
+						create_label(label_in_use);
+					}
 				break;
 
 				case FOR_STATEMENT:
+					if(node->opr[0]->nature == NODE_PRIO)
+					{
+						switch(node->opr[0]->opr[0]->type)
+						{
+							case TYPE_BOOL :
+								create_NOT_operation(node->opr[0]->opr[0]);
+							break;
+							case TYPE_INT:
+							case TYPE_FLOAT:
+								create_operation(node->opr[0]->opr[0]);
+								if( node->opr[0]->opr[0]->nature != NODE_INTVAL && 
+									node->opr[0]->opr[0]->nature != NODE_FLOATVAL && 
+									node->opr[0]->opr[0]->nature != NODE_BOOLVAL  )
+								{
+									one_complement(A, W_FIELD); // take the one complement of the result of a int operation
+								}
+								equal_to_zero(A, W_FIELD);
+							break;
+
+						}
+					}
+					else if(node->opr[0]->nature == NODE_IDENT)
+					{
+						load_pointer(D0, node->opr[0]->address);
+						// exchange A and DAT
+						reading_memory(D0, A, W_FIELD);
+						//if value != 0 skip the if
+						equal_to_zero(A, W_FIELD);
+					}
+					else
+					{
+						create_NOT_operation(node->opr[0]);
+					}
+					GOYES(label_in_use);	
+					if(countInCond < 2) // for recursion
+					{
+						if(root->opr[3] != NULL)
+			 			{
+							gen_code_passe_2(root->opr[3]);
+			 			}
+			 			// -- incrementing the variable
+			 			switch(root->opr[2]->opr[1]->nature)
+						{
+							case NODE_PRIO:
+								create_operation(root->opr[2]->opr[1]->opr[0]);
+								load_pointer(D0, root->opr[2]->opr[0]->address);
+								writing_memory(D0, A, W_FIELD);
+								flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+							break;
+
+							case NODE_INTVAL:
+							case NODE_BOOLVAL:
+							case NODE_FLOATVAL:
+							case NODE_IDENT:
+								affect_variable(root->opr[2]);
+							break;
+
+							default:
+								create_operation(root->opr[2]->opr[1]);
+								load_pointer(D0, root->opr[2]->opr[0]->address);
+								writing_memory(D0, A, W_FIELD);
+								flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+							break;
+						}
+						// --
+						go_very_long(label_in_use_1);
+						create_label(label_in_use);
+					}
+				break;
 				break;
 			}
 		break;
@@ -1372,18 +1632,25 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 		case NODE_BOOLVAL:
 		case NODE_INTVAL:
 		case NODE_FLOATVAL:
-			switch(node->opr[0]->value)
+			switch(node->value)
 			{
 				// if 0 / false dont do it or only once for do while
 				case 0 :
 					if(statement == DOWHILE_STATEMENT)
 					{
-						gen_code_passe_2(node->opr[1]);	
+						gen_code_passe_2(root->opr[1]);	
 					}
 				break;
 				// else do it
 				default :
-					gen_code_passe_2(node->opr[1]);	
+					if(root->opr[1] != NULL && statement != FOR_STATEMENT)
+		 			{
+						gen_code_passe_2(root->opr[1]);
+		 			}
+		 			else if(root->opr[3] != NULL && statement == FOR_STATEMENT)
+		 			{
+		 				gen_code_passe_2(root->opr[3]);
+		 			}
 					if(statement == DOWHILE_STATEMENT || statement == WHILE_STATEMENT)
 					{
 						go_very_long(label_in_use_1);
@@ -1397,15 +1664,7 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 			switch(statement)
 			{
 				case IF_STATEMENT:
-					if(node->opr[0]->nature == NODE_PRIO)
-					{
-						create_operation(node->opr[0]->opr[0]);
-						if(node->opr[0]->opr[0]->type != TYPE_BOOL)
-						{
-							equal_to_zero(A, W_FIELD); // operation so type int
-						}
-					}
-					else
+					if(node->nature == NODE_PRIO)
 					{
 						create_operation(node->opr[0]);
 						if(node->opr[0]->type != TYPE_BOOL)
@@ -1413,49 +1672,60 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 							equal_to_zero(A, W_FIELD); // operation so type int
 						}
 					}
+					else
+					{
+						create_operation(node);
+						if(node->type != TYPE_BOOL)
+						{
+							equal_to_zero(A, W_FIELD); // operation so type int
+						}
+					}
 					GOYES(label_in_use);	
-					gen_code_passe_2(node->opr[1]);
+					gen_code_passe_2(root->opr[1]);
 					go_very_long(label_formatting());
 					create_label(label_in_use);
 				break;
 
 				case WHILE_STATEMENT:
-					if(node->opr[0]->nature == NODE_PRIO)
+					if(node->nature == NODE_PRIO)
 					{
-						create_operation(node->opr[0]->opr[0]);
-						if(node->opr[0]->opr[0]->type != TYPE_BOOL)
+						create_operation(node->opr[0]);
+						if(node->opr[0]->type != TYPE_BOOL)
 						{
 							equal_to_zero(A, W_FIELD); // operation so type int
 						}
 					}
 					else
 					{
-						create_operation(node->opr[0]);
-						if(node->opr[0]->opr[0]->type != TYPE_BOOL)
+						create_operation(node);
+						if(node->type != TYPE_BOOL)
 						{
 							equal_to_zero(A, W_FIELD); // operation so type int
 						}
 					}
 					GOYES(label_in_use);	
-					gen_code_passe_2(node->opr[1]);
+					if(root->opr[1] != NULL)
+		 			{
+						gen_code_passe_2(root->opr[1]);
+		 			}
 					go_very_long(label_in_use_1);
 					create_label(label_in_use);
 				break;
 
 				case DOWHILE_STATEMENT:
-					gen_code_passe_2(node->opr[1]);
-					if(node->opr[0]->nature == NODE_PRIO)
+					gen_code_passe_2(root->opr[1]);
+					if(node->nature == NODE_PRIO)
 					{
-						create_operation(node->opr[0]->opr[0]);
-						if(node->opr[0]->opr[0]->type != TYPE_BOOL)
+						create_operation(node->opr[0]);
+						if(node->opr[0]->type != TYPE_BOOL)
 						{
 							equal_to_zero(A, W_FIELD); // operation so type int
 						}
 					}
 					else
 					{
-						create_operation(node->opr[0]);
-						if(node->opr[0]->opr[0]->type != TYPE_BOOL)
+						create_operation(node);
+						if(node->type != TYPE_BOOL)
 						{
 							equal_to_zero(A, W_FIELD); // operation so type int
 						}
@@ -1466,6 +1736,54 @@ void create_cond_instruction(node_t node, char * loc_label, int statement)
 				break;
 
 				case FOR_STATEMENT:
+					if(node->nature == NODE_PRIO)
+					{
+						create_operation(node->opr[0]);
+						if(node->opr[0]->type != TYPE_BOOL)
+						{
+							equal_to_zero(A, W_FIELD); // operation so type int
+						}
+					}
+					else
+					{
+						create_operation(node);
+						if(node->type != TYPE_BOOL)
+						{
+							equal_to_zero(A, W_FIELD); // operation so type int
+						}
+					}
+					GOYES(label_in_use);	
+					if(root->opr[3] != NULL)
+		 			{
+						gen_code_passe_2(root->opr[3]);
+		 			}
+		 			// -- incrementing the variable
+		 			switch(root->opr[2]->opr[1]->nature)
+					{
+						case NODE_PRIO:
+							create_operation(root->opr[2]->opr[1]->opr[0]);
+							load_pointer(D0, root->opr[2]->opr[0]->address);
+							writing_memory(D0, A, W_FIELD);
+							flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+						break;
+
+						case NODE_INTVAL:
+						case NODE_BOOLVAL:
+						case NODE_FLOATVAL:
+						case NODE_IDENT:
+							affect_variable(root->opr[2]);
+						break;
+
+						default:
+							create_operation(root->opr[2]->opr[1]);
+							load_pointer(D0, root->opr[2]->opr[0]->address);
+							writing_memory(D0, A, W_FIELD);
+							flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+						break;
+					}
+					// --
+					go_very_long(label_in_use_1);
+					create_label(label_in_use);
 				break;
 			}
 		break;
@@ -1476,37 +1794,12 @@ end_of_cond: // jump for skip when cond is always false
 	blockParsed = true; // force block parsing
 }
 
-// -------------------------------------------- //
-
-void create_for(node_t node, char* loc_label)
-{
-	// while with stop condition
-	char label_in_use[16]; 		// creating a temporary label for recursion
-	char label_in_use_1[16]; 	// creating a temporary label for recursion
-	memcpy(label_in_use,loc_label,16);
-	update_label_string(loc_label);
-	memcpy(label_in_use_1,loc_label,16);
-	create_label(label_in_use_1);
-
-	gen_code_passe_2(node->opr[1]);
-	create_operation(node->opr[0]);
-	GOYES(label_in_use);	
-	go_very_long(label_in_use_1);
-	create_label(label_in_use);
-	blockParsed = true; // force block parsing
-}
-
 /* -------------------------------------------------------------- */
 
-/* --------------------- Parsing functions ---------------------- */
+/* --------------- Actually generating the codes ---------------- */
 
 void gen_code_passe_2(node_t root) 
 {
-	if (!launch)
-	{
-		// launching the program
-		launch = true;
-	}
 	for(int i = 0; i < root->nops; i++)
 	{
 		//set_current_node(root->opr[i]);
@@ -1550,12 +1843,12 @@ void gen_code_passe_2(node_t root)
 				break;		
 
 				case NODE_AFFECT :
-					// in 'for' loop block must be parsed before incrementing the index
-					if (root->opr[i+1] != NULL && root->opr[i+1]->nature == NODE_BLOCK)
+					if (root->opr[i+1] != NULL && root->opr[i+1]->nature == NODE_BLOCK )
 					{
 						gen_code_passe_2(root->opr[i+1]);
 						blockParsed = true;
 					}
+					if(root->nature != NODE_FOR){
 					switch(root->opr[i]->opr[1]->nature)
 					{
 						case NODE_PRIO:
@@ -1579,6 +1872,7 @@ void gen_code_passe_2(node_t root)
 							flush_save_reg(); // reset save_reg pointers from our side : to test if useful
 						break;
 					}
+				}
 				break;
 				
 				// creation of the While loop
@@ -1587,7 +1881,7 @@ void gen_code_passe_2(node_t root)
 					inWhile = true;
 					label_formatting();
 					countInCond++; 														// = 1 for recursion, first entry point
-					create_cond_instruction(root->opr[i], get_label(), WHILE_STATEMENT);
+					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], get_label(), WHILE_STATEMENT);
 					countInCond--; 														// = 0 for recursion, last exit point
 					inWhile = false;
 					create_comment("--- ENDWHILE ---");
@@ -1599,10 +1893,10 @@ void gen_code_passe_2(node_t root)
 					inDoWhile = true;
 					label_formatting();
 					countInCond++; 														// = 1 for recursion, first entry point
-					create_cond_instruction(root->opr[i], get_label(), DOWHILE_STATEMENT);
+					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], get_label(), DOWHILE_STATEMENT);
 					countInCond--; 														// = 0 for recursion, last exit point
 					inDoWhile = false;
-					create_comment("--- ENDOWHILE ---");
+					create_comment("--- ENDDOWHILE ---");
 				break;
 
 				// creation of the If Statement
@@ -1611,7 +1905,7 @@ void gen_code_passe_2(node_t root)
 					inIf = true;
 					label_formatting();
 					countInCond++; 														// = 1 for recursion, first entry point
-					create_cond_instruction(root->opr[i], get_label(), IF_STATEMENT);
+					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], get_label(), IF_STATEMENT);
 					countInCond--; 														// = 0 for recursion, last exit point
 					if(root->opr[i]->opr[2] != NULL) 									// else
 					{
@@ -1624,16 +1918,46 @@ void gen_code_passe_2(node_t root)
 					create_comment("-- ENDIF --"); 										// to delete for debug in dump file
 				break;
 				
-				// case if the FOR index initialization is a ident not an affectation
+				// creation of FOR loop
 				case NODE_FOR :
-					create_comment("STARTING FOR LOOP :");
+					create_comment("--- FOR --- ");
 					inFor = true;
+					label_formatting();
+					// -- affectation for looping variable
+					switch(root->opr[i]->opr[0]->opr[1]->nature)
+					{
+						case NODE_PRIO:
+							create_operation(root->opr[i]->opr[0]->opr[1]->opr[0]);
+							load_pointer(D0, root->opr[i]->opr[0]->opr[0]->address);
+							writing_memory(D0, A, W_FIELD);
+							flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+						break;
+
+						case NODE_INTVAL:
+						case NODE_BOOLVAL:
+						case NODE_FLOATVAL:
+						case NODE_IDENT:
+							affect_variable(root->opr[i]->opr[0]);
+						break;
+
+						default:
+							create_operation(root->opr[i]->opr[0]->opr[1]);
+							load_pointer(D0, root->opr[i]->opr[0]->opr[0]->address);
+							writing_memory(D0, A, W_FIELD);
+							flush_save_reg(); // reset save_reg pointers from our side : to test if useful
+						break;
+					}
+					// --
+					countInCond++; 														// = 1 for recursion, first entry point
+					create_cond_instruction(root->opr[i]->opr[1], root->opr[i], get_label(), FOR_STATEMENT);
+					countInCond--;														// = 0 for recursion, last exit point
+					blockParsed = true;
 					inFor = false;
-					create_label(label_formatting());
+					create_comment("--- ENDFOR --- ");
 				break;
 
 				default:
-				case NODE_LIST :
+					// nothing happens
 				break;
 			}		
 		}
@@ -1641,8 +1965,8 @@ void gen_code_passe_2(node_t root)
 		// RECURSION
 		if(root->opr[i] != NULL)
 		{
-			if (!(root->opr[i]->nature == NODE_BLOCK && blockParsed) && // block managed in the  
-				(root->opr[i]->nature != NODE_ELSE)) // else managed in if 
+			if (!(root->opr[i]->nature == NODE_BLOCK && blockParsed) && // block managed in the condition
+				((root->opr[i]->nature != NODE_ELSE) && (root->opr[i]->nature != NODE_FOR))) // block already parsed 
 			{
 				gen_code_passe_2(root->opr[i]);
 			}

@@ -208,9 +208,17 @@ inst                    : expr TOK_SEMICOL
                         {
                             $$ = make_node(NODE_WHILE, 2, $3, $5);
                         }
+                        | TOK_WHILE TOK_LPAR expr TOK_RPAR TOK_SEMICOL     // blocking while
+                        {
+                            $$ = make_node(NODE_WHILE, 1, $3);
+                        }
                         | TOK_FOR TOK_LPAR expr TOK_SEMICOL expr TOK_SEMICOL expr TOK_RPAR inst
                         {
-                            $$ = make_node(NODE_FOR, 4, $3, $5,$7 ,$9);
+                            $$ = make_node(NODE_FOR, 4, $3, $5, $7 ,$9);
+                        }
+                        | TOK_FOR TOK_LPAR TOK_SEMICOL TOK_SEMICOL TOK_RPAR inst // empty for 
+                        {
+                            $$ = make_node(NODE_FOR, 1, $6);
                         }
                         | TOK_DO inst TOK_WHILE TOK_LPAR expr TOK_RPAR TOK_SEMICOL
                         {
@@ -556,6 +564,10 @@ void analyse_tree(node_t root) {
         if (!stop_after_verif)
         {
             outfileDescriptor = outfile_open(outfile);
+            if(verboseDebug)
+            {
+                printf(BOLD "> Second parse\n" NC);
+            } 
             gen_code_passe_2(root);
             outfile_close(outfileDescriptor);
         }

@@ -2,37 +2,30 @@
  * Comment on multiple 
  * line !
  */ 
-int start;
+int start = 0;
+int end = 5;
 int x;
 // Starting main
 void main(){
-	do 
-	{
-		// if (start == 1)
-		// {
-		// 	x = x + 1;
-		// }
-		// else 
-		// {
-		// 	x = x - 2;
-		// }
-		start = 3;
-	}
-	while(x*2 || x+2);
-	// if(false) 
-	// {
-	// 	x = x & start;
-	// }
-	// else
-	// {
-	// 	x = 0;
-	// }
-/*  
 	int i;
 	int sum = 0;
-	for (i = start; i < end; i = i + 1) {
+	for (i = start; !(i < end); i = i + 1) 
+	// for ( ; ; ) 
+ 	// while(x<1 && !(x>2))
+ 	// while(!(x<1) && x>2)
+ 	while(x<1 && x>2 && x < 3)
+ 	// while(x<1 || !(x>2))
+ 	// while(!(x<1) || x>2)
+ 	// if(!(x<1) && x>2)
+ 	// if(!(x<1) || x>2)
+ 	// if(!(x<1) && x>2 && x > 3)
+ 	// if(!(x<1) && x>2 || x > 3)
+	{
  		sum = sum + 10;	
  	}
- 	printf("sum :", start , "\n"); 
-*/
+ 	// {
+ 	// 	i= 1;
+ 	// }
+ 	// printf("sum :", start , "\n"); 
+
 }
