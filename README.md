@@ -53,7 +53,7 @@ Fast test file with tree as png and svg :
 - ~~bool operation~~ 
 - ~~if~~
 - ~~while / do...while~~
-- for
+- ~~for~~
 
 
 
