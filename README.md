@@ -55,6 +55,13 @@ Fast test file with tree as png and svg :
 - ~~while / do...while~~
 - ~~for~~
 
+## Optimization to do :
+- revamp conditionnal operations construction
+- ~~consecutive prio nodes~~
+- NOT operation in AND
+- AND and OR in the same condition  
+
+
 
 
 ## TO DO IN THE FUTURE ##
