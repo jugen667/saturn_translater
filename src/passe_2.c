@@ -17,7 +17,7 @@
 
 // global utility variables
 static unsigned int label = 0;
-static char labelStr[16];
+static char labelStr[LABEL_STR_SIZE];
 static bool inIf = false;
 static bool inWhile = false;
 static bool inDoWhile = false;
@@ -35,8 +35,8 @@ static int inFunc_Decl = 0;
 // automation of label creation
 char * label_formatting(void)
 {
-	memset(labelStr, 0x0, 16);
-	sprintf(labelStr, "L%d", label);
+	memset(labelStr, 0x0, LABEL_STR_SIZE);
+	snprintf(labelStr, LABEL_STR_SIZE, "L%d", label);
 	label++; 						// create a new label
 	return labelStr;
 }

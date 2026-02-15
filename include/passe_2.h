@@ -9,6 +9,8 @@
 
 #include "../include/defs.h"
 
+#define LABEL_STR_SIZE 	16
+
 void gen_code_passe_2(node_t root);
 
 void manage_priority(node_t node, int position);

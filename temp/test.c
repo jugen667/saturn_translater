@@ -4,28 +4,31 @@
  */ 
 int start = 0;
 int end = 5;
-int x;
+int x = 0;
 // Starting main
 void main(){
 	int i;
 	int sum = 0;
-	for (i = start; !(i < end); i = i + 1) 
+	// for (i = start; !(i < end); i = i + 1) 
 	// for ( ; ; ) 
+	// while(true)
+ 	// while(true && !(x<1))
  	// while(x<1 && !(x>2))
  	// while(!(x<1) && x>2)
- 	while(x<1 && x>2 && x < 3)
+ 	// while(x<1 && x>2 && x < 3)
  	// while(x<1 || !(x>2))
  	// while(!(x<1) || x>2)
- 	// if(!(x<1) && x>2)
+ 	if(!(x<1) && x>2)
  	// if(!(x<1) || x>2)
  	// if(!(x<1) && x>2 && x > 3)
  	// if(!(x<1) && x>2 || x > 3)
 	{
- 		sum = sum + 10;	
+ 		sum = sum + 6;	
  	}
- 	// {
- 	// 	i= 1;
- 	// }
+ 	else
+ 	{
+ 		i= 1;
+ 	}
  	// printf("sum :", start , "\n"); 
 
 }
