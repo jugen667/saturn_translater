@@ -292,7 +292,7 @@ void create_operation(node_t node)
 			{
 				manage_priority(node->opr[0], LEFT);
 			}
-			if(node->opr[1]->isPrio)
+			if(node->opr[1] != NULL && node->opr[1]->isPrio)
 			{
 				manage_priority(node->opr[1], RIGHT);
 			}
@@ -304,7 +304,7 @@ void create_operation(node_t node)
 				load_pointer(D0, node->opr[0]->address);
 				// exchange A and DAT
 				reading_memory(D0, A, W_FIELD);
-				if(node->opr[1]->isPrio)
+				if(node->opr[1] != NULL && node->opr[1]->isPrio)
 				{
 					copy_reg_save_work(R1, C, W_FIELD);	
 					if(save_reg_available(NULL, NO)) // to ensure that the prio has been treated
@@ -366,7 +366,7 @@ void create_operation(node_t node)
 					 node->opr[0]->nature == NODE_BOOLVAL)
 			{
 				load_register(node->opr[0]->value, 0);
-				if(node->opr[1]->isPrio)
+				if(node->opr[1] != NULL && node->opr[1]->isPrio)
 				{
 					copy_reg_save_work(R1, C, W_FIELD);	
 					if(save_reg_available(NULL, NO)) // to ensure that the prio has been treated
@@ -433,130 +433,133 @@ void create_operation(node_t node)
 			}
 
 			//right operand
-			if(node->opr[1]->nature == NODE_IDENT)
+			if(node->opr[1] != NULL)
 			{
-				// pointer = address 
-				load_pointer(D1, node->opr[1]->address);
-				// exchange A and DAT
-				reading_memory(D1, C, W_FIELD);
-				if(node->opr[0]->isPrio)
+				if(node->opr[1]->nature == NODE_IDENT)
 				{
-					copy_reg_save_work(R0, A, W_FIELD);
+					// pointer = address 
+					load_pointer(D1, node->opr[1]->address);
+					// exchange A and DAT
+					reading_memory(D1, C, W_FIELD);
+					if(node->opr[0]->isPrio)
+					{
+						copy_reg_save_work(R0, A, W_FIELD);
+					}
+					switch(node->nature)
+					{
+						case NODE_PLUS :
+							add_register(A, C, W_FIELD);
+						break;
+						case NODE_MINUS :
+							sub_register(A, C, W_FIELD);
+						break;
+						case NODE_MUL :
+							mul_register(A, C, W_FIELD);
+						break;
+						case NODE_DIV :
+							div_register(A, C, W_FIELD);
+						break;
+						case NODE_MOD :
+							mod_register(A, C, W_FIELD);
+						break;
+						case NODE_BAND :
+							logical_AND(A, C, W_FIELD);
+						break;
+						case NODE_BOR :
+							logical_OR(A, C, W_FIELD);
+						break;
+						case NODE_BXOR :
+							logical_XOR(A, C, W_FIELD);
+						break;
+						case NODE_LT : // opposite op : GTE
+							register_GTE(A, C, W_FIELD);
+						break;
+						case NODE_GT : // opposite op : LTE
+							register_LTE(A, C, W_FIELD);
+						break;
+						case NODE_EQ : // opposite op : NE
+							register_not_equal(A, C, W_FIELD);
+						break;
+						case NODE_NE : // opposite op : EQ
+							register_equal(A, C, W_FIELD);
+						break;
+						case NODE_GE : // opposite op : LT
+							register_LT(A, C, W_FIELD);
+						break;
+						case NODE_LE : // opposite op : GT
+							register_GT(A, C, W_FIELD);
+						break;
+						case NODE_SLL :
+						case NODE_SRL :
+						default:
+						break;
+					}
 				}
-				switch(node->nature)
+				else if (node->opr[1]->nature == NODE_INTVAL 	|| 
+						 node->opr[1]->nature == NODE_FLOATVAL	||
+						 node->opr[1]->nature == NODE_BOOLVAL) 
 				{
-					case NODE_PLUS :
-						add_register(A, C, W_FIELD);
-					break;
-					case NODE_MINUS :
-						sub_register(A, C, W_FIELD);
-					break;
-					case NODE_MUL :
-						mul_register(A, C, W_FIELD);
-					break;
-					case NODE_DIV :
-						div_register(A, C, W_FIELD);
-					break;
-					case NODE_MOD :
-						mod_register(A, C, W_FIELD);
-					break;
-					case NODE_BAND :
-						logical_AND(A, C, W_FIELD);
-					break;
-					case NODE_BOR :
-						logical_OR(A, C, W_FIELD);
-					break;
-					case NODE_BXOR :
-						logical_XOR(A, C, W_FIELD);
-					break;
-					case NODE_LT : // opposite op : GTE
-						register_GTE(A, C, W_FIELD);
-					break;
-					case NODE_GT : // opposite op : LTE
-						register_LTE(A, C, W_FIELD);
-					break;
-					case NODE_EQ : // opposite op : NE
-						register_not_equal(A, C, W_FIELD);
-					break;
-					case NODE_NE : // opposite op : EQ
-						register_equal(A, C, W_FIELD);
-					break;
-					case NODE_GE : // opposite op : LT
-						register_LT(A, C, W_FIELD);
-					break;
-					case NODE_LE : // opposite op : GT
-						register_GT(A, C, W_FIELD);
-					break;
-					case NODE_SLL :
-					case NODE_SRL :
-					default:
-					break;
+					load_register(node->opr[1]->value, 1);
+					if(	node->opr[0]->isPrio)
+					{
+						copy_reg_save_work(R0, A, W_FIELD);
+					}
+					switch(node->nature)
+					{
+						case NODE_PLUS :
+							add_register(A, C, W_FIELD);
+						break;
+						case NODE_MINUS :
+							sub_register(A, C, W_FIELD);
+						break;
+						case NODE_MUL :
+							mul_register(A, C, W_FIELD);
+						break;
+						case NODE_DIV :
+							div_register(A, C, W_FIELD);
+						break;
+						case NODE_MOD :
+							mod_register(A, C, W_FIELD);
+						break;
+						case NODE_BAND :
+							logical_AND(A, C, W_FIELD);
+						break;
+						case NODE_BOR :
+							logical_OR(A, C, W_FIELD);
+						break;
+						case NODE_BXOR :
+							logical_XOR(A, C, W_FIELD);
+						break;
+						case NODE_LT : // opposite op : GTE
+							register_GTE(A, C, W_FIELD);
+						break;
+						case NODE_GT : // opposite op : LTE
+							register_LTE(A, C, W_FIELD);
+						break;
+						case NODE_EQ : // opposite op : NE
+							register_not_equal(A, C, W_FIELD);
+						break;
+						case NODE_NE : // opposite op : EQ
+							register_equal(A, C, W_FIELD);
+						break;
+						case NODE_GE : // opposite op : LT
+							register_LT(A, C, W_FIELD);
+						break;
+						case NODE_LE : // opposite op : GT
+							register_GT(A, C, W_FIELD);
+						break;
+						case NODE_SLL :
+						case NODE_SRL :
+						default:
+						break;
+					}
 				}
-			}
-			else if (node->opr[1]->nature == NODE_INTVAL 	|| 
-					 node->opr[1]->nature == NODE_FLOATVAL	||
-					 node->opr[1]->nature == NODE_BOOLVAL) 
-			{
-				load_register(node->opr[1]->value, 1);
-				if(	node->opr[0]->isPrio)
+				else
 				{
-					copy_reg_save_work(R0, A, W_FIELD);
-				}
-				switch(node->nature)
-				{
-					case NODE_PLUS :
-						add_register(A, C, W_FIELD);
-					break;
-					case NODE_MINUS :
-						sub_register(A, C, W_FIELD);
-					break;
-					case NODE_MUL :
-						mul_register(A, C, W_FIELD);
-					break;
-					case NODE_DIV :
-						div_register(A, C, W_FIELD);
-					break;
-					case NODE_MOD :
-						mod_register(A, C, W_FIELD);
-					break;
-					case NODE_BAND :
-						logical_AND(A, C, W_FIELD);
-					break;
-					case NODE_BOR :
-						logical_OR(A, C, W_FIELD);
-					break;
-					case NODE_BXOR :
-						logical_XOR(A, C, W_FIELD);
-					break;
-					case NODE_LT : // opposite op : GTE
-						register_GTE(A, C, W_FIELD);
-					break;
-					case NODE_GT : // opposite op : LTE
-						register_LTE(A, C, W_FIELD);
-					break;
-					case NODE_EQ : // opposite op : NE
-						register_not_equal(A, C, W_FIELD);
-					break;
-					case NODE_NE : // opposite op : EQ
-						register_equal(A, C, W_FIELD);
-					break;
-					case NODE_GE : // opposite op : LT
-						register_LT(A, C, W_FIELD);
-					break;
-					case NODE_LE : // opposite op : GT
-						register_GT(A, C, W_FIELD);
-					break;
-					case NODE_SLL :
-					case NODE_SRL :
-					default:
-					break;
-				}
-			}
-			else
-			{
-				if(!node->opr[1]->isPrio)
-				{
-					create_operation(node->opr[1]);
+					if(!node->opr[1]->isPrio)
+					{
+						create_operation(node->opr[1]);
+					}
 				}
 			}
 		break;
@@ -577,7 +580,7 @@ void create_NOT_operation(node_t node)
 			{
 				manage_priority(node->opr[0], LEFT);
 			}
-			if(node->opr[1]->isPrio)
+			if(node->opr[1] != NULL && node->opr[1]->isPrio)
 			{
 				manage_priority(node->opr[1], RIGHT);
 			}
@@ -589,7 +592,7 @@ void create_NOT_operation(node_t node)
 				load_pointer(D0, node->opr[0]->address);
 				// exchange A and DAT
 				reading_memory(D0, A, W_FIELD);
-				if(node->opr[1]->isPrio)
+				if(node->opr[1] != NULL && node->opr[1]->isPrio)
 				{
 					copy_reg_save_work(R1, C, W_FIELD);	
 					if(save_reg_available(NULL, NO)) // to ensure that the prio has been treated
@@ -627,7 +630,7 @@ void create_NOT_operation(node_t node)
 					 node->opr[0]->nature == NODE_BOOLVAL)
 			{
 				load_register(node->opr[0]->value, 0);
-				if(node->opr[1]->isPrio)
+				if(node->opr[1] != NULL && node->opr[1]->isPrio)
 				{
 					copy_reg_save_work(R1, C, W_FIELD);	
 					if(save_reg_available(NULL, NO)) // to ensure that the prio has been treated
@@ -670,82 +673,85 @@ void create_NOT_operation(node_t node)
 			}
 
 			//right operand
-			if(node->opr[1]->nature == NODE_IDENT)
+			if(node->opr[1] != NULL)
 			{
-				// pointer = address 
-				load_pointer(D0, node->opr[1]->address);
-				// exchange A and DAT
-				reading_memory(D0, C, W_FIELD);
-				if(node->opr[0]->isPrio)
+				if(node->opr[1]->nature == NODE_IDENT)
 				{
-					copy_reg_save_work(R0, A, W_FIELD);
+					// pointer = address 
+					load_pointer(D0, node->opr[1]->address);
+					// exchange A and DAT
+					reading_memory(D0, C, W_FIELD);
+					if(node->opr[0]->isPrio)
+					{
+						copy_reg_save_work(R0, A, W_FIELD);
+					}
+					switch(node->nature)
+					{
+						case NODE_LT : // opposite op of GTE 
+							register_LT(A, C, W_FIELD);
+						break;
+						case NODE_GT : // opposite op of GT
+							register_GT(A, C, W_FIELD);
+						break;
+						case NODE_EQ : // opposite op of NE
+							register_equal(A, C, W_FIELD);
+						break;
+						case NODE_NE : // opposite op of EQ
+							register_not_equal(A, C, W_FIELD);
+						break;
+						case NODE_GE : // opposite op of LT
+							register_GTE(A, C, W_FIELD);
+						break;
+						case NODE_LE : // opposite op of GT
+							register_LTE(A, C, W_FIELD);
+						break;
+						case NODE_SLL :
+						case NODE_SRL :
+						default:
+						break;
+					}
 				}
-				switch(node->nature)
+				else if (node->opr[1]->nature == NODE_INTVAL 	|| 
+						 node->opr[1]->nature == NODE_FLOATVAL	||
+						 node->opr[1]->nature == NODE_BOOLVAL) 
 				{
-					case NODE_LT : // opposite op of GTE 
-						register_LT(A, C, W_FIELD);
-					break;
-					case NODE_GT : // opposite op of GT
-						register_GT(A, C, W_FIELD);
-					break;
-					case NODE_EQ : // opposite op of NE
-						register_equal(A, C, W_FIELD);
-					break;
-					case NODE_NE : // opposite op of EQ
-						register_not_equal(A, C, W_FIELD);
-					break;
-					case NODE_GE : // opposite op of LT
-						register_GTE(A, C, W_FIELD);
-					break;
-					case NODE_LE : // opposite op of GT
-						register_LTE(A, C, W_FIELD);
-					break;
-					case NODE_SLL :
-					case NODE_SRL :
-					default:
-					break;
+					load_register(node->opr[1]->value, 1);
+					if(	node->opr[0]->isPrio)
+					{
+						copy_reg_save_work(R0, A, W_FIELD);
+					}
+					switch(node->nature)
+					{
+						case NODE_LT : // opposite op of GTE 
+							register_LT(A, C, W_FIELD);
+						break;
+						case NODE_GT : // opposite op of GT
+							register_GT(A, C, W_FIELD);
+						break;
+						case NODE_EQ : // opposite op of NE
+							register_equal(A, C, W_FIELD);
+						break;
+						case NODE_NE : // opposite op of EQ
+							register_not_equal(A, C, W_FIELD);
+						break;
+						case NODE_GE : // opposite op of LT
+							register_GTE(A, C, W_FIELD);
+						break;
+						case NODE_LE : // opposite op of GT
+							register_LTE(A, C, W_FIELD);
+						break;
+						case NODE_SLL :
+						case NODE_SRL :
+						default:
+						break;
+					}
 				}
-			}
-			else if (node->opr[1]->nature == NODE_INTVAL 	|| 
-					 node->opr[1]->nature == NODE_FLOATVAL	||
-					 node->opr[1]->nature == NODE_BOOLVAL) 
-			{
-				load_register(node->opr[1]->value, 1);
-				if(	node->opr[0]->isPrio)
+				else
 				{
-					copy_reg_save_work(R0, A, W_FIELD);
-				}
-				switch(node->nature)
-				{
-					case NODE_LT : // opposite op of GTE 
-						register_LT(A, C, W_FIELD);
-					break;
-					case NODE_GT : // opposite op of GT
-						register_GT(A, C, W_FIELD);
-					break;
-					case NODE_EQ : // opposite op of NE
-						register_equal(A, C, W_FIELD);
-					break;
-					case NODE_NE : // opposite op of EQ
-						register_not_equal(A, C, W_FIELD);
-					break;
-					case NODE_GE : // opposite op of LT
-						register_GTE(A, C, W_FIELD);
-					break;
-					case NODE_LE : // opposite op of GT
-						register_LTE(A, C, W_FIELD);
-					break;
-					case NODE_SLL :
-					case NODE_SRL :
-					default:
-					break;
-				}
-			}
-			else
-			{
-				if(!node->opr[1]->isPrio)
-				{
-					create_operation(node->opr[1]);
+					if(!node->opr[1]->isPrio)
+					{
+						create_operation(node->opr[1]);
+					}
 				}
 			}
 		break;
@@ -1812,23 +1818,20 @@ void gen_code_passe_2(node_t root)
 					if(root->opr[i]->opr[0]->global_decl)
 					{
 						create_comment(root->opr[i]->opr[0]->ident);
+						// pointer = address
+						load_pointer(D0, root->opr[i]->opr[0]->address);
 						if(root->opr[i]->opr[1] != NULL)
 						{
-							// pointer = address
-							load_pointer(D0, root->opr[i]->opr[0]->address);
 							// A = value
 							load_register(root->opr[i]->opr[1]->value, 0);
-							// exchange A and DAT
-							writing_memory(D0, A, W_FIELD);
 						}
 						else // IF NO VALUE : VALUE = 0
 						{
-							load_pointer(D0, root->opr[i]->opr[0]->address);
 							// A = value
 							load_register(0, 0);
-							// exchange A and DAT
-							writing_memory(D0, A, W_FIELD);
 						}
+						// exchange A and DAT
+						writing_memory(D0, A, W_FIELD);
 					}
 					else
 					{
@@ -1855,7 +1858,6 @@ void gen_code_passe_2(node_t root)
 							create_operation(root->opr[i]->opr[1]->opr[0]);
 							load_pointer(D0, root->opr[i]->opr[0]->address);
 							writing_memory(D0, A, W_FIELD);
-							flush_save_reg(); // reset save_reg pointers from our side : to test if useful
 						break;
 
 						case NODE_INTVAL:
@@ -1869,7 +1871,6 @@ void gen_code_passe_2(node_t root)
 							create_operation(root->opr[i]->opr[1]);
 							load_pointer(D0, root->opr[i]->opr[0]->address);
 							writing_memory(D0, A, W_FIELD);
-							flush_save_reg(); // reset save_reg pointers from our side : to test if useful
 						break;
 					}
 				}

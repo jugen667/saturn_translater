@@ -23,11 +23,11 @@
 // =========================================== GLOBALS ============================================= //
 // ================================================================================================= //
 // array to point to registers
-static node_t work_reg[MAX_WORKING_REGISTER] = {NULL, NULL,NULL, NULL};
+// static node_t work_reg[MAX_WORKING_REGISTER] = {NULL, NULL,NULL, NULL};
 
-static node_t save_reg[MAX_SAVE_REGISTER] = {NULL, NULL, NULL, NULL, NULL};
+// static node_t save_reg[MAX_SAVE_REGISTER] = {NULL, NULL, NULL, NULL, NULL};
 
-static node_t point_reg[MAX_POINTER_REGISTER] = {NULL, NULL};
+// static node_t point_reg[MAX_POINTER_REGISTER] = {NULL, NULL};
 
 
 static char * direction_str[MAX_DIRECTION] = {
@@ -89,77 +89,77 @@ void dump_instruction(char * inst, FILE * fDest)
 // check if register available for working with data (useless imo unless optimization)
 short work_reg_available(node_t node, int save)
 {
-	for (short i = 0; i < MAX_WORKING_REGISTER; i++)
-	{
-		if(work_reg[i] == NULL) 
-		{
-			if(save) 	// tracking nodes and do checks
-			{
-				work_reg[i] = node;
-			}
-			return i;
-		}
-	}
-	return -1;
+	// for (short i = 0; i < MAX_WORKING_REGISTER; i++)
+	// {
+	// 	if(work_reg[i] == NULL) 
+	// 	{
+	// 		if(save) 	// tracking nodes and do checks
+	// 		{
+	// 			work_reg[i] = node;
+	// 		}
+	// 		return i;
+	// 	}
+	// }
+	// return -1;
 }
 
 void flush_work_reg(void)
 {
-	for (short i = 0; i < MAX_WORKING_REGISTER; i++)
-	{
-		work_reg[i] = NULL;
-	}
+	// for (short i = 0; i < MAX_WORKING_REGISTER; i++)
+	// {
+	// 	work_reg[i] = NULL;
+	// }
 }
 
 
 // check if register available for saving data
 short save_reg_available(node_t node, int save)
 {
-	for (short i = 0; i < MAX_SAVE_REGISTER; i++)
-	{
-		if(save_reg[i] == NULL)
-		{
-			if(save) // tracking nodes and do checks
-			{
-				save_reg[i] = node;
-			}
-			return i;
-		}
-	}
-	return -1;
+	// for (short i = 0; i < MAX_SAVE_REGISTER; i++)
+	// {
+	// 	if(save_reg[i] == NULL)
+	// 	{
+	// 		if(save) // tracking nodes and do checks
+	// 		{
+	// 			save_reg[i] = node;
+	// 		}
+	// 		return i;
+	// 	}
+	// }
+	// return -1;
 }
 
 void flush_save_reg(void)
 {
-	for (short i = 0; i < MAX_SAVE_REGISTER; i++)
-	{
-		save_reg[i] = NULL;
-	}
+	// for (short i = 0; i < MAX_SAVE_REGISTER; i++)
+	// {
+	// 	save_reg[i] = NULL;
+	// }
 }
 
 // check if register available for pointers (useless imo unless optimization)
 short point_reg_available(node_t node, int save)
 {
-	for (short i = 0; i < MAX_POINTER_REGISTER; i++)
-	{
-		if(point_reg[i] == NULL)
-		{
-			if(save) 	// tracking nodes and do checks
-			{
-				point_reg[i] = node;
-			}
-			return i;
-		}
-	}
-	return -1;
+	// for (short i = 0; i < MAX_POINTER_REGISTER; i++)
+	// {
+	// 	if(point_reg[i] == NULL)
+	// 	{
+	// 		if(save) 	// tracking nodes and do checks
+	// 		{
+	// 			point_reg[i] = node;
+	// 		}
+	// 		return i;
+	// 	}
+	// }
+	// return -1;
 }
 
 void flush_point_reg(void)
 {
-	for (short i = 0; i < MAX_POINTER_REGISTER; i++)
-	{
-		point_reg[i] = NULL;
-	}
+	// for (short i = 0; i < MAX_POINTER_REGISTER; i++)
+	// {
+	// 	point_reg[i] = NULL;
+	// }
 }
 
 // -------------------------------------------
