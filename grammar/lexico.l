@@ -176,6 +176,8 @@ int main(int argc, char ** argv) {
     node_t program_root;
     parse_args(argc, argv);
     yyin = fopen(infile, "r");
+    if(yyin != NULL)
+    {
     #if LEX_DEBUG
         while(yylex());
         fclose(yyin);
@@ -187,6 +189,12 @@ int main(int argc, char ** argv) {
         fclose(yyin);
         analyse_tree(program_root);
     #endif
+    }
+    else
+    {
+        printf(RED "Error : " NC "could not open file %s\n", infile);
+        exit(EXIT_FAILURE);
+    }
     yylex_destroy();
     return 0;
 }
