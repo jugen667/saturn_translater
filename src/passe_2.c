@@ -78,93 +78,53 @@ void manage_priority(node_t node, int position) // position left or right
 void decl_inblock(node_t node)
 {
 	create_comment(node->opr[0]->ident);
+	// pointer = address 
+	load_pointer(D0, node->opr[0]->address);
 	if(node->opr[1] != NULL)
 	{
 		if(node->opr[1]->nature == NODE_IDENT)
 		{
-			// pointer = address 
-			load_pointer(D0, node->opr[0]->address);
 			load_pointer(D1, node->opr[1]->address);
 			// read memory into A
 			reading_memory(D1, A, W_FIELD);
-			// exchange A and DAT
-			writing_memory(D0, A, W_FIELD);
 		}
 		else // IT IS A IMMEDIATE 
 		{
-			// pointer = address 
-			load_pointer(D0, node->opr[0]->address);
 			// A = value
 			load_register(node->opr[1]->value, 0);
-			// exchange A and DAT
-			writing_memory(D0, A, W_FIELD);
 		}
 	}
 	else
 	{
-		// pointer = address 
-		load_pointer(D0, node->opr[0]->address);
 		// A = value
 		load_register(0, 0);
-		// exchange A and DAT
-		writing_memory(D0, A, W_FIELD);
 	}
+	// exchange A and DAT
+	writing_memory(D0, A, W_FIELD);
 }
 
-// affectation of a variable (unused)
+// affectation of a variable
 void affect_variable(node_t node)
 {
+	// pointer = address 
+	load_pointer(D0, node->opr[0]->address);
 	// affect an ident with an ident
 	if(node->opr[0]->nature == NODE_IDENT && 
 		node->opr[1]->nature == NODE_IDENT)
 	{
 		// pointer = address 
-		load_pointer(D0, node->opr[0]->address);
 		load_pointer(D1, node->opr[1]->address);
 		// read memory into A
 		reading_memory(D1, A, W_FIELD);
-		// exchange A and DAT
-		writing_memory(D0, A, W_FIELD);
 	}
-
-	// affect an ident with a intval
-	if((node->opr[0]->nature == NODE_IDENT && 
-		node->opr[0]->type == TYPE_INT) && 
-		node->opr[1]->nature == NODE_INTVAL)
+	// affect an ident with a value
+	else
 	{
-		// pointer = address 
-		load_pointer(D0, node->opr[0]->address);
 		// A = value
 		load_register(node->opr[1]->value, 0);
-		// exchnage A and DAT
-		writing_memory(D0, A, W_FIELD);
 	}
-
-	// affect an ident with a floatval
-	if((node->opr[0]->nature == NODE_IDENT && 
-		node->opr[0]->type == TYPE_FLOAT) && 
-		node->opr[1]->nature == NODE_FLOATVAL)
-	{
-		// pointer = address 
-		load_pointer(D0, node->opr[0]->address);
-		// A = value
-		load_register(node->opr[1]->value, 0);
-		// exchange A and DAT
-		writing_memory(D0, A, W_FIELD);
-	}
-
-	// affect an ident with a boolval
-	if((node->opr[0]->nature == NODE_IDENT && 
-		node->opr[0]->type == TYPE_BOOL) && 
-		node->opr[1]->nature == NODE_BOOLVAL)
-	{
-		// pointer = address 
-		load_pointer(D0, node->opr[0]->address);
-		// A = value
-		load_register(node->opr[1]->value, 0);
-		// exchange A and DAT
-		writing_memory(D0, A, S_FIELD);	// value of bool on a S field only
-	}
+	// exchange A and DAT
+	writing_memory(D0, A, W_FIELD);	// value of bool on a S field only (for further optimization)
 }
 // --------------------------------------------- //
 
@@ -186,15 +146,12 @@ void create_uminus_instr(node_t node)
 		load_pointer(D0, node->opr[0]->address);
 		// exchange A and DAT
 		reading_memory(D0, A, W_FIELD);
-		two_complement(A, W_FIELD);
-
 	}
 	else if (node->opr[0]->nature == NODE_INTVAL 	|| 
 			 node->opr[0]->nature == NODE_FLOATVAL	||
 			 node->opr[0]->nature == NODE_BOOLVAL)
 	{
 		load_register(node->opr[0]->value, 0);
-		two_complement(A, W_FIELD);				
 	}
 	else
 	{
@@ -205,9 +162,9 @@ void create_uminus_instr(node_t node)
 		else
 		{
 			copy_reg_save_work(R0, A, W_FIELD);
-			two_complement(A, W_FIELD);
 		}
 	}
+	two_complement(A, W_FIELD);
 }
 
 // create a bitwise not
@@ -225,7 +182,6 @@ void create_bnot_instr(node_t node)
 		load_pointer(D0, node->opr[0]->address);
 		// exchange A and DAT
 		reading_memory(D0, A, W_FIELD);
-		one_complement(A, W_FIELD);
 
 	}
 	else if (node->opr[0]->nature == NODE_INTVAL 	|| 
@@ -233,7 +189,6 @@ void create_bnot_instr(node_t node)
 			 node->opr[0]->nature == NODE_BOOLVAL)
 	{
 		load_register(node->opr[0]->value, 0);
-		one_complement(A, W_FIELD);				
 	}
 	else
 	{
@@ -244,9 +199,9 @@ void create_bnot_instr(node_t node)
 		else
 		{
 			copy_reg_save_work(R0, A, W_FIELD);
-			one_complement(A, W_FIELD);
 		}
 	}
+	one_complement(A, W_FIELD);
 }
 
 // create operation 
@@ -782,10 +737,7 @@ void create_cond_instruction(node_t node, node_t root, char * loc_label, int sta
 		memcpy(label_in_use_1,loc_label,16);
 		create_label(label_in_use_1);
 	}
-
-	g_currentNode = node;
-
-	switch(g_currentNode->nature) // treatment of condition
+	switch(node->nature) // treatment of condition
 	{
 		/*case NODE_AND:
 			if(countInCond < 2 && statement == DOWHILE_STATEMENT)
@@ -1434,12 +1386,15 @@ void create_cond_instruction(node_t node, node_t root, char * loc_label, int sta
 		break;
 */
 
+		case NODE_AND:
+			
+		break;
+
 		case NODE_NOT:
 			if(statement == DOWHILE_STATEMENT)
 			{
 				gen_code_passe_2(root->opr[1]);
 			}
-			g_currentNode = node->opr[0];
 			if(node->opr[0]->nature == NODE_PRIO)
 			{
 				switch(node->opr[0]->opr[0]->type)
