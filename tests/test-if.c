@@ -19,4 +19,5 @@ void main()
  	{
  		sum = 1;
  	}
+ 	i;
 }
