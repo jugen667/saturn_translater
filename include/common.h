@@ -25,8 +25,6 @@
 // > v0.7 : optimizations and fixes			\\
 // > v0.8 : parser enhancements				\\
 // > v0.9 : compiler adjustements 			\\
-// > v0.10 : changes and fixes				\\
-// > v0.11 : testing phase on HPx assembler \\
 // > v1.0 : first release					\\
 // > v1.x : test on machine + corrections	\\
 // ========================================	\\

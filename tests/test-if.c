@@ -7,10 +7,14 @@ int sum = 0;
 void main()
 {
 	int i = start;
- 	if(i < end)
-	{
- 		sum = sum + 10;	
- 	}
+ 	if(i){ }
+	if(!i){ }
+	if(i<2){ }		
+	if(!((i<(2+1)))){ }
+	if(0){ }
+	if(1){sum = 1; }
+	if(false){ }
+	if(true){ sum = 2; }
  	else
  	{
  		sum = 1;

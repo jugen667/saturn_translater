@@ -254,7 +254,11 @@ list                    :   listdecl
                         ;
 
 
-block                   :  TOK_LACC list TOK_RACC
+block                   :  TOK_LACC TOK_RACC
+                        {
+                            $$ = make_node(NODE_BLOCK, 0);
+                        }
+                        |  TOK_LACC list TOK_RACC
                         {
                             $$ = make_node(NODE_BLOCK, 1, $2);
                         }
