@@ -42,8 +42,12 @@
 
 extern bool verboseDebug;
 extern short target;
-extern short disable_tree_dump;
+extern bool disable_tree_dump;
 extern FILE * outfileDescriptor;
+
+extern bool stop_after_syntax;
+extern bool stop_after_verif;
+extern char * outfile;
 
 // ================================================================================================= //
 // ========================================== PROTOTYPE ============================================ //

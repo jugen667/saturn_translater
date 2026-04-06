@@ -7,9 +7,13 @@ int sum = 0;
 void main ()
 {
 	int i = start;
-	while(i < end)
+	// while(i < end)
+	while(true)
 	{
-		sum = sum + 10;
 		i = i + 1;
+		// while( i < 3)
+		// {
+		// 	i = i +1;
+		// }
 	}
 }

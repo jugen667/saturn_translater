@@ -127,13 +127,6 @@ enum DIRECTION          // for bit/nibble shift AND priority management
 #define VAR_MAX_SIZE 32
 #define VAR_MAX_NUMBER 32
 
-#define printf_level(level, ...) ({         \
-    if (level < trace_level) {              \
-        printf(__VA_ARGS__);                \
-    }                                       \
-})
-
-
 typedef enum node_nature_s {
     NONE,
     NODE_PROGRAM,

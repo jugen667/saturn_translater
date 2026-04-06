@@ -30,12 +30,12 @@ extern char * infile;
 char * outfile = DEFAULT_OUTFILE;
 bool stop_after_syntax = false;
 bool stop_after_verif = false;
+bool verboseDebug = false;
 
 FILE * outfileDescriptor = NULL;
-bool verboseDebug = 0;
 short target = 48;
-short disable_tree_dump = 1;
-bool uncompatible=0;
+bool disable_tree_dump = true;
+bool uncompatible=false;
 
 // ================================================================================================= //
 // =========================================== FUNCTIONS =========================================== //
@@ -66,7 +66,7 @@ void affiche_help()
 	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
 	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
     printf("  -t : Define compilation target (HP-48 or HP-49)\n\t(default=48)\n");
-    printf("  -a : Enable the tree dumping in a file\n\t(default=on)");
+    printf("  -a : Enable the tree dumping in a file\n\t(default=on)\n");
     printf("  -d : Activate verbose compilation\n");
 	printf("  -h : Print help\n");
     printf("  -v : Print build version of SaturnCC\n\n");
@@ -117,11 +117,11 @@ void testValideOutFile(char * test)
 
 void test_arg_compatibility(char *arg_1, char *arg_2, char *test)
 {
-	if((strcmp(test, arg_1) || strcmp(test, arg_2)) && uncompatible == 0)
+	if((strcmp(test, arg_1) || strcmp(test, arg_2)) && uncompatible == false)
     {
-		uncompatible = 1;
+		uncompatible = true;
 	}
-	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == 1)
+	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == true)
     {
 		fprintf(stderr,BOLD "incompatible options  : %s and %s \n" NC, arg_1, arg_2);
 		exit(EXIT_FAILURE);
@@ -152,22 +152,22 @@ void parse_args(int argc, char ** argv)
 						i++;
 					break;
                     case 'a':
-                        disable_tree_dump = 0;
+                        disable_tree_dump = false;
                         printf(BOLD "Compilation tree will be dumped in .dot files\n" NC);
                     break;
 					case 't':
-						test_int_value(48,49,atoi(argv[i+1]), argv[i]);
+						test_int_value(48, 49, atoi(argv[i+1]), argv[i]);
                         target = atoi(argv[i+1]);
                         printf(BOLD "Compilation target : HP-%d series\n" NC, target);
 						i++;
 					break;
 					case 's':
 						test_arg_compatibility("-s","-c",argv[i]);
-						stop_after_syntax = 1;
+						stop_after_syntax = true;
 					break;
 					case 'c':
 						test_arg_compatibility("-s","-c",argv[i]);
-						stop_after_verif = 1;
+						stop_after_verif = true;
 					break;
                     case 'v':
                         print_version();
@@ -178,7 +178,7 @@ void parse_args(int argc, char ** argv)
                         exit(EXIT_SUCCESS);
                     break;
                     case 'd':
-                        verboseDebug = 1;
+                        verboseDebug = true;
                         printf(BOLD "Compilation will be verbose\n" NC);
                     break;
 					default:
@@ -393,8 +393,8 @@ const char * node_type2string(node_type t)
         case TYPE_VOID:
             return "TYPE VOID";
         default:
-            return "";
-        break;
+            printf("*** Error in %s: Unknown node type: %d\n", __func__, t);
+            exit(EXIT_FAILURE);
     }
 }
 
@@ -489,7 +489,7 @@ const char * node_nature2string(node_nature t)
         case NODE_PRIO:
             return "PRIO";
     	default:
-            fprintf(stderr, "*** Error in %s: Unknown node nature: %d\n", __func__, t);
+            printf("*** Error in %s: Unknown node nature: %d\n", __func__, t);
             exit(EXIT_FAILURE);
     }
 }
@@ -544,9 +544,14 @@ const char * node_nature2symb(node_nature t)
         case NODE_UMINUS:
             return "-";
         default:
-            fprintf(stderr, "*** Error in %s: Unknown node nature: %d\n", __func__, t);
+            printf("*** Error in %s: Unknown node nature: %d\n", __func__, t);
             exit(EXIT_FAILURE);
     }
+}
+
+void print_node_info(node_t root)
+{
+    printf("Node Nature:%s \t\t| Node Type:%s \t\t| Nbr. Ops:%d\t\t|\n",node_nature2string(root->nature), node_type2string(root->type), root->nops);
 }
 
 // ------------------------------------------------------------------------------------------------- //

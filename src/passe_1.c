@@ -25,16 +25,14 @@
 
 static decl_table declaration_table[VAR_MAX_NUMBER]; // max 32 variable
 
-extern int trace_level;
-
 // ================================================================================================= //
 // =========================================== GLOBALS ============================================= //
 // ================================================================================================= //
 
-short currentVar = -1; 		// declaration index 
-bool declaration = 0;		// in a declaration part
-bool isGlobal = 1;			// in global scope
-node_type current_type= 0;  // typing nodes
+static short currentVar = -1; 		// declaration index 
+static bool declaration = false;		// in a declaration part
+static bool isGlobal = true;			// in global scope
+static node_type current_type = 0;  // typing nodes
 
 // ================================================================================================= //
 // =========================================== FUNCTIONS =========================================== //
@@ -53,14 +51,6 @@ void print_decl_table(void)
 		printf("Variable n°%d - %s | ", i, declaration_table[i].varName);
 	}
 }
-
-// ------------------------------------------------------------------------------------------------- //
-
-void print_node_info(node_t root)
-{
-	printf("Node Nature:%s \t\t| Node Type:%s \t\t| Nbr. Ops:%d\t\t|\n",node_nature2string(root->nature), node_type2string(root->type), root->nops);
-}
-
 // ------------------------------------------------------------------------------------------------- //
 
 /* ========================= Check-Up functions ========================= */
@@ -111,7 +101,7 @@ void add_decl_node(node_t node)
 {
 	// checks on ident
 	check_ident_size(node);
-	if(check_var_number){					
+	if(check_var_number()){					
 		if(currentVar == -1 || get_decl_node(node) == NULL)
 		{
 			currentVar++;
@@ -121,7 +111,7 @@ void add_decl_node(node_t node)
 	}
 	else
 	{
-		printf(RED "Error line" BOLD " %d " NC ": variable number overflow (max variable : %d)\n", node->lineno, VAR_MAX_NUMBER);
+		printf(RED "Error line" BOLD " %d " NC ": variable amount overflow (max variable : %d)\n", node->lineno, VAR_MAX_NUMBER);
 		exit(EXIT_FAILURE);
 	}
 }

@@ -28,7 +28,11 @@ Fast test file with tree as png and svg :
 
 # KNOWN BUGS 
 
-- Mixing 'OR' and 'AND' in conditionnal makes the instruction creation messy : to fix ?
+**1. Conditionnal boolean operations : mixing operations (LT and PLUS for example) is broken.**
+
+Temporary fix : add parenthesis to ensure the operations to be compared is executed 
+
+Example : Replace ```if(!(i<2+1))``` by ```if(!(i<(2+1))``` 
 
 ---------------
 

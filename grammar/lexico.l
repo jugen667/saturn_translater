@@ -14,6 +14,7 @@
 
 #include "../include/defs.h"
 #include "../include/common.h"
+#include "../include/passe_2.h"
 
 #include "../include/y.tab.h"
 int yyparse(node_t * program_root);

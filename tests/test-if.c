@@ -7,17 +7,38 @@ int sum = 0;
 void main()
 {
 	int i = start;
- 	if(i){ }
-	if(!i){ }
-	if(i<2){ }		
-	if(!((i<(2+1)))){ }
-	if(0){ }
-	if(1){sum = 1; }
-	if(false){ }
-	if(true){ sum = 2; }
+ 	if(i)
+ 	{
+ 		if(i<2)
+ 		{ 
+	 		if(start)
+	 		{
+	 			if(!i)
+	 			{ 
+	 				sum = 255; 
+	 			}
+	 			sum = 3;
+	 		}
+	 		else
+			{
+				if(start > end)
+				{
+					sum = 4;
+				}
+				else
+				{
+					sum = 2;
+				}	
+			}
+ 		}
+ 		else
+ 		{
+ 			sum = 1;
+ 		}
+ 	}
  	else
  	{
- 		sum = 1;
- 	}
- 	i;
+ 		sum = 0;
+ 	}	
+	// if(!(i<(2+1))){ } // bug here : see known bug 1
 }

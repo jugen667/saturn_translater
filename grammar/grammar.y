@@ -23,10 +23,6 @@
 
 
 /* Global variables */
-extern bool stop_after_syntax;
-extern bool stop_after_verif;
-extern bool verboseDebug;
-extern char * outfile;
 extern bool isPrio;
 
 /* prototypes */
@@ -265,7 +261,11 @@ block                   :  TOK_LACC TOK_RACC
                         ;
 
 
-expr                    : TOK_LPAR expr TOK_RPAR
+expr                    : TOK_NOT TOK_LPAR expr TOK_RPAR
+                        {
+                            $$ = make_node(NODE_NOT, 1, $3);
+                        }
+                        |TOK_LPAR expr TOK_RPAR
                         {
                             // priority
                             $$ = make_node(NODE_PRIO, 1, $2);
