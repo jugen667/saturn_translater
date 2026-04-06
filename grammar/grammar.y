@@ -18,12 +18,6 @@
 #include "../include/common.h"
 #include "../include/passe_1.h"
 #include "../include/passe_2.h"
-// #include "../include/objects.h"
-
-
-
-/* Global variables */
-extern bool isPrio;
 
 /* prototypes */
 int yylex(void);
@@ -547,40 +541,41 @@ node_t make_node_main(node_t node_next){
 
 
 void analyse_tree(node_t root) {
-    if(verboseDebug)
+    if(g_verboseDebug)
     {
-        printf(BOLD "> Syntax analysis\n" NC);
+        printf(BOLD "\n> Syntax analysis\n" NC);
     }    
-    if(!disable_tree_dump)
+    if(!g_disableTreeDump)
     {
         dump_tree(root, "after_syntax.dot");
     }
-    if (!stop_after_syntax) {
-        if(verboseDebug)
-        {
-            printf(BOLD "> First parse\n" NC);
-        } 
-        analyse_passe_1(root);
-        if(!disable_tree_dump)
-        {
-            dump_tree(root, "after_passe_1.dot");
-        }
-        if (!stop_after_verif)
-        {
-            outfileDescriptor = outfile_open(outfile);
-            if(verboseDebug)
-            {
-                printf(BOLD "> Second parse\n" NC);
-            } 
-            gen_code_passe_2(root);
-            outfile_close(outfileDescriptor);
-        }
-        // free_global_strings();
-    }
-    free_nodes(root);
-    if(verboseDebug)
+    if(g_verboseDebug)
     {
-        printf(BOLD "> End of compilation\n" NC);
+        printf(BOLD "\n> First parse\n" NC);
+        printf(BOLD "-> Node list\n" NC);
+    } 
+    analyse_passe_1(root);
+    if(!g_disableTreeDump)
+    {
+        dump_tree(root, "after_passe_1.dot");
+    }
+    if(g_verboseDebug)
+    {
+        printf(BOLD "->Variables in the program\n" NC);
+        print_decl_table();
+    }
+    g_outfileDescriptor = outfile_open(g_outfile);
+    if(g_verboseDebug)
+    {
+        printf(BOLD "\n> Second parse\n" NC);
+    } 
+    gen_code_passe_2(root);
+    outfile_close(g_outfileDescriptor);
+    // free_global_strings();
+    free_nodes(root);
+    if(g_verboseDebug)
+    {
+        printf(BOLD "\n> End of compilation\n" NC);
     }
 }
 

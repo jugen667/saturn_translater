@@ -1,8 +1,11 @@
 // ========================================
-// > Author :   jugen 667 
+// > Author :   jugen667 
 // > Title  :   defs.h
 // > Desc.  :   Header with node structs   
 //              and arch specs
+//              All structs and enums for 
+//              the compilation are defined
+//              here
 // ========================================
 
 #ifndef _DEFS_H_
@@ -124,8 +127,8 @@ enum DIRECTION          // for bit/nibble shift AND priority management
 
 // ===== Node description =====
 
-#define VAR_MAX_SIZE 32
-#define VAR_MAX_NUMBER 32
+#define VAR_MAX_SIZE    256
+#define VAR_MAX_NUMBER  256
 
 typedef enum node_nature_s {
     NONE,
@@ -205,13 +208,20 @@ typedef struct _node_s {
 
 typedef node_s * node_t;
 
-
-typedef struct{
+// =============================
+typedef struct
+{
     char varName[VAR_MAX_SIZE];
     node_t node;
 } decl_table;
 
-// =============================
+#define LABEL_STR_SIZE  16
+#define MAX_LABEL_AMT   65535 // max int
+
+typedef struct
+{
+    char labelStr[LABEL_STR_SIZE];
+}label_string;
 
 #endif
 

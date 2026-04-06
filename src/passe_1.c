@@ -3,6 +3,12 @@
 // > Title  :   passe_1.c 
 // > Desc.  :   First parse to check tree
 //				and program consistence
+// 				This first parsing does all
+//				the checks before creating 
+// 				an assembly output
+//				(variable uniqueness, type
+//				constistency, address 
+//				assignements, ...)
 // > Associated header : passe_1.h
 // ========================================
 
@@ -18,21 +24,15 @@
 #include "../include/passe_1.h"
 #include "../include/common.h"
 
-
-// ================================================================================================= //
-// ========================================== PROTOTYPES =========================================== //
-// ================================================================================================= //
-
-static decl_table declaration_table[VAR_MAX_NUMBER]; // max 32 variable
-
 // ================================================================================================= //
 // =========================================== GLOBALS ============================================= //
 // ================================================================================================= //
 
-static short currentVar = -1; 		// declaration index 
-static bool declaration = false;		// in a declaration part
-static bool isGlobal = true;			// in global scope
-static node_type current_type = 0;  // typing nodes
+static decl_table g_varTable[VAR_MAX_NUMBER]; 	// max 256 variable
+static short g_currentVarIdx = -1; 				// declaration index 
+static bool g_inDeclaration = false;			// in a declaration part
+static bool g_inGlobalScope = true;				// in global scope
+static node_type g_currentType = 0;  			// typing nodes
 
 // ================================================================================================= //
 // =========================================== FUNCTIONS =========================================== //
@@ -43,12 +43,12 @@ void print_decl_table(void)
 {
 	for (int i=0; i < VAR_MAX_NUMBER; i++)
 	{
-		if (declaration_table[i].node == NULL)
+		if (g_varTable[i].node == NULL)
 		{
 			printf("\n"); 	
 			break;
 		}
-		printf("Variable n°%d - %s | ", i, declaration_table[i].varName);
+		printf("Variable n°%d - %s | ", i, g_varTable[i].varName);
 	}
 }
 // ------------------------------------------------------------------------------------------------- //
@@ -57,7 +57,7 @@ void print_decl_table(void)
 
 bool check_var_number(void)
 {
-	if(currentVar <= VAR_MAX_NUMBER)
+	if(g_currentVarIdx <= VAR_MAX_NUMBER)
 	{
 		return true;
 	}
@@ -80,16 +80,16 @@ void check_ident_size(node_t node)
 // reading a declaration table : returns a pointer to a node
 node_t get_decl_node(node_t node) 
 {
-	for(short i = 0; i <= currentVar; i++)
+	for(short i = 0; i <= g_currentVarIdx; i++)
 	{
-		if(strncmp(declaration_table[i].varName, node->ident, VAR_MAX_SIZE))
+		if(strncmp(g_varTable[i].varName, node->ident, VAR_MAX_SIZE))
 		{
 			// diff in strings : not the droid we are looking for
 			continue;
 		}
 		else
 		{
-			return(declaration_table[i].node);
+			return(g_varTable[i].node);
 		}
 	}
 	return NULL;
@@ -101,12 +101,13 @@ void add_decl_node(node_t node)
 {
 	// checks on ident
 	check_ident_size(node);
-	if(check_var_number()){					
-		if(currentVar == -1 || get_decl_node(node) == NULL)
+	if(check_var_number())
+	{					
+		if(g_currentVarIdx == -1 || get_decl_node(node) == NULL)
 		{
-			currentVar++;
-			declaration_table[currentVar].node = node;
-			strncpy(declaration_table[currentVar].varName,node->ident, VAR_MAX_SIZE);
+			g_currentVarIdx++;
+			g_varTable[g_currentVarIdx].node = node;
+			strncpy(g_varTable[g_currentVarIdx].varName,node->ident, VAR_MAX_SIZE);
 		} 
 	}
 	else
@@ -148,12 +149,9 @@ void check_int_op_type(node_t node)
 // ------------------------------------------------------------------------------------------------- //
 
 // check that IF, DOWHILE, WHILE and FOR gives boolean type expression
-void check_bool_cond(node_t node, int positionnal)
+void check_bool_cond(node_t node, unsigned int position)
 {
-	if (node->opr[positionnal]->type != TYPE_BOOL && 
-		node->opr[positionnal]->type != TYPE_INT && 
-		node->opr[positionnal]->type != TYPE_FLOAT && 
-		node->opr[positionnal]->type != TYPE_NONE)
+	if (node->opr[position]->type == TYPE_VOID)
 	{
 		switch(node->nature)
 		{
@@ -315,18 +313,21 @@ void check_global_decl(node_t node)
 
 void analyse_passe_1(node_t root) 
 {	
-	node_t variableDecl;
-	
-	// printf("declaration flag : %d\n", declaration);
+	node_t variableDecl; // pointer to a IDENT node
+
+	if(g_verboseDebug)
+	{
+		print_node_info(root);
+	}
 	if (root->nature == NODE_PROGRAM)
 	{
 		//flag to update the global_decl attribute
-		isGlobal=1; 
+		g_inGlobalScope = true; 
 	}
 	if (root->nature == NODE_FUNC)
 	{ 
 		//flag to update the global_decl attribute
-		isGlobal=0; 
+		g_inGlobalScope = false; 
 	}
 	// parsing the tree
 	for(int i = 0; i < root->nops; i++)
@@ -338,9 +339,9 @@ void analyse_passe_1(node_t root)
 				case NODE_TYPE :
 					if (root->opr[i]->type != TYPE_NONE)
 					{
-						current_type = root->opr[i]->type;
+						g_currentType = root->opr[i]->type;
 					}
-					declaration = 1;
+					g_inDeclaration = true;
 				break;
 
 				case NODE_INTVAL :
@@ -367,21 +368,21 @@ void analyse_passe_1(node_t root)
 				case NODE_IDENT :
 					// Check if variable has been declared already
 					variableDecl = get_decl_node(root->opr[i]);  // 2 ENTRY ARRAY FOR IDENT ASSOCIATION WITH A NODE
-					root->opr[i]->type = current_type; 
+					root->opr[i]->type = g_currentType; 
 					
 					// if first time seeing the ident (not fully operationnal : to pair with declaration flag)
-					if (variableDecl == NULL && declaration == 1)
+					if (variableDecl == NULL && g_inDeclaration == true)
 					{
 						//If undeclared, we add it to the table
 						root->opr[i]->address = assign_address();
 						add_decl_node(root->opr[i]);
-						declaration = 0;
+						g_inDeclaration = false;
 					}
 					else 
 					{
 						// Else we get the address of declaration and associate it with the current variable
 						// using the variable
-						if (variableDecl != NULL && declaration == 0)
+						if (variableDecl != NULL && g_inDeclaration == false)
 						{
 							root->opr[i]->address = variableDecl->address;
 							root->opr[i]->global_decl = variableDecl->global_decl;
@@ -397,7 +398,7 @@ void analyse_passe_1(node_t root)
 							}
 						}
 						// if trying to re declare	
-						else if(variableDecl != NULL && declaration == 1)
+						else if(variableDecl != NULL && g_inDeclaration == true)
 						{
 							printf(RED "Error line" BOLD " %d " NC ": variable " BOLD "'%s'" NC " already declared : previous declaration line %d\n", root->opr[i]->lineno, root->opr[i]->ident, variableDecl->lineno);
 							exit(EXIT_FAILURE);
@@ -410,7 +411,7 @@ void analyse_passe_1(node_t root)
 						}					
 					}
 					// Update of the global_decl
-					if(isGlobal && !root->opr[i]->global_decl)
+					if(g_inGlobalScope && !root->opr[i]->global_decl)
 					{
 						root->opr[i]->global_decl = true;
 					}
@@ -447,12 +448,12 @@ void analyse_passe_1(node_t root)
 				break;
 
 				case NODE_DECL :
-					declaration = 1;
+					g_inDeclaration = true;
 				break;
 
 				case NODE_BLOCK :
-					isGlobal=0;
-					declaration = 0;
+					g_inGlobalScope=false;
+					g_inDeclaration = false;
 				break;
 
 				case NODE_AFFECT :
@@ -507,7 +508,9 @@ void analyse_passe_1(node_t root)
 		{
 			//the 'do_while' & 'for' bool expression is the second son
 			if(root->opr[1] != NULL)
+			{
 				check_bool_cond(root, 1);
+			}
 		}
 		if (root->nature == NODE_WHILE ||
 			root->nature == NODE_IF )

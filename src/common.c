@@ -24,18 +24,15 @@
 // ================================================================================================= //
 // =========================================== GLOBALS ============================================= //
 // ================================================================================================= //
-static uint32_t current_address = MIN_ADDRESS; // init at base address
-extern char * infile;
+extern char *   g_infile;
 
-char * outfile = DEFAULT_OUTFILE;
-bool stop_after_syntax = false;
-bool stop_after_verif = false;
-bool verboseDebug = false;
+static uint32_t g_currentAddress = MIN_ADDRESS; // init at base address
+char *  g_outfile = DEFAULT_OUTFILE;
+bool    g_verboseDebug = false;
 
-FILE * outfileDescriptor = NULL;
-short target = 48;
-bool disable_tree_dump = true;
-bool uncompatible=false;
+FILE *  g_outfileDescriptor = NULL;
+short   g_target = 48;
+bool    g_disableTreeDump = true;
 
 // ================================================================================================= //
 // =========================================== FUNCTIONS =========================================== //
@@ -63,8 +60,6 @@ void affiche_help()
 	printf(BOLD "Translator from Simplified C to Saturn HP assembly\n" NC);
     printf("Usage : ./saturncc <options> <infile>\n\n");
 	printf("  -o <filename> : Custom output filename\n\t(default : out.s)\n");
-	printf("  -s : Stop translation after syntax check \n\t(default = no)\n");
-	printf("  -c : Stop translation after first phase\n\t(default = no)\n");
     printf("  -t : Define compilation target (HP-48 or HP-49)\n\t(default=48)\n");
     printf("  -a : Enable the tree dumping in a file\n\t(default=on)\n");
     printf("  -d : Activate verbose compilation\n");
@@ -74,7 +69,7 @@ void affiche_help()
 
 // ------------------------------------------------------------------------------------------------- //
 
-void test_int_value(int min, int max, int test, char * argv )
+void check_int_value(int min, int max, int test, char * argv )
 {
 	if (test > max || test < min)
     {
@@ -89,7 +84,7 @@ void test_int_value(int min, int max, int test, char * argv )
 
 // ------------------------------------------------------------------------------------------------- //
 
-void testValideInFile(char * test)
+void check_infile(char * test)
 {
     int i=0;
     i = strlen(test);
@@ -102,43 +97,29 @@ void testValideInFile(char * test)
 
 // ------------------------------------------------------------------------------------------------- //
 
-void testValideOutFile(char * test)
+void check_outfile(char * test)
 {
     int i=0;
     i = strlen(test);
     if (strstr(&test[i-2],".s") == NULL )
     {
-        fprintf(stderr,RED BOLD"invalid file name : %s\n" NC,test);
+        fprintf(stderr,RED BOLD "invalid file name : %s\n" NC,test);
         exit(EXIT_FAILURE);    
     }
 }
 
-// ------------------------------------------------------------------------------------------------- //
-
-void test_arg_compatibility(char *arg_1, char *arg_2, char *test)
-{
-	if((strcmp(test, arg_1) || strcmp(test, arg_2)) && uncompatible == false)
-    {
-		uncompatible = true;
-	}
-	else if((strcmp(test,arg_1) || strcmp(test,arg_2)) && uncompatible == true)
-    {
-		fprintf(stderr,BOLD "incompatible options  : %s and %s \n" NC, arg_1, arg_2);
-		exit(EXIT_FAILURE);
-	}
-}
 
 // ------------------------------------------------------------------------------------------------- //
 
 void parse_args(int argc, char ** argv) 
 {
-	infile = NULL;
+	g_infile = NULL;
     for (int i=1; i<argc; i++)
     {
-    	if (argv[i][0] != '-')
+    	if (argv[i][0] != OPTION_START)
         {
-            testValideInFile(argv[i]);
-            infile = argv[i];
+            check_infile(argv[i]);
+            g_infile = argv[i];
     	}
     	else
         {
@@ -146,39 +127,31 @@ void parse_args(int argc, char ** argv)
             {
 				switch (argv[i][1])
                 {
-					case 'o':
-						testValideOutFile(argv[i+1]);
-						outfile = argv[i+1];
+					case OPTION_OUTPUT:
+						check_outfile(argv[i+1]);
+						g_outfile = argv[i+1];
 						i++;
 					break;
-                    case 'a':
-                        disable_tree_dump = false;
+                    case OPTION_TREE_DUMP:
+                        g_disableTreeDump = false;
                         printf(BOLD "Compilation tree will be dumped in .dot files\n" NC);
                     break;
-					case 't':
-						test_int_value(48, 49, atoi(argv[i+1]), argv[i]);
-                        target = atoi(argv[i+1]);
-                        printf(BOLD "Compilation target : HP-%d series\n" NC, target);
+					case OPTION_TARGET:
+						check_int_value(48, 49, atoi(argv[i+1]), argv[i]);
+                        g_target = atoi(argv[i+1]);
+                        printf(BOLD "Compilation target : HP-%d series\n" NC, g_target);
 						i++;
 					break;
-					case 's':
-						test_arg_compatibility("-s","-c",argv[i]);
-						stop_after_syntax = true;
-					break;
-					case 'c':
-						test_arg_compatibility("-s","-c",argv[i]);
-						stop_after_verif = true;
-					break;
-                    case 'v':
+                    case OPTION_VERSION:
                         print_version();
                         exit(EXIT_SUCCESS);
                     break;
-                    case 'h':
+                    case OPTION_HELP:
                         affiche_help();
                         exit(EXIT_SUCCESS);
                     break;
-                    case 'd':
-                        verboseDebug = true;
+                    case OPTION_DEBUG:
+                        g_verboseDebug = true;
                         printf(BOLD "Compilation will be verbose\n" NC);
                     break;
 					default:
@@ -190,7 +163,7 @@ void parse_args(int argc, char ** argv)
 			}
 		}
     }
-	if (infile == NULL)
+	if (g_infile == NULL)
     {
 		fprintf(stderr,RED BOLD "No .c file to translate\n" NC);
 		exit(EXIT_FAILURE);
@@ -609,15 +582,15 @@ int decimal2BCD(int value)
 // assign an address to a node (maybe the most useful func here but to check if ok with hardware)
 uint32_t assign_address(void)
 {
-    current_address+=NEXT_ADDRESS; // + 8 BYTES 
-    if(current_address >= MAX_PRACTICAL_ADDRESS)
+    g_currentAddress+=NEXT_ADDRESS; // + 8 BYTES 
+    if(g_currentAddress >= MAX_PRACTICAL_ADDRESS)
     {
-        printf(BOLD RED "TRAP ADDRESS ERROR : address 0x%05x is unreachable\n" NC, current_address);
+        printf(BOLD RED "TRAP ADDRESS ERROR : address 0x%05x is unreachable\n" NC, g_currentAddress);
         exit(EXIT_FAILURE);
     }
     else
     {
-        return(current_address);
+        return(g_currentAddress);
     }
 }
 
@@ -630,14 +603,15 @@ FILE * outfile_open(char * outfileName)
     FILE * f = NULL;
     f = fopen(outfileName, "w");
     if(f != NULL){
-        fprintf(f, "%% Source file name : %s\n", infile);
-        fprintf(f, "%% Target of this program : HP-%d series\n", target);
+        fprintf(f, "%% Source file name : %s\n", g_infile);
+        fprintf(f, "%% Target of this program : HP-%d series\n", g_target);
         fprintf(f, "%% Compiled with saturn_translater\n");
         fprintf(f, "%% https://github.com/jugen667/saturn_translater\n");
         fprintf(f, "\n\n");
     }
-    else{
-        printf(RED "Error : " NC "could not open/create file %s\n", outfile);
+    else
+    {
+        printf(RED "Error : " NC "could not open/create file %s\n", g_outfile);
         printf(BOLD GREEN "Printing program in stdout\n" NC);
     }
     return f;

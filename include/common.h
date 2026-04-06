@@ -2,6 +2,9 @@
 // > Author :   jugen 667 
 // > Title  :   common.h 
 // > Desc.  :   Header for common.c
+//				All utils and globals for 
+// 				the executable are defined 
+//				in this header
 // ========================================
 
 #ifndef _COMMON_H_
@@ -10,7 +13,7 @@
 // ================================================================================================= //
 // =========================================== DEFINES ============================================= //
 // ================================================================================================= //
-#define DEFAULT_OUTFILE "out.s"
+#define 	DEFAULT_OUTFILE "out.s"
 
 #define     MAIN_VERSION    "0"                 /*dev phase*/
 #define     SUB_VERSION     "6"                 /*iteration*/
@@ -40,14 +43,21 @@
 #define     WHITE           "\033[37m"          /* White */
 #define     BOLD            "\033[1m"           /* Bold */
 
-extern bool verboseDebug;
-extern short target;
-extern bool disable_tree_dump;
-extern FILE * outfileDescriptor;
+extern bool 	g_verboseDebug;
+extern short 	g_target;
+extern bool 	g_disableTreeDump;
+extern FILE * 	g_outfileDescriptor;
+extern char * 	g_outfile;
 
-extern bool stop_after_syntax;
-extern bool stop_after_verif;
-extern char * outfile;
+#define OPTION_START 		'-'
+#define OPTION_DEBUG 		'd'
+#define OPTION_VERSION 		'v'
+#define OPTION_TREE_DUMP 	'a'
+#define OPTION_HELP 		'h'
+#define OPTION_OUTPUT 		'o'
+#define OPTION_TARGET 		't'
+
+
 
 // ================================================================================================= //
 // ========================================== PROTOTYPE ============================================ //
@@ -60,6 +70,7 @@ void dump_tree(node_t prog_root, const char * filename);
 const char * node_type2string(node_type t);
 const char * node_nature2string(node_nature t);
 const char * node_nature2symb(node_nature t);
+void print_node_info(node_t root);
 
 short extract_sign(void * value);
 short extract_exponent(double value);

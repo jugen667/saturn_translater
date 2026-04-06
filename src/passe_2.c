@@ -3,6 +3,11 @@
 // > Title  :   passe_2.c 
 // > Desc.  :   Second parse to generate
 //				assembly code
+// 				This second parsing does 
+//				assembly output 
+//				(manages jump label, cond
+//				management, operations 
+//				creations, priorities, ...)
 // > Associated header : passe_2.h
 // ========================================
 
@@ -16,10 +21,10 @@
 
 
 // global utility variables
-static unsigned int curLabelIdx = 0;
-static label_string labelTable[MAX_LABEL_AMT];
-static bool blockParsed = false;
-static unsigned int countInCond = 0; // less then  2^31-1 '&&' or '||' in if condition or maybe you're trying something crazy
+static unsigned int g_curLabelIdx = 0;
+static label_string g_labelTable[MAX_LABEL_AMT];
+static bool g_isBlockParsed = false;
+static unsigned int g_countInCond = 0; // less then  2^31-1 '&&' or '||' in if condition or maybe you're trying something crazy
 
 static node_t g_currentNode = NULL; //unused atm 
 
@@ -27,22 +32,18 @@ static node_t g_currentNode = NULL; //unused atm
 /* --------------- Instruction creation functions --------------- */
 void create_new_label(unsigned int index)
 {
-	snprintf(labelTable[index].labelStr, LABEL_STR_SIZE, "L%d", index);
-	if(verboseDebug)
-		printf("Creating label %d : %s\n",index, labelTable[index].labelStr);
-	curLabelIdx++;
-}
-
-
-void delete_label(unsigned int index)
-{
-	memset(&labelTable[index], 0x0, sizeof(label_string));
+	snprintf(g_labelTable[index].labelStr, LABEL_STR_SIZE, "L%d", index);
+	if(g_verboseDebug)
+	{
+		printf("Creating label %d : %s\n",index, g_labelTable[index].labelStr);
+	}
+	g_curLabelIdx++;
 }
 
 
 char * get_label(unsigned int index)
 {
-	return labelTable[index].labelStr;
+	return g_labelTable[index].labelStr;
 }
 
 
@@ -731,7 +732,7 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 
 end_of_cond: // jump for skip when cond is always false
 	
-	blockParsed = true; // force block parsing
+	g_isBlockParsed = true; // force block parsing
 }
 
 /* -------------------------------------------------------------- */
@@ -783,7 +784,7 @@ void gen_code_passe_2(node_t root)
 					if (root->opr[i+1] != NULL && root->opr[i+1]->nature == NODE_BLOCK )
 					{
 						gen_code_passe_2(root->opr[i+1]);
-						blockParsed = true;
+						g_isBlockParsed = true;
 					}
 					if(root->nature != NODE_FOR)
 					{
@@ -814,31 +815,31 @@ void gen_code_passe_2(node_t root)
 				// creation of the If Statement
 				case NODE_IF :
 					create_comment("--- IF ---"); 										// to delete for debug in dump file
-					countInCond++; 														// = 1 for recursion, first entry point
-					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], curLabelIdx, IF_STATEMENT);
-					countInCond--; 														// = 0 for recursion, last exit point
+					g_countInCond++; 														// = 1 for recursion, first entry point
+					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], g_curLabelIdx, IF_STATEMENT);
+					g_countInCond--; 														// = 0 for recursion, last exit point
 					create_comment("-- ENDIF --"); 										// to delete for debug in dump file
 				break;
 
 				// creation of the Do While loop
 				case NODE_DOWHILE :
 					create_comment("--- DOWHILE ---");
-					create_new_label(curLabelIdx);
-					create_label(get_label(curLabelIdx-1));
-					countInCond++; 														// = 1 for recursion, first entry point
-					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], curLabelIdx-1, DOWHILE_STATEMENT);
-					countInCond--; 														// = 0 for recursion, last exit point
+					create_new_label(g_curLabelIdx);
+					create_label(get_label(g_curLabelIdx-1));
+					g_countInCond++; 														// = 1 for recursion, first entry point
+					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], g_curLabelIdx-1, DOWHILE_STATEMENT);
+					g_countInCond--; 														// = 0 for recursion, last exit point
 					create_comment("--- ENDDOWHILE ---");
 				break;
 
 				// creation of the While loop
 				case NODE_WHILE :
 					create_comment("--- WHILE ---");
-					create_new_label(curLabelIdx);
-					create_label(get_label(curLabelIdx-1));
-					countInCond++; 														// = 1 for recursion, first entry point
-					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], curLabelIdx-1, WHILE_STATEMENT);
-					countInCond--; 														// = 0 for recursion, last exit point
+					create_new_label(g_curLabelIdx);
+					create_label(get_label(g_curLabelIdx-1));
+					g_countInCond++; 														// = 1 for recursion, first entry point
+					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], g_curLabelIdx-1, WHILE_STATEMENT);
+					g_countInCond--; 														// = 0 for recursion, last exit point
 					create_comment("--- ENDWHILE ---");
 				break;
 
@@ -847,8 +848,8 @@ void gen_code_passe_2(node_t root)
 				// creation of FOR loop
 				case NODE_FOR :
 					create_comment("--- FOR --- ");
-					create_new_label(curLabelIdx);
-					create_label(get_label(curLabelIdx-1));
+					create_new_label(g_curLabelIdx);
+					create_label(get_label(g_curLabelIdx-1));
 					// -- affectation for looping variable
 					switch(root->opr[i]->opr[0]->opr[1]->nature)
 					{
@@ -872,10 +873,10 @@ void gen_code_passe_2(node_t root)
 						break;
 					}
 					// --
-					countInCond++; 														// = 1 for recursion, first entry point
-					create_cond_instruction(root->opr[i]->opr[1], root->opr[i], curLabelIdx-1, FOR_STATEMENT);
-					countInCond--;														// = 0 for recursion, last exit point
-					blockParsed = true;
+					g_countInCond++; 														// = 1 for recursion, first entry point
+					create_cond_instruction(root->opr[i]->opr[1], root->opr[i], g_curLabelIdx-1, FOR_STATEMENT);
+					g_countInCond--;														// = 0 for recursion, last exit point
+					g_isBlockParsed = true;
 					create_comment("--- ENDFOR --- ");
 				break;
 
@@ -888,14 +889,14 @@ void gen_code_passe_2(node_t root)
 		// RECURSION
 		if(root->opr[i] != NULL)
 		{
-			if (!(root->opr[i]->nature == NODE_BLOCK && blockParsed) && // block managed in the condition
+			if (!(root->opr[i]->nature == NODE_BLOCK && g_isBlockParsed) && // block managed in the condition
 				((root->opr[i]->nature != NODE_ELSE) && (root->opr[i]->nature != NODE_FOR))) // block already parsed 
 			{
 				gen_code_passe_2(root->opr[i]);
 			}
 			else
 			{
-				blockParsed = false;
+				g_isBlockParsed = false;
 			}
 		}
 	}

@@ -19,14 +19,6 @@
 // ================================================================================================= //
 // =========================================== PROTOTYPES ========================================== //
 // ================================================================================================= //
-short work_reg_available(node_t node, int save);
-void flush_work_reg(void);
-short save_reg_available(node_t node, int save);
-void flush_save_reg(void);
-short point_reg_available(node_t node, int save);
-void flush_point_reg(void);
-// =========================================  
-
 void increment_P(void);
 void decrement_P(void);
 void set_PField_value(short value);

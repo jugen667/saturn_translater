@@ -20,11 +20,9 @@
 int yyparse(node_t * program_root);
 void analyse_tree(node_t root);
 static int input ( void );
-static void yyunput ( int c, char *buf_ptr  );
+static void yyunput ( int c, char *buf_ptr);
 
-
-char * infile = NULL;
-bool isPrio = false;
+char * g_infile = NULL;
 
 #if YYDEBUG
 extern int yydebug;
@@ -176,7 +174,7 @@ int yywrap(void) {
 int main(int argc, char ** argv) {
     node_t program_root;
     parse_args(argc, argv);
-    yyin = fopen(infile, "r");
+    yyin = fopen(g_infile, "r");
     if(yyin != NULL)
     {
     #if LEX_DEBUG
@@ -193,7 +191,7 @@ int main(int argc, char ** argv) {
     }
     else
     {
-        printf(RED "Error : " NC "could not open file %s\n", infile);
+        printf(RED "Error : " NC "could not open file %s\n", g_infile);
         exit(EXIT_FAILURE);
     }
     yylex_destroy();
