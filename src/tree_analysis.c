@@ -1,6 +1,6 @@
 // ========================================
 // > Author :   jugen 667 
-// > Title  :   passe_1.c 
+// > Title  :   tree_analysis.c 
 // > Desc.  :   First parse to check tree
 //				and program consistence
 // 				This first parsing does all
@@ -9,7 +9,7 @@
 //				(variable uniqueness, type
 //				constistency, address 
 //				assignements, ...)
-// > Associated header : passe_1.h
+// > Associated header : tree_analysis.h
 // ========================================
 
 // ================================================================================================= //
@@ -21,7 +21,7 @@
 #include <string.h>
 
 #include "../include/defs.h"
-#include "../include/passe_1.h"
+#include "../include/tree_analysis.h"
 #include "../include/common.h"
 
 // ================================================================================================= //
@@ -311,7 +311,7 @@ void check_global_decl(node_t node)
 
 /* ========================= Tree parsing ========================= */
 
-void analyse_passe_1(node_t root) 
+void tree_analysis(node_t root) 
 {	
 	node_t variableDecl; // pointer to a IDENT node
 
@@ -476,7 +476,7 @@ void analyse_passe_1(node_t root)
 		//Recursion 
 		if(root->opr[i] != NULL)
 		{
-			analyse_passe_1(root->opr[i]);
+			tree_analysis(root->opr[i]);
 		}
 
 		// CHECKS 

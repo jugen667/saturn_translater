@@ -17,8 +17,8 @@
 
 #include "../include/defs.h"
 #include "../include/common.h"
-#include "../include/passe_1.h"
-#include "../include/passe_2.h"
+#include "../include/tree_analysis.h"
+#include "../include/gen_code.h"
 
 
 // ================================================================================================= //

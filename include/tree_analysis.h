@@ -1,11 +1,11 @@
 // ========================================
 // > Author :   jugen 667 
-// > Title  :   passe_1.h 
+// > Title  :   tree_analysis.h 
 // > Desc.  :   Header for the first parse
 // ========================================
 
-#ifndef _PASSE_1_
-#define _PASSE_1_
+#ifndef _TREE_ANALYSIS_H_
+#define _TREE_ANALYSIS_H_
 
 #include "../include/defs.h"
 
@@ -23,5 +23,5 @@ void check_affect_type(node_t node);
 void check_global_decl(node_t node);
 void check_intval_domain(node_t node);
 
-void analyse_passe_1(node_t root);
+void tree_analysis(node_t root);
 #endif

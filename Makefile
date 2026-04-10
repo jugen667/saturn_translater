@@ -22,10 +22,10 @@ INCLUDE=-I$(INC_DIR)
 
 all: $(EXE)
 
-$(EXE) :  y.tab.o lex.yy.o common.o passe_1.o instruction_set.o objects.o passe_2.o
+$(EXE) :  y.tab.o lex.yy.o common.o tree_analysis.o instruction_set.o gen_code.o
 	@echo "| Linking files : $^"
 	@echo "| Creating binary $@"
-	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o passe_1.o instruction_set.o objects.o passe_2.o -o $@
+	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o tree_analysis.o instruction_set.o gen_code.o -o $@
 	@echo "| Cleaning .o files"
 	@rm -f *.o
 	@echo "| \033[1mFinished building $(EXE)\033[0m"
@@ -53,7 +53,7 @@ common.o: $(SRC_DIR)/common.c $(INC_DIR)/common.h $(INC_DIR)/defs.h Makefile
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
-passe_1.o: $(SRC_DIR)/passe_1.c $(INC_DIR)/passe_1.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
+tree_analysis.o: $(SRC_DIR)/tree_analysis.c $(INC_DIR)/tree_analysis.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
@@ -61,11 +61,8 @@ instruction_set.o: $(SRC_DIR)/instruction_set.c $(INC_DIR)/defs.h $(INC_DIR)/com
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
-objects.o: $(SRC_DIR)/objects.c $(INC_DIR)/defs.h $(INC_DIR)/common.h $(INC_DIR)/objects.h Makefile
-	@echo "| Compiling $<"
-	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
-passe_2.o: $(SRC_DIR)/passe_2.c $(INC_DIR)/passe_2.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
+gen_code.o: $(SRC_DIR)/gen_code.c $(INC_DIR)/gen_code.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 

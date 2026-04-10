@@ -1,6 +1,6 @@
 // ========================================
 // > Author :   jugen 667 
-// > Title  :   passe_2.c 
+// > Title  :   gen_code.c 
 // > Desc.  :   Second parse to generate
 //				assembly code
 // 				This second parsing does 
@@ -8,7 +8,7 @@
 //				(manages jump label, cond
 //				management, operations 
 //				creations, priorities, ...)
-// > Associated header : passe_2.h
+// > Associated header : gen_code.h
 // ========================================
 
 #include <stdio.h>
@@ -16,7 +16,7 @@
 #include <string.h>
 #include "../include/defs.h"
 #include "../include/common.h"
-#include "../include/passe_2.h"
+#include "../include/gen_code.h"
 #include "../include/instruction_set.h"
 
 
@@ -607,7 +607,7 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 		case NODE_NOT:
 			if(statement == DOWHILE_STATEMENT)
 			{
-				gen_code_passe_2(root->opr[1]);
+				gen_code(root->opr[1]);
 			}
 			create_NOT_operation(node->opr[0]);
 		break;
@@ -621,18 +621,18 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 				case 0 :
 					if(statement == DOWHILE_STATEMENT)
 					{
-						gen_code_passe_2(root->opr[1]);	
+						gen_code(root->opr[1]);	
 					}
 				break;
 				// else do it
 				default :
 					if(root->opr[1] != NULL && statement != FOR_STATEMENT)
 		 			{
-						gen_code_passe_2(root->opr[1]);
+						gen_code(root->opr[1]);
 		 			}
 		 			else if(root->opr[3] != NULL && statement == FOR_STATEMENT)
 		 			{
-		 				gen_code_passe_2(root->opr[3]);
+		 				gen_code(root->opr[3]);
 		 			}
 					if(statement == DOWHILE_STATEMENT || statement == WHILE_STATEMENT)
 					{
@@ -647,7 +647,7 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 		default :
 			if(DOWHILE_STATEMENT == statement)
 			{
-				gen_code_passe_2(root->opr[1]);
+				gen_code(root->opr[1]);
 			}
 			create_operation(node);
 		break;
@@ -659,18 +659,18 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 			if(root != NULL && root->opr[2] != NULL) // there is a ELSE
 			{
 				GOYES(get_label(labelIndex1));
-				gen_code_passe_2(root->opr[1]);
+				gen_code(root->opr[1]);
 				go_very_long(get_label(labelIndex2));
 				create_comment("--- ELSE ---"); 								// to delete for debug in dump file
 				create_label(get_label(labelIndex1));
-				gen_code_passe_2(root->opr[2]);
+				gen_code(root->opr[2]);
 				create_label(get_label(labelIndex2));
 				create_comment("-- ENDELSE --"); 								// to delete for debug in dump file
 			}
 			else
 			{
 				GOYES(get_label(labelIndex1));
-				gen_code_passe_2(root->opr[1]);
+				gen_code(root->opr[1]);
 				go_very_long(get_label(labelIndex1));
 				create_label(get_label(labelIndex1));
 			}
@@ -688,7 +688,7 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 			GOYES(get_label(labelIndex2));	
 			if(root->opr[1] != NULL)
  			{
-				gen_code_passe_2(root->opr[1]);
+				gen_code(root->opr[1]);
  			}
 			go_very_long(get_label(labelIndex1));
 			create_label(get_label(labelIndex2));
@@ -700,7 +700,7 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 			GOYES(get_label(labelIndex2));	
 			if(root->opr[3] != NULL)
  			{
-				gen_code_passe_2(root->opr[3]);
+				gen_code(root->opr[3]);
  			}
  			// -- incrementing the variable
  			switch(root->opr[2]->opr[1]->nature)
@@ -739,7 +739,7 @@ end_of_cond: // jump for skip when cond is always false
 
 /* --------------- Actually generating the codes ---------------- */
 
-void gen_code_passe_2(node_t root) 
+void gen_code(node_t root) 
 {
 	for(int i = 0; i < root->nops; i++)
 	{
@@ -783,7 +783,7 @@ void gen_code_passe_2(node_t root)
 				case NODE_AFFECT :
 					if (root->opr[i+1] != NULL && root->opr[i+1]->nature == NODE_BLOCK )
 					{
-						gen_code_passe_2(root->opr[i+1]);
+						gen_code(root->opr[i+1]);
 						g_isBlockParsed = true;
 					}
 					if(root->nature != NODE_FOR)
@@ -892,7 +892,7 @@ void gen_code_passe_2(node_t root)
 			if (!(root->opr[i]->nature == NODE_BLOCK && g_isBlockParsed) && // block managed in the condition
 				((root->opr[i]->nature != NODE_ELSE) && (root->opr[i]->nature != NODE_FOR))) // block already parsed 
 			{
-				gen_code_passe_2(root->opr[i]);
+				gen_code(root->opr[i]);
 			}
 			else
 			{

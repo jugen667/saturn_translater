@@ -1,11 +1,11 @@
 // ========================================
 // > Author :   jugen 667 
-// > Title  :   passe_2.h 
+// > Title  :   gen_code.h 
 // > Desc.  :   Header for the second parse
 // ========================================
 
-#ifndef _PASSE_2_H_
-#define _PASSE_2_H_
+#ifndef _GEN_CODE_H_
+#define _GEN_CODE_H_
 
 #include "../include/defs.h"
 
@@ -27,7 +27,7 @@ void create_NOT_operation(node_t node);
 void create_sll_instr(node_t node); // prototype only not implemented
 void create_srl_instr(node_t node); // prototype only not implemented
 
-void gen_code_passe_2(node_t root);
 void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, int statement);
 
+void gen_code(node_t root);
 #endif
