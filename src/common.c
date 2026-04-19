@@ -627,6 +627,18 @@ void outfile_close(FILE * fileDesc)
     }
 }
 
+void dump_instruction(char * inst, FILE * fDest)
+{
+    if(fDest != NULL)
+    {
+        fprintf(fDest, "%s\n", inst);
+    }
+    else
+    {
+        printf("%s\n",inst);
+    }
+}
+
 // ------------------------------------------------------------------------------------------------- //
 
 

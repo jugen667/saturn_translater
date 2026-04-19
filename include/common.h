@@ -81,7 +81,7 @@ uint32_t assign_address(void);
 // open file
 FILE * outfile_open(char * outfileName);
 void outfile_close(FILE * fileDesc);
-
+void dump_instruction(char * inst, FILE * fDest);
 
 #endif
 

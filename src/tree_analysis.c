@@ -479,93 +479,97 @@ void tree_analysis(node_t root)
 			tree_analysis(root->opr[i]);
 		}
 
-		// CHECKS 
-		if(root->nature == NODE_FUNC)
+		// CHECKS parsing the tree in the other way
+		switch(root->nature)
 		{
-			if(root->type != TYPE_VOID)
-			{
-				printf(RED "Error line" BOLD " %d " NC ": " BOLD CYAN "main()" NC " declaration must have " PURPLE "void" NC " return type\n", root->opr[0]->lineno);
-				exit(EXIT_FAILURE);
-			}
-			if(strcmp(root->ident, "main")) // only 1 func allowed : main -- REDUNDANT checks done at syntax
-			{
-				printf(RED "Error line" BOLD " %d " NC ": function name must be " BOLD CYAN "main()" NC " \n", root->opr[0]->lineno);
-				exit(EXIT_FAILURE);
-			}
-		}
-		// check that operations are between INT
-		if(root->nature == NODE_PLUS ||
-		   root->nature == NODE_MINUS || 
-		   root->nature == NODE_MUL ||
-		   root->nature == NODE_DIV ||
-		   root->nature == NODE_MOD)
-		{
-			check_int_op_type(root);
-		}
-		// check that condition returns boolean 
-		if(	root->nature == NODE_DOWHILE ||
-			root->nature == NODE_FOR)
-		{
-			//the 'do_while' & 'for' bool expression is the second son
-			if(root->opr[1] != NULL)
-			{
-				check_bool_cond(root, 1);
-			}
-		}
-		if (root->nature == NODE_WHILE ||
-			root->nature == NODE_IF )
-		{
-			//the 'if' & 'while' bool expression is the first son
-			check_bool_cond(root, 0);
-		}
-		// check the coherence of type affectation
-		if(root->nature == NODE_AFFECT)
-		{
-			check_affect_type(root);
-
-		}
-		if(root->nature == NODE_DECLS){
-			if (root->opr[0]->type && root->opr[1]->type)
-			{
-				if (root->opr[0]->type != root->opr[1]->type)
+			case NODE_FUNC:
+				if(root->type != TYPE_VOID)
 				{
-					printf(RED "Error line" BOLD " %d " NC ": variable already declared\n", root->lineno);
+					printf(RED "Error line" BOLD " %d " NC ": " BOLD CYAN "main()" NC " declaration must have " PURPLE "void" NC " return type\n", root->opr[0]->lineno);
 					exit(EXIT_FAILURE);
-				}	
-			}
-		}
-		if(root->nature == NODE_DECL)
-		{
-			// check the global declaration : not an expression and check the coherence of the types
-			root->type = root->opr[0]->type;
-			check_global_decl(root);
-			check_affect_type(root);
-		}
-		
-		// case if(...) else ...
-		if(root->nature == NODE_IF && root->nops == 3)
-		{
-			// if 3 node then 3rd is else statement (to check) (statement, block, else)
-			root->opr[2]->nature = NODE_ELSE;
-		}
+				}
+				if(strcmp(root->ident, "main")) // only 1 func allowed : main -- REDUNDANT checks done at syntax
+				{
+					printf(RED "Error line" BOLD " %d " NC ": function name must be " BOLD CYAN "main()" NC " \n", root->opr[0]->lineno);
+					exit(EXIT_FAILURE);
+				}
+			break;
 
-		// check if the type is the same for the two arguments
-		if(	root->nature == NODE_EQ ||
-			root->nature == NODE_NE ||
-			root->nature == NODE_LT ||
-			root->nature == NODE_GT ||
-			root->nature == NODE_LE ||
-			root->nature == NODE_GE ||
-			root->nature == NODE_BNOT ||
-			root->nature == NODE_BAND ||
-			root->nature == NODE_BOR ||
-			root->nature == NODE_BXOR ||
-			root->nature == NODE_SRL ||
-			root->nature == NODE_SLL )
-		{
-			check_same_type(root);
-		}
+			case NODE_PLUS:
+			case NODE_MINUS:
+			case NODE_MUL:
+			case NODE_DIV:
+			case NODE_MOD:
+				// check that operations are between INT
+				check_int_op_type(root);
+			break;
 
+			case NODE_DOWHILE:
+			case NODE_FOR:
+				//the 'do_while' & 'for' bool expression is the second son
+				if(root->opr[1] != NULL)
+				{
+					check_bool_cond(root, 1);
+				}
+			break;
+
+			case NODE_WHILE:
+				//'while' bool expression is the first son
+				check_bool_cond(root, 0);
+			break;
+
+			case NODE_IF:
+				//'if' bool expression is the first son
+				check_bool_cond(root, 0);
+				if(root->nops == 3)
+				{
+					// if 3 node then 3rd is else statement (to check) (statement, block, else)
+					root->opr[2]->nature = NODE_ELSE;
+				}
+			break;
+
+			case NODE_AFFECT:
+				// check the coherence of type affectation
+				check_affect_type(root);
+			break;
+
+			case NODE_DECLS:
+				if (root->opr[0]->type && root->opr[1]->type)
+				{
+					if (root->opr[0]->type != root->opr[1]->type)
+					{
+						printf(RED "Error line" BOLD " %d " NC ": variable already declared\n", root->lineno);
+						exit(EXIT_FAILURE);
+					}	
+				}
+			break;
+
+			case NODE_DECL:
+				// check the global declaration : not an expression and check the coherence of the types
+				root->type = root->opr[0]->type;
+				check_global_decl(root);
+				check_affect_type(root);
+			break;
+
+			case NODE_EQ :
+			case NODE_NE :
+			case NODE_LT :
+			case NODE_GT :
+			case NODE_LE :
+			case NODE_GE :
+			case NODE_BNOT :
+			case NODE_BAND :
+			case NODE_BOR :
+			case NODE_BXOR :
+			case NODE_SRL :
+			case NODE_SLL :
+				// check if the type is the same for the two arguments
+				check_same_type(root);
+			break;
+
+			default:
+			break;
+		}
 	}
 }
 

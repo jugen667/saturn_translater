@@ -405,7 +405,8 @@ ident                   : TOK_IDENT
 %%
 
 // === NODE MAKER FUNCS === 
-node_t make_node(node_nature nature, int nops, ...) {
+node_t make_node(node_nature nature, int nops, ...) 
+{
     va_list ap;
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nops = nops;
@@ -428,7 +429,8 @@ node_t make_node(node_nature nature, int nops, ...) {
 }
 
 
-node_t make_node_ident(char* identifier){
+node_t make_node_ident(char* identifier)
+{
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_IDENT;
     node->lineno = yylineno;
@@ -444,7 +446,8 @@ node_t make_node_ident(char* identifier){
 }
 
 
-node_t make_node_type(node_type type){
+node_t make_node_type(node_type type)
+{
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_TYPE;
     node->lineno = yylineno;
@@ -460,7 +463,8 @@ node_t make_node_type(node_type type){
 }
 
 
-node_t make_node_intval(int32_t value){
+node_t make_node_intval(int32_t value)
+{
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_INTVAL;
     node->lineno = yylineno;
@@ -476,7 +480,8 @@ node_t make_node_intval(int32_t value){
 }
 
 
-node_t make_node_floatval(double value){
+node_t make_node_floatval(double value)
+{
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_FLOATVAL;
     node->lineno = yylineno;
@@ -492,7 +497,8 @@ node_t make_node_floatval(double value){
 }
 
 
-node_t make_node_boolval(bool value){
+node_t make_node_boolval(bool value)
+{
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_BOOLVAL;
     node->lineno = yylineno;
@@ -508,7 +514,8 @@ node_t make_node_boolval(bool value){
 }
 
 
-node_t make_node_strval(char* string){
+node_t make_node_strval(char* string)
+{
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_STRINGVAL;
     node->lineno = yylineno;
@@ -524,7 +531,8 @@ node_t make_node_strval(char* string){
 }
 
 
-node_t make_node_main(node_t node_next){
+node_t make_node_main(node_t node_next)
+{
     node_t node = (node_t) malloc(sizeof(node_s));
     node->nature = NODE_FUNC;
     node->lineno = yylineno;
@@ -540,7 +548,8 @@ node_t make_node_main(node_t node_next){
 }
 
 
-void analyse_tree(node_t root) {
+void analyse_tree(node_t root) 
+{
     if(g_verboseDebug)
     {
         printf(BOLD "\n> Syntax analysis\n" NC);

@@ -38,11 +38,17 @@ extern int yydebug;
 void comment()
 {
     char c1, c2;
-loop:
-    while ((c1 = input()) != '*' && c1 != 0);
-    if ((c2 = input()) != '/' && c1 != 0) {
-        unput(c2);
-        goto loop;
+    while(1)
+    {
+        while ((c1 = input()) != '*' && c1 != 0);
+        if ((c2 = input()) != '/' && c1 != 0) 
+        {
+            unput(c2);
+        }
+        else
+        {
+            break;
+        }
     }
 }
 

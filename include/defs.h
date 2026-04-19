@@ -221,6 +221,7 @@ typedef struct
 typedef struct
 {
     char labelStr[LABEL_STR_SIZE];
+    bool labelExist;
 }label_string;
 
 #endif

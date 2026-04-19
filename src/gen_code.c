@@ -37,7 +37,12 @@ void create_new_label(unsigned int index)
 	{
 		printf("Creating label %d : %s\n",index, g_labelTable[index].labelStr);
 	}
-	g_curLabelIdx++;
+	if(!g_labelTable[index].labelExist)
+	{
+		// new label
+		g_labelTable[index].labelExist = true;
+		g_curLabelIdx++;
+	}
 }
 
 
@@ -57,12 +62,12 @@ void manage_priority(node_t node, int position) // position left or right
 		case NODE_MOD :
 			create_operation(node);
 			// load the result in save reg
-			ex_reg_work_save(A, position, W_FIELD);
+			copy_reg_save_work(position, A, W_FIELD);
 		break;
 		case NODE_PRIO:
 			create_operation(node->opr[0]);
 			// load the result in a save reg 
-			ex_reg_work_save(A, position, W_FIELD); 
+			copy_reg_save_work(position, A, W_FIELD); 
 		break;
 		default:
 		break;
@@ -340,8 +345,15 @@ void create_operation(node_t node)
 		case NODE_PRIO:
 			create_operation(node->opr[0]);
 		break;
-		// case ident is used as a condition in a if
-		case NODE_IDENT :							
+		// for condition with value (not optimal)
+		case NODE_INTVAL :
+		case NODE_FLOATVAL : 
+		case NODE_BOOLVAL :						
+			load_register(node->value, 0);
+			//if value = 0 skip the if
+			equal_to_zero(A, W_FIELD);
+		break;
+		case NODE_IDENT :	
 			load_pointer(D0, node->address);
 			// exchange A and DAT
 			reading_memory(D0, A, W_FIELD);
@@ -583,10 +595,7 @@ void create_NOT_operation(node_t node)
 // 			statement -> conditionnal statement currently parsing (while, do_while, if, for)
 void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, int statement)
 {
-
-// unsigned int labelIndex1, labelIndex2;
-
-	// distribute labels: need 2 labels 
+	// distribute labels: need 2 labels for tracking
 	unsigned int labelIndex1 = loc_label;
 	unsigned int labelIndex2 = loc_label + 1;
 
@@ -597,11 +606,15 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 	// labelIndex1 already created at start (for, while & dowhile)
 	create_new_label(labelIndex2);	
 
-	switch(node->nature) // treatment of condition
+	switch(node->nature) // treatment of conditions
 	{
 		case NODE_AND:
+			create_cond_instruction(node->opr[0], node, loc_label, MAX_STATEMENT);
+			GOYES(get_label(labelIndex1));
+			create_cond_instruction(node->opr[1], node, loc_label, MAX_STATEMENT);
+		break;
+
 		case NODE_OR:
-			
 		break;
 
 		case NODE_NOT:
@@ -612,37 +625,6 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 			create_NOT_operation(node->opr[0]);
 		break;
 
-		case NODE_BOOLVAL:
-		case NODE_INTVAL:
-		case NODE_FLOATVAL:
-			switch(node->value)
-			{
-				// if 0 / false dont do it or only once for do while
-				case 0 :
-					if(statement == DOWHILE_STATEMENT)
-					{
-						gen_code(root->opr[1]);	
-					}
-				break;
-				// else do it
-				default :
-					if(root->opr[1] != NULL && statement != FOR_STATEMENT)
-		 			{
-						gen_code(root->opr[1]);
-		 			}
-		 			else if(root->opr[3] != NULL && statement == FOR_STATEMENT)
-		 			{
-		 				gen_code(root->opr[3]);
-		 			}
-					if(statement == DOWHILE_STATEMENT || statement == WHILE_STATEMENT)
-					{
-						go_very_long(get_label(labelIndex1));
-						create_label(get_label(labelIndex2));
-					}
-				break;
-			}
-			goto end_of_cond;
-		break;
 
 		default :
 			if(DOWHILE_STATEMENT == statement)
@@ -677,8 +659,6 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 		break;
 
 		case DOWHILE_STATEMENT:
-
-			
 			GOYES(get_label(labelIndex2));	
 			go_very_long(get_label(labelIndex1));
 			create_label(get_label(labelIndex2));
@@ -728,10 +708,10 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 			go_very_long(get_label(labelIndex1));
 			create_label(get_label(labelIndex2));
 		break;
-	}
 
-end_of_cond: // jump for skip when cond is always false
-	
+		default:
+		break;
+	}
 	g_isBlockParsed = true; // force block parsing
 }
 
