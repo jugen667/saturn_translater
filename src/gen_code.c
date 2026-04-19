@@ -24,7 +24,8 @@
 static unsigned int g_curLabelIdx = 0;
 static label_string g_labelTable[MAX_LABEL_AMT];
 static bool g_isBlockParsed = false;
-static unsigned int g_countInCond = 0; // less then  2^31-1 '&&' or '||' in if condition or maybe you're trying something crazy
+static unsigned int g_countInCond = 0; 	// stacked if/while/for etc (future)
+static unsigned int g_countOrAnd = 0; 	// less then  2^31-1 '&&' or '||' in if condition or maybe you're trying something crazy
 
 static node_t g_currentNode = NULL; //unused atm 
 
@@ -615,6 +616,31 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 		break;
 
 		case NODE_OR:
+			if(g_countOrAnd == 0)
+			{
+				register_zero(B, W_FIELD);
+			}
+			g_countOrAnd++;
+			create_cond_instruction(node->opr[0], node, loc_label, MAX_STATEMENT);
+			create_new_label(g_curLabelIdx);
+			GOYES(get_label(g_curLabelIdx - 1));
+			// increment register if true
+			inc_register(B, W_FIELD);
+			create_label(get_label(g_curLabelIdx - 1));
+
+			create_cond_instruction(node->opr[1], node, loc_label, MAX_STATEMENT);
+			create_new_label(g_curLabelIdx);
+			GOYES(get_label(g_curLabelIdx - 1));
+			// increment register if true
+			inc_register(B, W_FIELD);
+			create_label(get_label(g_curLabelIdx - 1));
+
+			// check B register 
+			if(g_countOrAnd < 2)
+			{
+				equal_to_zero(B, W_FIELD);
+			}
+			g_countOrAnd--;
 		break;
 
 		case NODE_NOT:

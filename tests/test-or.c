@@ -4,7 +4,7 @@ int i;
 
 void main () 
 {
-	if((start > 65535) || (end < 255))
+	if((start > 65535) || (end < 255) || true)
 	{
 		i = 3;
 	}
