@@ -22,10 +22,10 @@ INCLUDE=-I$(INC_DIR)
 
 all: $(EXE)
 
-$(EXE) :  y.tab.o lex.yy.o common.o tree_analysis.o instruction_set.o gen_code.o
+$(EXE) :  y.tab.o lex.yy.o common.o tree_analysis.o instruction_set.o gen_code.o main.o
 	@echo "| Linking files : $^"
 	@echo "| Creating binary $@"
-	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o tree_analysis.o instruction_set.o gen_code.o -o $@
+	@gcc $(CFLAGS) $(INCLUDE) y.tab.o lex.yy.o common.o tree_analysis.o instruction_set.o gen_code.o main.o -o $@
 	@echo "| Cleaning .o files"
 	@rm -f *.o
 	@echo "| \033[1mFinished building $(EXE)\033[0m"
@@ -61,8 +61,11 @@ instruction_set.o: $(SRC_DIR)/instruction_set.c $(INC_DIR)/defs.h $(INC_DIR)/com
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
-
 gen_code.o: $(SRC_DIR)/gen_code.c $(INC_DIR)/gen_code.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
+	@echo "| Compiling $<"
+	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
+
+main.o: $(SRC_DIR)/main.c $(INC_DIR)/gen_code.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
 	@echo "| Compiling $<"
 	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
 
@@ -91,7 +94,5 @@ clean:
 	@echo "| Cleaning built files"
 	@rm -f *.s *.dot
 	@rm -rf tools/graph-last-program
-	@echo "| Cleaning test files"
-	@rm -f  tests/log.txt tests/buffer.txt tests/*.s tests/*.dot *.txt
 	@echo "| \033[1mCleaned all files\033[0m"
 

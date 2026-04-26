@@ -38,8 +38,7 @@ These loops and branches have the same syntax as C
 - *for*
 - *while*
 - *do{ ... }while*
-- *if* 
-	> *else* should be supported but is currently not implemented
+- *if* / *else* 
 
 ### Not Supported 
 - **switch / case**, 

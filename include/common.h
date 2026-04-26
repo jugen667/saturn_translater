@@ -16,7 +16,7 @@
 #define 	DEFAULT_OUTFILE "out.s"
 
 #define     MAIN_VERSION    "0"                 /*dev phase*/
-#define     SUB_VERSION     "6"                 /*iteration*/
+#define     SUB_VERSION     "7"                 /*iteration*/
 
 // ============== LOGGING =================	\\
 // > v0.1 : first iteration = start		 	\\	
@@ -26,8 +26,7 @@
 // > v0.5 : while integration finished		\\
 // > v0.6 : for integration finished		\\
 // > v0.7 : optimizations and fixes			\\
-// > v0.8 : parser enhancements				\\
-// > v0.9 : compiler adjustements 			\\
+// > v0.8 : compîler enhancements			\\
 // > v1.0 : first release					\\
 // > v1.x : test on machine + corrections	\\
 // ========================================	\\
@@ -48,6 +47,7 @@ extern short 	g_target;
 extern bool 	g_disableTreeDump;
 extern FILE * 	g_outfileDescriptor;
 extern char * 	g_outfile;
+extern char *   g_infile;
 
 #define OPTION_START 		'-'
 #define OPTION_DEBUG 		'd'
@@ -82,6 +82,25 @@ uint32_t assign_address(void);
 FILE * outfile_open(char * outfileName);
 void outfile_close(FILE * fileDesc);
 void dump_instruction(char * inst, FILE * fDest);
+
+// NODE MAKING FUNCTIONS
+int yylex(void);
+extern int yylineno;
+
+void yyerror(node_t * program_root, char * s);
+node_t make_node(node_nature nature, int nops, ...);
+node_t make_node_ident(char* identifier);
+node_t make_node_type(node_type type);
+node_t make_node_intval(int32_t value);
+node_t make_node_floatval(double value);
+node_t make_node_boolval(bool value);
+node_t make_node_strval(char* string);
+node_t make_node_main(node_t node_next);
+
+
+// FUNCTION THAT RUN THE PARSING, CHECKS AND TRANSLATION
+void run_translation(node_t root);
+
 
 #endif
 

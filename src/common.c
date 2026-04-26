@@ -14,6 +14,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "../include/defs.h"
 #include "../include/common.h"
@@ -24,9 +25,8 @@
 // ================================================================================================= //
 // =========================================== GLOBALS ============================================= //
 // ================================================================================================= //
-extern char *   g_infile;
-
 static uint32_t g_currentAddress = MIN_ADDRESS; // init at base address
+char *  g_infile = NULL;
 char *  g_outfile = DEFAULT_OUTFILE;
 bool    g_verboseDebug = false;
 
@@ -640,6 +640,194 @@ void dump_instruction(char * inst, FILE * fDest)
 }
 
 // ------------------------------------------------------------------------------------------------- //
+
+
+// === NODE MAKER FUNCS === 
+node_t make_node(node_nature nature, int nops, ...) 
+{
+    va_list ap;
+    node_t node = (node_t) malloc(sizeof(node_s));
+    node->nops = nops;
+    node->lineno = yylineno;
+    node->nature = nature;
+    node->type = TYPE_NONE;
+    node->value = 0;
+    node->isPrio = 0;           // update passe 1
+    va_start(ap, nops);
+
+    node->opr = (node_t *) calloc(nops, sizeof(node_s)); // ensure every sub nodes are initialized
+
+    for(int i=0;i<nops;i++){
+        node->opr[i] = va_arg(ap, node_t);
+    }
+    
+
+    va_end(ap);
+    return node;
+}
+
+
+node_t make_node_ident(char* identifier)
+{
+    node_t node = (node_t) malloc(sizeof(node_s));
+    node->nature = NODE_IDENT;
+    node->lineno = yylineno;
+    node->nops = 0; 
+    node->ident = identifier;
+    node->type = TYPE_NONE;              // init but update in passe 1
+    node->address = 0;                   // init but update in passe 1
+    node->global_decl = false;           // init but update in passe 1
+    node->opr = NULL;
+    node->value = 0;
+    node->isPrio = 0;                   // update passe 1
+    return node;
+}
+
+
+node_t make_node_type(node_type type)
+{
+    node_t node = (node_t) malloc(sizeof(node_s));
+    node->nature = NODE_TYPE;
+    node->lineno = yylineno;
+    node->nops = 0; 
+    node->ident = NULL;
+    node->type = type;                  // init but update in passe 1
+    node->address = 0;                  // init but update in passe 1
+    node->global_decl = false;          // init but update in passe 1
+    node->opr = NULL;
+    node->value = 0;
+    node->isPrio = 0;                   // update passe 1
+    return node;
+}
+
+
+node_t make_node_intval(int32_t value)
+{
+    node_t node = (node_t) malloc(sizeof(node_s));
+    node->nature = NODE_INTVAL;
+    node->lineno = yylineno;
+    node->nops = 0; 
+    node->ident = NULL;
+    node->type = TYPE_NONE;              // init but update in passe 1
+    node->address = 0;                  // init but update in passe 1
+    node->global_decl = false;          // init but update in passe 1
+    node->value = value;                // to update in passe1
+    node->opr = NULL;
+    node->isPrio = 0;                   // update passe 1
+    return node;
+}
+
+
+node_t make_node_floatval(double value)
+{
+    node_t node = (node_t) malloc(sizeof(node_s));
+    node->nature = NODE_FLOATVAL;
+    node->lineno = yylineno;
+    node->nops = 0; 
+    node->ident = NULL;
+    node->type = TYPE_NONE;            // init but update in passe 1
+    node->address = 0;                  // init but update in passe 1
+    node->global_decl = false;          // init but update in passe 1
+    node->value = value;                // to update in passe 1
+    node->opr = NULL;
+    node->isPrio = 0;                   // update passe 1
+    return node;
+}
+
+
+node_t make_node_boolval(bool value)
+{
+    node_t node = (node_t) malloc(sizeof(node_s));
+    node->nature = NODE_BOOLVAL;
+    node->lineno = yylineno;
+    node->nops = 0; 
+    node->ident = NULL;
+    node->type = TYPE_NONE;             // init but update in passe 1
+    node->address = 0;                  // init but update in passe 1
+    node->global_decl = false;          // init but update in passe 1
+    node->value = (uint64_t) value;
+    node->opr = NULL;
+    node->isPrio = 0;                   // update passe 1
+    return node;
+}
+
+
+node_t make_node_strval(char* string)
+{
+    node_t node = (node_t) malloc(sizeof(node_s));
+    node->nature = NODE_STRINGVAL;
+    node->lineno = yylineno;
+    node->nops = 0; 
+    node->ident = NULL;
+    node->type = TYPE_NONE;             // init but update in passe 1
+    node->address = 0;                  // init but update in passe 1
+    node->global_decl = false;          // maj dans passe 1
+    node->str = string;
+    node->opr = NULL;
+    node->isPrio = 0;                   // update passe 1
+    return node;
+}
+
+
+node_t make_node_main(node_t node_next)
+{
+    node_t node = (node_t) malloc(sizeof(node_s));
+    node->nature = NODE_FUNC;
+    node->lineno = yylineno;
+    node->nops = 1; 
+    node->ident = "main";
+    node->type = TYPE_VOID;
+    node->address = 0;                  // init but update in passe 1
+    node->global_decl = true;      
+    node->opr = (node_t *) malloc(sizeof(node_s)); // child block
+    node->opr[0] = node_next;
+    node->isPrio = 0;                   // update passe 1
+    return node;
+}
+
+
+
+// PROGRAM TRANSLATION FUNCTION 
+void run_translation(node_t root) 
+{
+    if(g_verboseDebug)
+    {
+        printf(BOLD "\n> Syntax analysis\n" NC);
+    }    
+    if(!g_disableTreeDump)
+    {
+        dump_tree(root, "after_syntax_check.dot");
+    }
+    if(g_verboseDebug)
+    {
+        printf(BOLD "\n> First parse\n" NC);
+        printf(BOLD "-> Node list\n" NC);
+    } 
+    tree_analysis(root);
+    if(!g_disableTreeDump)
+    {
+        dump_tree(root, "after_tree_analysis.dot");
+    }
+    if(g_verboseDebug)
+    {
+        printf(BOLD "->Variables in the program\n" NC);
+        print_decl_table();
+    }
+    g_outfileDescriptor = outfile_open(g_outfile);
+    if(g_verboseDebug)
+    {
+        printf(BOLD "\n> Second parse\n" NC);
+    } 
+    gen_code(root);
+    outfile_close(g_outfileDescriptor);
+    // free_global_strings();
+    free_nodes(root);
+    if(g_verboseDebug)
+    {
+        printf(BOLD "\n> End of compilation\n" NC);
+    }
+}
+
 
 
 // ================================================================================================= //

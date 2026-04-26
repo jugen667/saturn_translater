@@ -13,17 +13,18 @@ This subset is mainly limited by the instruction set of the Saturn CPU.
 More about the subset under [grammar/rules.md](https://github.com/jugen667/saturn_translater/blob/master/grammar/rules.md)
 
 ## Useful ressources
-- Instruction set and documentation: [Introduction to Saturn Asembly Language](https://www.keesvandersanden.nl/calculators/downloads/Saturn_tutorial.pdf)
+- Instruction set and documentation: [Introduction to Saturn Assembly Language](https://www.keesvandersanden.nl/calculators/downloads/Saturn_tutorial.pdf)
 - General information about Saturn Architecture : [HP Saturn](https://en.wikipedia.org/wiki/HP_Saturn)
 - The HP 48 that inspired that project : [HP 48 series](https://en.wikipedia.org/wiki/HP_48_series)
 - HP Calc archive : [hpcalc.org](https://www.hpcalc.org/)
 
 ## Utils
+
 Clone the repo : ```git clone https://github.com/jugen667/saturn_translater```
 
-Fast test file with tree as png and svg :
+Compile from source : ```make clean && make all && bin/saturncc your-file.c -o output-file.s```
 
-```make clean && make all && bin/saturncc -a temp/test.c && tools/graph-create.sh```
+To display help, type ```bin/saturncc -h```
 
 
 # KNOWN BUGS 
@@ -37,43 +38,11 @@ Example : Replace ```if(!(i<2+1))``` by ```if(!(i<(2+1))```
 ---------------
 
 
-# Road Map
+## IMPROVEMENTS TO DO ##
 
-## ~~Add float support~~
-
-## ~~Ensure tree is correct~~
-
-## ~~1st parsing : ensure we are doing operations correctly (type checks etc)~~
-
-## ~~Instruction Set implementation~~ 
-
-### ~~Check what we need it in our arch~~
-
-- ~~registers setups~~
-- ~~instuctions list~~
-
-## 2nd parsing : translate nodes to instructions with the instructions set
-- ~~int operations~~
-- ~~bool operation~~ 
-- ~~if~~
-- ~~while / do...while~~
-- ~~for~~
-
-## Optimization to do :
-- revamp conditionnal operations construction
-- ~~consecutive prio nodes~~
-- NOT operation in AND
-- AND and OR in the same condition  
-
-
-
-
-## TO DO IN THE FUTURE ##
-
-- Add support for more C function (incremental operator ?)
-- Pointers maybe ?
-- ~~Address management (func loop etc)~~
-- String support
+- Mixing AND and OR currently not working
+- Add support for more C function (incremental operator, goto, Pointers, Functions etc)
+- optimization for execution (cycle amount etc)
 - add ARM instruction set compatibility and compilation option (not sure)
 
 
