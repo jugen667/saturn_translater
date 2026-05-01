@@ -48,20 +48,20 @@ These loops and branches have the same syntax as C
 ## About operators
 ### Supported 
 - **Arithmetic operators** ( +, -, /, *, %)
+- **Incremental operators** (++, --)
 - **Bitwise operators**  (&, |, ~, ^)
 - **Bit Shift operators** (>>, <<, >>>)
 - **Logical operators** (&&, ||, !)
 - **Conditionnal operators** (==, !=, <, >, <=, >=)
 - **Direct Assignement** (=)
+- **Other type of assignement** (*=, +=, -=, ...)
 - **Comma** as a separator for definition and assignement 
 > Ex : int a = 1 **,** int b = 2;
 - **Comment** (// and /\*\*/) : not supporting nested comments 
 
 ### Not Supported 
-- **Incremental operators** (++, --)
-- **Other type of assignement** (*=, +=, -=, ...)
 - **All pointer operators**
-- **Function calls** except *print()*
+- **Function calls**
 - **Comma**
 - **Ternary conditional**
 - ***sizeof*** and ***alignof***

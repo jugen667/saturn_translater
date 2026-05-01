@@ -210,6 +210,29 @@ void create_bnot_instr(node_t node)
 	one_complement(A, W_FIELD);
 }
 
+// create a decrement or increment
+void create_inc_dec_instr(node_t node)
+{
+	// pointer = address 
+	load_pointer(D0, node->opr[0]->address);
+	// exchange A and DAT
+	reading_memory(D0, A, W_FIELD);
+	switch(node->nature)
+	{
+		case NODE_INC:
+			inc_register(A, W_FIELD);
+		break;
+		case NODE_DEC:
+			dec_register(A, W_FIELD);
+		break;
+		default:
+		break;
+
+	}
+	load_pointer(D0, node->opr[0]->address);
+	writing_memory(D0, A, W_FIELD);	// value of bool on a S field only (for further optimization)
+}
+
 
 // create a primitive operation 
 void create_raw_op(node_t node)
@@ -443,14 +466,15 @@ void create_operation(node_t node)
 					break;	
 
 					default:
-						if(!node->opr[1]->isPrio)  // not sure is useful ??
-						{
-							create_operation(node->opr[1]);
-						}
-						else if(node->opr[0]->isPrio && node->opr[1]->isPrio)
+						if(node->opr[0]->isPrio && node->opr[1]->isPrio)
 						{
 							copy_reg_work_save(A, R0, W_FIELD);
 							copy_reg_work_save(C, R1, W_FIELD);
+						}
+						else
+						// if(!node->opr[1]->isPrio)  // not sure is useful ??
+						{
+							create_operation(node->opr[1]);
 						}
 					break;
 				}
@@ -781,11 +805,18 @@ void gen_code(node_t root)
 				break;
 
 				// FUNC initialization 
-				case NODE_FUNC :
+				case NODE_MAIN :
 					// create label
-					create_label("MAIN_FUNC");
+					create_label("MAIN");
 				break;		
 
+				// special instructions (no affect)
+				case NODE_INC:
+				case NODE_DEC:
+					create_inc_dec_instr(root->opr[i]);
+				break;	
+
+				// variable modifications
 				case NODE_AFFECT :
 					if (root->opr[i+1] != NULL && root->opr[i+1]->nature == NODE_BLOCK )
 					{

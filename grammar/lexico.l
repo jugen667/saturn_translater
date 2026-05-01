@@ -79,11 +79,12 @@ SEPARATOR           [ \t\n]+
 "while"         RETURN(TOK_WHILE);
 "for"           RETURN(TOK_FOR);
 "do"            RETURN(TOK_DO);
-"printf"        RETURN(TOK_PRINT);
 "main"          RETURN(TOK_MAIN);
 
 "+"             RETURN(TOK_PLUS);
+"++"            RETURN(TOK_INC);
 "-"             RETURN(TOK_MINUS);
+"--"            RETURN(TOK_DEC);
 "*"             RETURN(TOK_MUL);
 "/"             RETURN(TOK_DIV);
 "%"             RETURN(TOK_MOD);
@@ -95,6 +96,14 @@ SEPARATOR           [ \t\n]+
 "|"             RETURN(TOK_BOR);
 "^"             RETURN(TOK_BXOR);
 "="             RETURN(TOK_AFFECT);
+"+="            RETURN(TOK_PLUS_AFF);
+"-="            RETURN(TOK_MINUS_AFF);
+"*="            RETURN(TOK_MUL_AFF);
+"/="            RETURN(TOK_DIV_AFF);
+"%="            RETURN(TOK_MOD_AFF);
+"&="            RETURN(TOK_BAND_AFF);
+"|="            RETURN(TOK_BOR_AFF);
+"^="            RETURN(TOK_BXOR_AFF);
 ";"             RETURN(TOK_SEMICOL);
 ","             RETURN(TOK_COMMA);
 "("             RETURN(TOK_LPAR);

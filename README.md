@@ -35,14 +35,27 @@ Temporary fix : add parenthesis to ensure the operations to be compared is execu
 
 Example : Replace ```if(!(i<2+1))``` by ```if(!(i<(2+1))``` 
 
+
+**2. Mixing AND and OR in a single condition check is not working.**
+
+Temprary fix : Avoid mixing OR and AND for your operations
+
+Example : make multiple ```if``` / use a temporary variable and do your checks on it
+
+
+**3. Multiple operations in a single instructions is broken.**
+
+Temprary fix : create multiple instruction, 1 for each operation
+
+Example : Replace ```sum = 2+(end*4);``` by ```sum = end*4; sum += 2;```
+
+
 ---------------
 
 
 ## IMPROVEMENTS TO DO ##
 
-- Mixing AND and OR currently not working
-- Add support for more C function (incremental operator, goto, Pointers, Functions etc)
-- optimization for execution (cycle amount etc)
+- Add support for more C function (goto, Pointers, Functions etc)
 - add ARM instruction set compatibility and compilation option (not sure)
 
 

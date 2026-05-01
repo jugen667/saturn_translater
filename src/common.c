@@ -170,47 +170,6 @@ void parse_args(int argc, char ** argv)
 	}
 }
 
-// ------------------------------------------------------------------------------------------------- //
-
-void free_nodes(node_t n) 
-{
-    // input : root node 
-    // Parse until no more node
-    // come back and free nodes
-    short currnops;
-    if(n->nops != 0)
-    {   
-        for(int i = 0; i<n->nops; i++){
-            if(n->opr[i] != NULL)
-            {
-                free_nodes(n->opr[i]);
-            }
-        }
-        free(n->opr); // free the pointer to sub nodes
-        free(n);
-    }
-    else
-    { 
-        if(n->nature == NODE_IDENT)
-        {
-            free(n->ident); // free the pointer identifier string
-        }
-        if(n->nature == NODE_STRINGVAL)
-        {
-            free(n->str); // free the pointer string value
-        }
-        free(n);
-    }
-}
-
-// ------------------------------------------------------------------------------------------------- //
-
-char * strdupl(char * s) 
-{
-    char * r = malloc(strlen(s) + 1);
-    strcpy(r, s);
-    return r;
-}
 
 // ------------------------------------------------------------------------------------------------- //
 
@@ -228,7 +187,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
     {
         case NODE_IDENT:
             {
-                fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{<decl>Global: %d|Ident: %s|address: %05X}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->global_decl, n->ident, n->address);
+                fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{<decl>Global: %d|Ident: %s|address: %05X}|{REAL CODE ADRESS %p}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->global_decl, n->ident, n->address, n);
                 break;
             }
         case NODE_INTVAL:
@@ -266,11 +225,11 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
         case NODE_WHILE:
         case NODE_FOR:
         case NODE_DOWHILE:
-        case NODE_PRINT:
         case NODE_PRIO:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Nb. ops: %d}}\"];\n", node_num, node_nature2string(n->nature), n->nops);
             break;
         case NODE_FUNC:
+        case NODE_MAIN:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Ident: %s|Nb. ops: %d}|{address: %05X}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->ident, n->nops, n->address);
             break;
         case NODE_PLUS:
@@ -296,6 +255,8 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
         case NODE_UMINUS:
     	case NODE_ELSE:
     	case NODE_AFFECT:
+        case NODE_INC:
+        case NODE_DEC:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s|Nb. ops: %d}|{Prio: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->nops, n->isPrio);
             break;
 	    default:
@@ -403,6 +364,8 @@ const char * node_nature2string(node_nature t)
             return "STRINGVAL";
         case NODE_FUNC:
             return "FUNC";
+        case NODE_MAIN:
+            return "MAIN";
         case NODE_IF:
             return "IF\t"; // \t for debug
         case NODE_WHILE:
@@ -455,12 +418,14 @@ const char * node_nature2string(node_nature t)
             return "UMINUS";
         case NODE_AFFECT:
             return "AFFECT";
-        case NODE_PRINT:
-            return "PRINT";
     	case NODE_ELSE:
     	    return "ELSE";
         case NODE_PRIO:
             return "PRIO";
+        case NODE_INC:
+            return "INC";
+        case NODE_DEC:
+            return "DEC";
     	default:
             printf("*** Error in %s: Unknown node nature: %d\n", __func__, t);
             exit(EXIT_FAILURE);
@@ -516,6 +481,10 @@ const char * node_nature2symb(node_nature t)
             return "~";
         case NODE_UMINUS:
             return "-";
+        case NODE_INC:
+            return "++";
+        case NODE_DEC:
+            return "--";
         default:
             printf("*** Error in %s: Unknown node nature: %d\n", __func__, t);
             exit(EXIT_FAILURE);
@@ -602,7 +571,8 @@ FILE * outfile_open(char * outfileName)
 {
     FILE * f = NULL;
     f = fopen(outfileName, "w");
-    if(f != NULL){
+    if(f != NULL)
+    {
         fprintf(f, "%% Source file name : %s\n", g_infile);
         fprintf(f, "%% Target of this program : HP-%d series\n", g_target);
         fprintf(f, "%% Compiled with saturn_translater\n");
@@ -643,6 +613,7 @@ void dump_instruction(char * inst, FILE * fDest)
 
 
 // === NODE MAKER FUNCS === 
+
 node_t make_node(node_nature nature, int nops, ...) 
 {
     va_list ap;
@@ -657,12 +628,21 @@ node_t make_node(node_nature nature, int nops, ...)
 
     node->opr = (node_t *) calloc(nops, sizeof(node_s)); // ensure every sub nodes are initialized
 
-    for(int i=0;i<nops;i++){
+    for(int i=0;i<nops;i++)
+    {
         node->opr[i] = va_arg(ap, node_t);
     }
     
 
     va_end(ap);
+    return node;
+}
+
+node_t make_node_special_affect(node_nature nature, char * ident, node_t expr) 
+{
+    // create a node that goes affect -> operation to do (string duplication to have 1 to 1 node string association)
+    node_t node = make_node(NODE_AFFECT, 2, make_node_ident(ident), make_node(nature, 2, make_node_ident(strdupl(ident)), expr));
+
     return node;
 }
 
@@ -772,7 +752,7 @@ node_t make_node_strval(char* string)
 node_t make_node_main(node_t node_next)
 {
     node_t node = (node_t) malloc(sizeof(node_s));
-    node->nature = NODE_FUNC;
+    node->nature = NODE_MAIN;
     node->lineno = yylineno;
     node->nops = 1; 
     node->ident = "main";
@@ -785,7 +765,58 @@ node_t make_node_main(node_t node_next)
     return node;
 }
 
+// ------------------------------------------------------------------------------------------------- //
 
+void free_nodes(node_t n) 
+{
+    // input : root node 
+    // Parse until no more node
+    // come back and free nodes
+    if(n != NULL)
+    {
+        if(n->nops != 0)
+        {   
+            for(int i = 0; i<n->nops; i++)
+            {
+                if(n->opr[i] != NULL)
+                {
+                    free_nodes(n->opr[i]);
+                }
+            }
+            if(n != NULL)
+            {
+                free(n->opr); // free the pointer to sub nodes
+                n->opr = NULL;
+                free(n);
+                n = NULL;
+            }   
+        }
+        else
+        { 
+            if(n->nature == NODE_IDENT)
+            {
+                free(n->ident); // free the pointer identifier string
+            }
+            if(n->nature == NODE_STRINGVAL)
+            {
+                free(n->str); // free the pointer string value
+            }
+            free(n);
+            n = NULL;
+        }
+    }
+}
+
+// ------------------------------------------------------------------------------------------------- //
+
+char * strdupl(char * s) 
+{
+    char * r = malloc(strlen(s) + 1);
+    strcpy(r, s);
+    return r;
+}
+
+// ------------------------------------------------------------------------------------------------- //
 
 // PROGRAM TRANSLATION FUNCTION 
 void run_translation(node_t root) 

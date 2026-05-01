@@ -19,6 +19,7 @@ void affect_variable(node_t node);
 
 void create_uminus_instr(node_t node);
 void create_bnot_instr(node_t node);
+void create_inc_dec_instr(node_t node);
 void create_raw_op(node_t node);
 void create_raw_not_op(node_t node);
 void create_operation(node_t node);

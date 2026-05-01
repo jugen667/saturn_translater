@@ -89,6 +89,7 @@ extern int yylineno;
 
 void yyerror(node_t * program_root, char * s);
 node_t make_node(node_nature nature, int nops, ...);
+node_t make_node_special_affect(node_nature nature, char * ident, node_t expr);
 node_t make_node_ident(char* identifier);
 node_t make_node_type(node_type type);
 node_t make_node_intval(int32_t value);

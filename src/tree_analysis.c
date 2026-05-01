@@ -324,7 +324,7 @@ void tree_analysis(node_t root)
 		//flag to update the global_decl attribute
 		g_inGlobalScope = true; 
 	}
-	if (root->nature == NODE_FUNC)
+	if (root->nature == NODE_FUNC || root->nature == NODE_MAIN)
 	{ 
 		//flag to update the global_decl attribute
 		g_inGlobalScope = false; 
@@ -459,7 +459,7 @@ void tree_analysis(node_t root)
 				case NODE_AFFECT :
 				break;
 
-				case NODE_FUNC :
+				case NODE_MAIN :
 					root->opr[i]->address = assign_address();
 			    	add_decl_node(root->opr[i]);
 					root->opr[i]->type = TYPE_VOID;
@@ -482,7 +482,7 @@ void tree_analysis(node_t root)
 		// CHECKS parsing the tree in the other way
 		switch(root->nature)
 		{
-			case NODE_FUNC:
+			case NODE_MAIN:
 				if(root->type != TYPE_VOID)
 				{
 					printf(RED "Error line" BOLD " %d " NC ": " BOLD CYAN "main()" NC " declaration must have " PURPLE "void" NC " return type\n", root->opr[0]->lineno);

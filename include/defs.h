@@ -143,6 +143,7 @@ typedef enum node_nature_s {
     NODE_FLOATVAL,      
     NODE_BOOLVAL,
     NODE_STRINGVAL,
+    NODE_MAIN,
     NODE_FUNC,
     NODE_IF,
     NODE_WHILE,
@@ -169,8 +170,9 @@ typedef enum node_nature_s {
     NODE_SLL,
     NODE_SRL,
     NODE_UMINUS,
+    NODE_INC,
+    NODE_DEC,
     NODE_AFFECT,
-    NODE_PRINT,
     NODE_ELSE,
     NODE_PRIO,
 } node_nature;

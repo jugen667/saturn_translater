@@ -9,7 +9,7 @@ void main()
 	int i = start;
 	do
 	{
-		sum = sum + 10;
-		i = i + 1;
+		sum+=10;
+		i++;
 	}while(i < end);
 }

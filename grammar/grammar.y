@@ -42,12 +42,13 @@
 // statements 
 %token  TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_DO
 // special tokens
-%token TOK_MAIN TOK_PRINT TOK_SEMICOL TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
+%token TOK_MAIN TOK_SEMICOL TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
 %nonassoc TOK_THEN
 %nonassoc TOK_ELSE 
 
 // operators
 %right TOK_AFFECT
+%right TOK_PLUS_AFF TOK_MINUS_AFF TOK_MUL_AFF TOK_DIV_AFF TOK_MOD_AFF TOK_BAND_AFF TOK_BOR_AFF TOK_BXOR_AFF 
 
 %left TOK_OR
 %left TOK_AND
@@ -60,10 +61,10 @@
 /* a / b / c = (a / b) / c AND a - b - c = (a - b) - c */
 %left TOK_PLUS TOK_MINUS
 %left TOK_MUL TOK_DIV TOK_MOD
-%nonassoc TOK_UMINUS TOK_NOT TOK_BNOT
+%nonassoc TOK_UMINUS TOK_NOT TOK_BNOT TOK_INC TOK_DEC
 
 
-%type <ptr> program listdecl vardecl ident type listtypedecl decl maindecl listinst inst block expr listparamprint paramprint list 
+%type <ptr> program listdecl vardecl ident type listtypedecl decl maindecl listinst inst block expr list 
 
 %%
 
@@ -202,10 +203,6 @@ inst                    : expr TOK_SEMICOL
                         {
                             $$ = $1;
                         }
-                        | TOK_PRINT TOK_LPAR listparamprint TOK_RPAR TOK_SEMICOL
-                        {
-                            $$ = make_node(NODE_PRINT, 1, $3);
-                        }
                         ;
 
 
@@ -243,7 +240,7 @@ expr                    : TOK_NOT TOK_LPAR expr TOK_RPAR
                         {
                             $$ = make_node(NODE_NOT, 1, $3);
                         }
-                        |TOK_LPAR expr TOK_RPAR
+                        | TOK_LPAR expr TOK_RPAR
                         {
                             // priority
                             $$ = make_node(NODE_PRIO, 1, $2);
@@ -336,6 +333,38 @@ expr                    : TOK_NOT TOK_LPAR expr TOK_RPAR
                         {
                             $$ = make_node(NODE_AFFECT, 2, $1, $3);
                         }
+                        | TOK_IDENT TOK_PLUS_AFF expr
+                        {
+                            $$ = make_node_special_affect(NODE_PLUS, $1, $3);
+                        }
+                        | TOK_IDENT TOK_MINUS_AFF expr
+                        {
+                            $$ = make_node_special_affect(NODE_MINUS, $1, $3);
+                        }
+                        | TOK_IDENT TOK_MUL_AFF expr
+                        {
+                            $$ = make_node_special_affect(NODE_MUL, $1, $3);
+                        }
+                        | TOK_IDENT TOK_DIV_AFF expr
+                        {
+                            $$ = make_node_special_affect(NODE_DIV, $1, $3);
+                        }
+                        | TOK_IDENT TOK_MOD_AFF expr
+                        {
+                            $$ = make_node_special_affect(NODE_MOD, $1, $3);
+                        }
+                        | TOK_IDENT TOK_BAND_AFF expr
+                        {
+                            $$ = make_node_special_affect(NODE_BAND, $1, $3);
+                        }
+                        | TOK_IDENT TOK_BOR_AFF expr
+                        {
+                            $$ = make_node_special_affect(NODE_BOR, $1, $3);
+                        }
+                        | TOK_IDENT TOK_BXOR_AFF expr
+                        {
+                            $$ = make_node_special_affect(NODE_BXOR, $1, $3);
+                        }
                         | TOK_INTVAL
                         {
                             $$ = make_node_intval($1);
@@ -352,36 +381,23 @@ expr                    : TOK_NOT TOK_LPAR expr TOK_RPAR
                         {
                             $$ = make_node_boolval(false);
                         }
+                        | ident TOK_INC
+                        {                
+                            $$ = make_node(NODE_INC, 1, $1);
+                        }
+                        | ident TOK_DEC
+                        {                
+                            $$ = make_node(NODE_DEC, 1, $1);
+                        }
                         | ident
                         {                
                             $$ = $1;
                         }
                         ;
 
-listparamprint          : listparamprint TOK_COMMA paramprint
-                        {
-                            $$ = make_node(NODE_LIST, 2, $1, $3);
-                        }
-                        | paramprint
-                        {
-                            $$ = $1;
-                        }
-                        ;
-    
-
-paramprint              : ident
-                        {
-                            $$ = $1;
-                        }
-                        | TOK_STRING
-                        {
-                            $$ = make_node_strval($1);
-                        }
-                        ;
-
 
 ident                   : TOK_IDENT
-                        {                
+                        {        
                             $$ = make_node_ident($1);
                         }
                         ;

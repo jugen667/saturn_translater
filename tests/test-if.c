@@ -15,9 +15,9 @@ void main()
 	 		{
 	 			if(!i)
 	 			{ 
-	 				sum = 255; 
+	 				sum++; 
 	 			}
-	 			sum = 3;
+				sum += i;
 	 		}
 	 		else
 			{
@@ -27,7 +27,8 @@ void main()
 				}
 				else
 				{
-					sum = 2;
+					sum = end*4;
+					sum+= 2;
 				}	
 			}
  		}
@@ -40,5 +41,8 @@ void main()
  	{
  		sum = 0;
  	}	
-	// if(!(i<(2+1))){ } // bug here : see known bug 1
+	// if(!(i<(2+1))) 			// bug here : see known bug 1
+	// { 
+	// 	sum = 2+(end*4); 		// bug here : see known bug 3 
+	// } 
 }
