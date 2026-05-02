@@ -24,7 +24,8 @@ extern int yylex_destroy(void);
 extern int yydebug;
 #endif
 
-int yywrap(void) {
+int yywrap(void) 
+{
     return 1;
 }
 

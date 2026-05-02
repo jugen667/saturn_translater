@@ -466,13 +466,13 @@ void create_operation(node_t node)
 					break;	
 
 					default:
-						if(node->opr[0]->isPrio && node->opr[1]->isPrio)
+						if(!node->opr[1]->isPrio)  // not sure is useful ??
 						{
 							copy_reg_work_save(A, R0, W_FIELD);
 							copy_reg_work_save(C, R1, W_FIELD);
 						}
 						else
-						// if(!node->opr[1]->isPrio)  // not sure is useful ??
+						if(node->opr[0]->isPrio && node->opr[1]->isPrio)
 						{
 							create_operation(node->opr[1]);
 						}

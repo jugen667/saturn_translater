@@ -9,7 +9,9 @@ void main()
 	int i = start;
 	do
 	{
-		sum+=10;
+		// sum = sum+  2 + end*3; // bug here : see known bug 3
+		sum += end*3;
+		sum += 2;
 		i++;
 	}while(i < end);
 }

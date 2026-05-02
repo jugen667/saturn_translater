@@ -9,7 +9,7 @@ void main()
 	int i = start;
  	if(i)
  	{
- 		if(i<2)
+ 		if(i<2 && i > 0)
  		{ 
 	 		if(start)
 	 		{
@@ -42,7 +42,4 @@ void main()
  		sum = 0;
  	}	
 	// if(!(i<(2+1))) 			// bug here : see known bug 1
-	// { 
-	// 	sum = 2+(end*4); 		// bug here : see known bug 3 
-	// } 
 }

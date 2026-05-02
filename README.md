@@ -10,7 +10,7 @@ This also can produce a tree of the program.
 We are using a sub-set of C. 
 This subset is mainly limited by the instruction set of the Saturn CPU.
 
-More about the subset under [grammar/rules.md](https://github.com/jugen667/saturn_translater/blob/master/grammar/rules.md)
+More about the subset under [grammar/rules.md](https://github.com/jugen667/saturn_translater/blob/main/grammar/rules.md)
 
 ## Useful ressources
 - Instruction set and documentation: [Introduction to Saturn Assembly Language](https://www.keesvandersanden.nl/calculators/downloads/Saturn_tutorial.pdf)
@@ -43,11 +43,11 @@ Temprary fix : Avoid mixing OR and AND for your operations
 Example : make multiple ```if``` / use a temporary variable and do your checks on it
 
 
-**3. Multiple operations in a single instructions is broken.**
+**3. Multiple operations in a single special affection instructions is broken.**
 
 Temprary fix : create multiple instruction, 1 for each operation
 
-Example : Replace ```sum = 2+(end*4);``` by ```sum = end*4; sum += 2;```
+Example : Replace ```sum += 2+(end*4);``` by ```sum += end*4; sum += 2;```
 
 
 ---------------
