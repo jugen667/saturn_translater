@@ -2,7 +2,6 @@
 int start = 0;
 int end = 10;
 int sum = 0;
-
 // Starting main
 void main()
 {

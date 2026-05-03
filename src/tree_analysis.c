@@ -29,7 +29,9 @@
 // ================================================================================================= //
 
 static decl_table g_varTable[VAR_MAX_NUMBER]; 	// max 256 variable
-static short g_currentVarIdx = -1; 				// declaration index 
+static decl_table g_labelTable[VAR_MAX_NUMBER]; // max 256 labels
+static short g_currentVarIdx = -1; 				// variable declaration index 
+static short g_currentLabelIdx = -1; 			// label declaration index 
 static bool g_inDeclaration = false;			// in a declaration part
 static bool g_inGlobalScope = true;				// in global scope
 static node_type g_currentType = 0;  			// typing nodes
@@ -50,6 +52,15 @@ void print_decl_table(void)
 		}
 		printf("Variable n°%d - %s | ", i, g_varTable[i].varName);
 	}
+	for (int i=0; i < VAR_MAX_NUMBER; i++)
+	{
+		if (g_labelTable[i].node == NULL)
+		{
+			printf("\n"); 	
+			break;
+		}
+		printf("Label n°%d - %s | ", i, g_labelTable[i].varName);
+	}
 }
 // ------------------------------------------------------------------------------------------------- //
 
@@ -58,6 +69,15 @@ void print_decl_table(void)
 bool check_var_number(void)
 {
 	if(g_currentVarIdx <= VAR_MAX_NUMBER)
+	{
+		return true;
+	}
+	return false;
+}
+
+bool check_label_number(void)
+{
+	if(g_currentLabelIdx <= VAR_MAX_NUMBER)
 	{
 		return true;
 	}
@@ -95,6 +115,24 @@ node_t get_decl_node(node_t node)
 	return NULL;
 }
 
+// reading a declaration table : returns a pointer to a node
+node_t get_label_node(node_t node) 
+{
+	for(short i = 0; i <= g_currentLabelIdx; i++)
+	{
+		if(strncmp(g_labelTable[i].varName, node->ident, VAR_MAX_SIZE))
+		{
+			// diff in strings : not the droid we are looking for
+			continue;
+		}
+		else
+		{
+			return(g_labelTable[i].node);
+		}
+	}
+	return NULL;
+}
+
 // ------------------------------------------------------------------------------------------------- //
 
 void add_decl_node(node_t node) 
@@ -108,6 +146,26 @@ void add_decl_node(node_t node)
 			g_currentVarIdx++;
 			g_varTable[g_currentVarIdx].node = node;
 			strncpy(g_varTable[g_currentVarIdx].varName,node->ident, VAR_MAX_SIZE);
+		} 
+	}
+	else
+	{
+		printf(RED "Error line" BOLD " %d " NC ": variable amount overflow (max variable : %d)\n", node->lineno, VAR_MAX_NUMBER);
+		exit(EXIT_FAILURE);
+	}
+}
+
+void add_label_node(node_t node) 
+{
+	// checks on ident
+	check_ident_size(node);
+	if(check_label_number())
+	{					
+		if(g_currentLabelIdx == -1 || get_label_node(node) == NULL)
+		{
+			g_currentLabelIdx++;
+			g_labelTable[g_currentLabelIdx].node = node;
+			strncpy(g_labelTable[g_currentLabelIdx].varName, node->ident, VAR_MAX_SIZE);
 		} 
 	}
 	else
@@ -313,7 +371,7 @@ void check_global_decl(node_t node)
 
 void tree_analysis(node_t root) 
 {	
-	node_t variableDecl; // pointer to a IDENT node
+	node_t variableDecl; // pointer to a IDENT or LABEL node
 
 	if(g_verboseDebug)
 	{
@@ -364,6 +422,35 @@ void tree_analysis(node_t root)
 					}
 				break;
 
+				case NODE_LABEL:
+					// label table check if label exist
+					variableDecl = get_label_node(root->opr[i]);  // 2 ENTRY ARRAY FOR IDENT ASSOCIATION WITH A NODE
+					if (variableDecl == NULL && root->nature != NODE_GOTO) // declaring label
+					{
+						//If undeclared, we add it to the table
+						root->opr[i]->address = assign_address();
+						add_label_node(root->opr[i]);
+					}
+					else
+					{
+						if (variableDecl != NULL && root->nature == NODE_GOTO) // calling the label
+						{
+							root->opr[i]->address = variableDecl->address; // ok
+						}
+						// if trying to re declare	
+						else if(variableDecl != NULL && root->nature != NODE_GOTO)
+						{
+							printf(RED "Error line" BOLD " %d " NC ": label " BOLD "'%s'" NC " already used : previous declaration line %d\n", root->opr[i]->lineno, root->opr[i]->ident, variableDecl->lineno);
+							exit(EXIT_FAILURE);
+						}
+						// if undeclared
+						else 
+						{
+							printf(RED "Error line" BOLD " %d " NC ": undeclared label " BOLD "'%s'" NC" \n", root->opr[i]->lineno, root->opr[i]->ident);
+							exit(EXIT_FAILURE);
+						}	
+					}
+				break;
 
 				case NODE_IDENT :
 					// Check if variable has been declared already
@@ -463,9 +550,6 @@ void tree_analysis(node_t root)
 					root->opr[i]->address = assign_address();
 			    	add_decl_node(root->opr[i]);
 					root->opr[i]->type = TYPE_VOID;
-				break;
-	
-				case NODE_STRINGVAL :
 				break;
 
 				default:

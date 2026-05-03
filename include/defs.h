@@ -175,6 +175,8 @@ typedef enum node_nature_s {
     NODE_AFFECT,
     NODE_ELSE,
     NODE_PRIO,
+    NODE_LABEL,
+    NODE_GOTO,
 } node_nature;
 
 
@@ -201,7 +203,6 @@ typedef struct _node_s {
     int32_t lineno;
     bool global_decl;
     char * ident;
-    char * str;
     bool isPrio;                // for info on tree 
 
     // for tree dump

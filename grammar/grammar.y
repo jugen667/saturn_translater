@@ -17,7 +17,6 @@
 #include "../include/tree_analysis.h"
 #include "../include/gen_code.h"
 
-
 %}
 
 %parse-param { 
@@ -34,7 +33,7 @@
 // data with variables values
 %token <intval> TOK_INTVAL;
 %token <floatval> TOK_FLOATVAL;
-%token <strval> TOK_IDENT TOK_STRING;
+%token <strval> TOK_LABEL TOK_IDENT TOK_STRING ;
 // data types
 %token TOK_VOID TOK_INT TOK_FLOAT TOK_BOOL
 // data static values
@@ -42,7 +41,7 @@
 // statements 
 %token  TOK_IF TOK_ELSE TOK_WHILE TOK_FOR TOK_DO
 // special tokens
-%token TOK_MAIN TOK_SEMICOL TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
+%token TOK_MAIN TOK_GOTO TOK_SEMICOL TOK_COLON TOK_COMMA TOK_LPAR TOK_RPAR TOK_LACC TOK_RACC
 %nonassoc TOK_THEN
 %nonassoc TOK_ELSE 
 
@@ -64,7 +63,7 @@
 %nonassoc TOK_UMINUS TOK_NOT TOK_BNOT TOK_INC TOK_DEC
 
 
-%type <ptr> program listdecl vardecl ident type listtypedecl decl maindecl listinst inst block expr list 
+%type <ptr> program listdecl vardecl ident type listtypedecl decl maindecl listinst inst block expr list label
 
 %%
 
@@ -200,6 +199,14 @@ inst                    : expr TOK_SEMICOL
                             $$ = make_node(NODE_DOWHILE, 2, $5, $2);
                         }
                         | block
+                        {
+                            $$ = $1;
+                        }
+                        | TOK_GOTO TOK_IDENT TOK_SEMICOL;
+                        {
+                            $$ = make_node(NODE_GOTO, 1, make_node_ident(NODE_LABEL, $2));
+                        }
+                        | label
                         {
                             $$ = $1;
                         }
@@ -389,18 +396,28 @@ expr                    : TOK_NOT TOK_LPAR expr TOK_RPAR
                         {                
                             $$ = make_node(NODE_DEC, 1, $1);
                         }
+                        | TOK_GOTO TOK_IDENT TOK_SEMICOL;
+                        {
+                            $$ = make_node(NODE_GOTO, 1, make_node_ident(NODE_LABEL, $2));
+                        }
                         | ident
                         {                
                             $$ = $1;
                         }
                         ;
 
+label                   : TOK_IDENT TOK_COLON
+                        {        
+                            $$ = make_node_ident(NODE_LABEL, $1);
+                        }
+                        ;
 
 ident                   : TOK_IDENT
                         {        
-                            $$ = make_node_ident($1);
+                            $$ = make_node_ident(NODE_IDENT, $1);
                         }
                         ;
+
 
 %%
 

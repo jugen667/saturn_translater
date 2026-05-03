@@ -80,7 +80,6 @@ void manage_priority(node_t node, int position) // position left or right
 // declaration of variable inside the function
 void decl_inblock(node_t node)
 {
-	create_comment(node->opr[0]->ident);
 	// pointer = address 
 	load_pointer(D0, node->opr[0]->address);
 	if(node->opr[1] != NULL)
@@ -693,11 +692,9 @@ void create_cond_instruction(node_t node, node_t root, unsigned int loc_label, i
 				GOYES(get_label(labelIndex1));
 				gen_code(root->opr[1]);
 				go_very_long(get_label(labelIndex2));
-				create_comment("--- ELSE ---"); 								// to delete for debug in dump file
 				create_label(get_label(labelIndex1));
 				gen_code(root->opr[2]);
 				create_label(get_label(labelIndex2));
-				create_comment("-- ENDELSE --"); 								// to delete for debug in dump file
 			}
 			else
 			{
@@ -782,7 +779,6 @@ void gen_code(node_t root)
 				case NODE_DECL :
 					if(root->opr[i]->opr[0]->global_decl)
 					{
-						create_comment(root->opr[i]->opr[0]->ident);
 						// pointer = address
 						load_pointer(D0, root->opr[i]->opr[0]->address);
 						if(root->opr[i]->opr[1] != NULL)
@@ -808,6 +804,18 @@ void gen_code(node_t root)
 				case NODE_MAIN :
 					// create label
 					create_label("MAIN");
+				break;		
+				
+				case NODE_LABEL :
+					if(root->nature != NODE_GOTO)
+					{
+						create_label(root->opr[i]->ident);
+					}
+				break;	
+
+				case NODE_GOTO :
+					// jump to label
+					go_very_long(root->opr[i]->opr[0]->ident);
 				break;		
 
 				// special instructions (no affect)
@@ -851,40 +859,33 @@ void gen_code(node_t root)
 				
 				// creation of the If Statement
 				case NODE_IF :
-					create_comment("--- IF ---"); 										// to delete for debug in dump file
 					g_countInCond++; 														// = 1 for recursion, first entry point
 					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], g_curLabelIdx, IF_STATEMENT);
 					g_countInCond--; 														// = 0 for recursion, last exit point
-					create_comment("-- ENDIF --"); 										// to delete for debug in dump file
 				break;
 
 				// creation of the Do While loop
 				case NODE_DOWHILE :
-					create_comment("--- DOWHILE ---");
 					create_new_label(g_curLabelIdx);
 					create_label(get_label(g_curLabelIdx-1));
 					g_countInCond++; 														// = 1 for recursion, first entry point
 					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], g_curLabelIdx-1, DOWHILE_STATEMENT);
 					g_countInCond--; 														// = 0 for recursion, last exit point
-					create_comment("--- ENDDOWHILE ---");
 				break;
 
 				// creation of the While loop
 				case NODE_WHILE :
-					create_comment("--- WHILE ---");
 					create_new_label(g_curLabelIdx);
 					create_label(get_label(g_curLabelIdx-1));
 					g_countInCond++; 														// = 1 for recursion, first entry point
 					create_cond_instruction(root->opr[i]->opr[0], root->opr[i], g_curLabelIdx-1, WHILE_STATEMENT);
 					g_countInCond--; 														// = 0 for recursion, last exit point
-					create_comment("--- ENDWHILE ---");
 				break;
 
 
 				
 				// creation of FOR loop
 				case NODE_FOR :
-					create_comment("--- FOR --- ");
 					create_new_label(g_curLabelIdx);
 					create_label(get_label(g_curLabelIdx-1));
 					// -- affectation for looping variable
@@ -914,7 +915,6 @@ void gen_code(node_t root)
 					create_cond_instruction(root->opr[i]->opr[1], root->opr[i], g_curLabelIdx-1, FOR_STATEMENT);
 					g_countInCond--;														// = 0 for recursion, last exit point
 					g_isBlockParsed = true;
-					create_comment("--- ENDFOR --- ");
 				break;
 
 				default:

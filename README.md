@@ -4,7 +4,10 @@ Simplified C to Saturn (HP-48x) assembly translater
 ## Main features
 
 Produces a binary file that convert a C program into a Saturn assembly program.
+This project is a way of ease of programming on HP-8 Saturn CPU platform.
 This also can produce a tree of the program.
+> [!NOTE]
+> This project has never been tested on a actual HP-48 calculator. All the generated code is a theoritically valid code, just not tested.
 
 ## About C
 We are using a sub-set of C. 
@@ -26,6 +29,7 @@ Compile from source : ```make clean && make all && bin/saturncc your-file.c -o o
 
 To display help, type ```bin/saturncc -h```
 
+---------------
 
 # KNOWN BUGS 
 
@@ -55,8 +59,6 @@ Example : Replace ```sum += 2+(end*4);``` by ```sum += end*4; sum += 2;```
 
 ## IMPROVEMENTS TO DO ##
 
-- Add support for more C function (goto, Pointers, Functions etc)
-- add ARM instruction set compatibility and compilation option (not sure)
-
+- Ensure it works on an actual machine
 
 

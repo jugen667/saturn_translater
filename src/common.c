@@ -186,6 +186,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
     switch (n->nature) 
     {
         case NODE_IDENT:
+        case NODE_LABEL:
             {
                 fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{<decl>Global: %d|Ident: %s|address: %05X}|{REAL CODE ADRESS %p}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->global_decl, n->ident, n->address, n);
                 break;
@@ -194,22 +195,6 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
         case NODE_BOOLVAL:
         case NODE_FLOATVAL:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{Value: %ld}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->value);
-            break;
-        case NODE_STRINGVAL:
-            {
-                char str[32];
-                int32_t i = 1;
-                while (true) {
-                    str[i - 1] = n->str[i];
-                    i += 1;
-                    if (n->str[i] == '"') 
-                    {
-                        str[i - 1] = '\0';
-                        break;
-                    }
-                }
-                fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}|{val: %s}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), str);
-            }
             break;
         case NODE_TYPE:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type));
@@ -257,6 +242,7 @@ static int32_t dump_tree2dot_rec(FILE * f, node_t n, int32_t node_num)
     	case NODE_AFFECT:
         case NODE_INC:
         case NODE_DEC:
+        case NODE_GOTO:
             fprintf(f, "    N%d [shape=record, label=\"{{NODE %s|Type: %s|Nb. ops: %d}|{Prio: %d}}\"];\n", node_num, node_nature2string(n->nature), node_type2string(n->type), n->nops, n->isPrio);
             break;
 	    default:
@@ -360,8 +346,6 @@ const char * node_nature2string(node_nature t)
             return "FLOATVAL";
         case NODE_BOOLVAL:
             return "BOOLVAL";
-        case NODE_STRINGVAL:
-            return "STRINGVAL";
         case NODE_FUNC:
             return "FUNC";
         case NODE_MAIN:
@@ -426,6 +410,10 @@ const char * node_nature2string(node_nature t)
             return "INC";
         case NODE_DEC:
             return "DEC";
+        case NODE_LABEL:
+            return "LABEL";
+        case NODE_GOTO:
+            return "GOTO";
     	default:
             printf("*** Error in %s: Unknown node nature: %d\n", __func__, t);
             exit(EXIT_FAILURE);
@@ -641,16 +629,16 @@ node_t make_node(node_nature nature, int nops, ...)
 node_t make_node_special_affect(node_nature nature, char * ident, node_t expr) 
 {
     // create a node that goes affect -> operation to do (string duplication to have 1 to 1 node string association)
-    node_t node = make_node(NODE_AFFECT, 2, make_node_ident(ident), make_node(nature, 2, make_node_ident(strdupl(ident)), expr));
+    node_t node = make_node(NODE_AFFECT, 2, make_node_ident(NODE_IDENT, ident), make_node(nature, 2, make_node_ident(NODE_IDENT, strdupl(ident)), expr));
 
     return node;
 }
 
 
-node_t make_node_ident(char* identifier)
+node_t make_node_ident(node_nature nature, char* identifier)
 {
     node_t node = (node_t) malloc(sizeof(node_s));
-    node->nature = NODE_IDENT;
+    node->nature = nature;
     node->lineno = yylineno;
     node->nops = 0; 
     node->ident = identifier;
@@ -732,23 +720,6 @@ node_t make_node_boolval(bool value)
 }
 
 
-node_t make_node_strval(char* string)
-{
-    node_t node = (node_t) malloc(sizeof(node_s));
-    node->nature = NODE_STRINGVAL;
-    node->lineno = yylineno;
-    node->nops = 0; 
-    node->ident = NULL;
-    node->type = TYPE_NONE;             // init but update in passe 1
-    node->address = 0;                  // init but update in passe 1
-    node->global_decl = false;          // maj dans passe 1
-    node->str = string;
-    node->opr = NULL;
-    node->isPrio = 0;                   // update passe 1
-    return node;
-}
-
-
 node_t make_node_main(node_t node_next)
 {
     node_t node = (node_t) malloc(sizeof(node_s));
@@ -793,13 +764,9 @@ void free_nodes(node_t n)
         }
         else
         { 
-            if(n->nature == NODE_IDENT)
+            if(n->nature == NODE_IDENT || n->nature == NODE_LABEL)
             {
                 free(n->ident); // free the pointer identifier string
-            }
-            if(n->nature == NODE_STRINGVAL)
-            {
-                free(n->str); // free the pointer string value
             }
             free(n);
             n = NULL;

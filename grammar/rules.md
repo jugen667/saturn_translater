@@ -39,11 +39,11 @@ These loops and branches have the same syntax as C
 - *while*
 - *do{ ... }while*
 - *if* / *else* 
+- **label** and **goto** expressions
 
 ### Not Supported 
 - **switch / case**, 
 - **break** and **continue**
-- **label** and thus **goto**
 
 ## About operators
 ### Supported 

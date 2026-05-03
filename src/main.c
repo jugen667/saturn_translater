@@ -38,17 +38,12 @@ int main(int argc, char ** argv)
     yyin = fopen(g_infile, "r");
     if(yyin != NULL)
     {
-#if LEX_DEBUG
-        while(yylex());
-        fclose(yyin);
-#else
-    #if YYDEBUG
-            yydebug = 1;
-    #endif
+#if YYDEBUG
+        yydebug = 1;
+#endif
         yyparse(&program_root);
         fclose(yyin);
         run_translation(program_root);
-#endif
     }
     else
     {

@@ -4,16 +4,20 @@ SRC_DIR:=src
 INC_DIR:=include
 GRA_DIR:=grammar
 
-DEBUG_LEX=0
-DEBUG_YACC=0
+DEBUG_LEX=
+DEBUG_YACC=
 
 YACC_FLAGS=
+YACC_DEBUG_FLAG=
 LEX_FLAGS=
 
 ifeq ($(DEBUG_LEX),1)
 	LEX_FLAGS=-DLEX_DEBUG=1 
-else ifeq ($(DEBUG_YACC),1)
+endif
+
+ifeq ($(DEBUG_YACC),1)
 	YACC_FLAGS=-t 
+	YACC_DEBUG_FLAG = -DYYDEBUG=1
 endif
 
 
@@ -47,11 +51,11 @@ lex.yy.o: lex.yy.c
 
 y.tab.o: y.tab.c
 	@echo "| Compiling $<"
-	@gcc $(YACC_FLAGS) $(CFLAGS) $(INCLUDE) -o $@ -c $(SRC_DIR)/$<
+	@gcc $(YACC_FLAGS) $(CFLAGS) $(INCLUDE) $(YACC_DEBUG_FLAG) -o $@ -c $(SRC_DIR)/$<
 
 common.o: $(SRC_DIR)/common.c $(INC_DIR)/common.h $(INC_DIR)/defs.h Makefile
 	@echo "| Compiling $<"
-	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	@gcc $(CFLAGS) $(INCLUDE) $(YACC_DEBUG_FLAG) -o $@ -c $<
 
 tree_analysis.o: $(SRC_DIR)/tree_analysis.c $(INC_DIR)/tree_analysis.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
 	@echo "| Compiling $<"
@@ -67,7 +71,7 @@ gen_code.o: $(SRC_DIR)/gen_code.c $(INC_DIR)/gen_code.h $(INC_DIR)/defs.h $(INC_
 
 main.o: $(SRC_DIR)/main.c $(INC_DIR)/gen_code.h $(INC_DIR)/defs.h $(INC_DIR)/common.h Makefile
 	@echo "| Compiling $<"
-	@gcc $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	@gcc $(CFLAGS) $(INCLUDE) $(YACC_DEBUG_FLAG) -o $@ -c $<
 
 # keeping the binary for delivery
 clean-delivery:  

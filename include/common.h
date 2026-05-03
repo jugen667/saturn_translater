@@ -15,8 +15,8 @@
 // ================================================================================================= //
 #define 	DEFAULT_OUTFILE "out.s"
 
-#define     MAIN_VERSION    "0"                 /*dev phase*/
-#define     SUB_VERSION     "7"                 /*iteration*/
+#define     MAIN_VERSION    "1"                 /*dev phase*/
+#define     SUB_VERSION     "0"                 /*iteration*/
 
 // ============== LOGGING =================	\\
 // > v0.1 : first iteration = start		 	\\	
@@ -26,9 +26,9 @@
 // > v0.5 : while integration finished		\\
 // > v0.6 : for integration finished		\\
 // > v0.7 : optimizations and fixes			\\
-// > v0.8 : compîler enhancements			\\
+// > v0.x : improvements					\\
 // > v1.0 : first release					\\
-// > v1.x : test on machine + corrections	\\
+// > v1.x : test on actual machine			\\
 // ========================================	\\
 
 #define     NC              "\e[0m"
@@ -56,8 +56,6 @@ extern char *   g_infile;
 #define OPTION_HELP 		'h'
 #define OPTION_OUTPUT 		'o'
 #define OPTION_TARGET 		't'
-
-
 
 // ================================================================================================= //
 // ========================================== PROTOTYPE ============================================ //
@@ -90,12 +88,11 @@ extern int yylineno;
 void yyerror(node_t * program_root, char * s);
 node_t make_node(node_nature nature, int nops, ...);
 node_t make_node_special_affect(node_nature nature, char * ident, node_t expr);
-node_t make_node_ident(char* identifier);
+node_t make_node_ident(node_nature nature, char* identifier);
 node_t make_node_type(node_type type);
 node_t make_node_intval(int32_t value);
 node_t make_node_floatval(double value);
 node_t make_node_boolval(bool value);
-node_t make_node_strval(char* string);
 node_t make_node_main(node_t node_next);
 
 

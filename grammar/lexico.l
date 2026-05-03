@@ -20,6 +20,7 @@
 
 static int input ( void );
 static void yyunput ( int c, char *buf_ptr);
+
 #if LEX_DEBUG
 #define RETURN(token) ({ printf("%s \t\"%s\"\n", #token, yytext); return token; })
 #else
@@ -80,6 +81,7 @@ SEPARATOR           [ \t\n]+
 "for"           RETURN(TOK_FOR);
 "do"            RETURN(TOK_DO);
 "main"          RETURN(TOK_MAIN);
+"goto"          RETURN(TOK_GOTO);
 
 "+"             RETURN(TOK_PLUS);
 "++"            RETURN(TOK_INC);
@@ -105,6 +107,7 @@ SEPARATOR           [ \t\n]+
 "|="            RETURN(TOK_BOR_AFF);
 "^="            RETURN(TOK_BXOR_AFF);
 ";"             RETURN(TOK_SEMICOL);
+":"             RETURN(TOK_COLON);
 ","             RETURN(TOK_COMMA);
 "("             RETURN(TOK_LPAR);
 ")"             RETURN(TOK_RPAR);
@@ -122,42 +125,34 @@ SEPARATOR           [ \t\n]+
 
 
 
+
 {IDF} {
-    #if !LEX_DEBUG
     yylval.strval = strdupl(yytext);
-    #endif
     RETURN(TOK_IDENT);
 }
 
 {INTEGER} {
-    #if !LEX_DEBUG
     yylval.intval = atoi(yytext);
-    #endif
     RETURN(TOK_INTVAL);
 }
 
 {INTEGER_HEXA} {
-    #if !LEX_DEBUG
     yylval.intval = strtol(yytext, NULL, 16);
-    #endif
     RETURN(TOK_INTVAL);
 }
 
 {FLOAT} {
-    #if !LEX_DEBUG
     yylval.floatval = atof(yytext);
-    #endif
     RETURN(TOK_FLOATVAL);
 }
 
 {STRING} {
-    #if !LEX_DEBUG
     yylval.strval = strdupl(yytext);
-    #endif
     RETURN(TOK_STRING);
 }
 
-{COMMENT} {
+{COMMENT} 
+{
 }
 
 
