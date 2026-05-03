@@ -4,10 +4,10 @@ Simplified C to Saturn (HP-48x) assembly translater
 ## Main features
 
 Produces a binary file that convert a C program into a Saturn assembly program.
-This project is a way of ease of programming on HP-8 Saturn CPU platform.
+This project is a way of ease the programming on HP-48 Saturn CPU platform.
 This also can produce a tree of the program.
 > [!NOTE]
-> This project has never been tested on a actual HP-48 calculator. All the generated code is a theoritically valid code, just not tested.
+> This project has never been tested on an actual HP-48 calculator. All the generated code is a theoritically valid code, just not tested.
 
 ## About C
 We are using a sub-set of C. 
